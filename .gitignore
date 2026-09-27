@@ -1,0 +1,28 @@
+# Local Python environment and generated packaging files
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Test and tool caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Local data, model caches, and benchmark outputs
+.cache/
+results/
+*.sqlite
+*.sqlite3
+
+# Local settings and credentials
+.env
+.env.*
+!.env.example
+.DS_Store
+.idea/
+.vscode/
