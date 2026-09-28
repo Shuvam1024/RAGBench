@@ -20,6 +20,11 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8,<10"]
+dense = [
+    "sentence-transformers>=3",
+    "faiss-cpu>=1.8",
+    "numpy>=1.26",
+]
 
 [project.scripts]
 ragbench = "ragbench.cli:app"
