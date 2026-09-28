@@ -1,0 +1,22 @@
+# BM25 baseline: run with ragbench evaluate --config configs/baseline.yaml.
+# Paths resolve relative to this YAML file, regardless of the shell directory.
+schema_version: 1
+
+dataset:
+  documents_path: ../datasets/documents
+  benchmark_path: ../datasets/benchmark.json
+
+chunking:
+  chunk_size: 120  # Whitespace-delimited words, not model tokens.
+  overlap: 20
+
+retrieval:
+  type: bm25
+  k1: 1.5
+  b: 0.75
+
+evaluation:
+  recall_at_k: [1, 3, 5]
+
+output:
+  json_path: null  # Example: ../results/baseline.json

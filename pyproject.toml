@@ -21,6 +21,9 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=8,<10"]
 
+[project.scripts]
+ragbench = "ragbench.cli:app"
+
 [project.urls]
 Repository = "https://github.com/Shuvam1024/RAGBench"
 

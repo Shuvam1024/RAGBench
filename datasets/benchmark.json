@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "questions": [
+    {
+      "id": "chunking-overlap",
+      "question": "What does overlap mean when splitting a document into chunks?",
+      "expected_answer": "Overlap is the number of words shared by neighboring chunk windows.",
+      "relevant_document_ids": ["chunking.md"]
+    },
+    {
+      "id": "recall-definition",
+      "question": "How is Recall@K calculated?",
+      "expected_answer": "Divide the number of relevant documents in the first K retrieved documents by the total number of relevant documents for the question.",
+      "relevant_document_ids": ["evaluation.md"]
+    },
+    {
+      "id": "dense-search",
+      "question": "Which tools create embeddings and search vectors for dense retrieval?",
+      "expected_answer": "A sentence-transformers model creates embeddings and FAISS searches the vectors.",
+      "relevant_document_ids": ["retrieval.txt"]
+    },
+    {
+      "id": "duplicate-chunks",
+      "question": "Why keep a parent document ID on each chunk, and how are duplicate chunk hits handled in evaluation?",
+      "expected_answer": "The parent ID links each chunk to its source document. Hits from the same document are collapsed so document-level metrics count it once.",
+      "relevant_document_ids": ["chunking.md", "evaluation.md"]
+    }
+  ]
+}
