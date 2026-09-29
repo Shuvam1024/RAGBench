@@ -30,7 +30,9 @@ def test_real_faiss_cosine_ranking_and_index_once(make_chunk: Callable[..., Chun
     retriever.index([make_chunk("east", "e"), make_chunk("north", "n"), make_chunk("west", "w")])
     hits = retriever.retrieve("query", 10)
     assert [hit.chunk.id for hit in hits] == ["e", "n", "w"]
-    assert [hit.score for hit in hits] == pytest.approx([2 / np.sqrt(5), 1 / np.sqrt(5), -2 / np.sqrt(5)])
+    assert [hit.score for hit in hits] == pytest.approx(
+        [2 / np.sqrt(5), 1 / np.sqrt(5), -2 / np.sqrt(5)]
+    )
     assert retriever.retrieve("query", 1) == hits[:1]
     assert embedder.calls == [["east", "north", "west"], ["query"], ["query"]]
     assert retriever.retrieve("  ", 1) == []
@@ -55,8 +57,9 @@ def test_dense_lifecycle_ties_and_dimension_mismatch(make_chunk: Callable[..., C
         retriever.index([make_chunk("same"), make_chunk("same")])
 
 
-@pytest.mark.parametrize("values", [[[0, 0]], [[float("nan"), 1]], [[float("inf"), 1]],
-                                    [1, 2], [[]], [[1, 0], [0, 1]]])
+@pytest.mark.parametrize(
+    "values", [[[0, 0]], [[float("nan"), 1]], [[float("inf"), 1]], [1, 2], [[]], [[1, 0], [0, 1]]]
+)
 def test_invalid_vectors(values: list[object]) -> None:
     with pytest.raises(ValueError):
         normalize_vectors(np.asarray(values, dtype=np.float32), rows=1)

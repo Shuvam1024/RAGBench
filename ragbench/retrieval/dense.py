@@ -26,7 +26,9 @@ def normalize_vectors(vectors: NDArray[np.float32], rows: int) -> NDArray[np.flo
 
 
 class DenseRetriever(Retriever):
-    def __init__(self, config: DenseConfig | None = None, embedder: EmbeddingProvider | None = None) -> None:
+    def __init__(
+        self, config: DenseConfig | None = None, embedder: EmbeddingProvider | None = None
+    ) -> None:
         super().__init__()
         self.config = config or DenseConfig()
         self._embedder = embedder
@@ -36,7 +38,9 @@ class DenseRetriever(Retriever):
         validated = self.validate_chunks(chunks)
         if self._embedder is None:
             self._embedder = SentenceTransformerEmbedder(self.config)
-        vectors = normalize_vectors(self._embedder.encode([chunk.text for chunk in validated]), len(validated))
+        vectors = normalize_vectors(
+            self._embedder.encode([chunk.text for chunk in validated]), len(validated)
+        )
         index = faiss.IndexFlatIP(vectors.shape[1])
         index.add(vectors)
         self._chunks, self._index = validated, index

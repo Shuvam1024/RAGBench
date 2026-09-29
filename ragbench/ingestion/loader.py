@@ -50,9 +50,13 @@ def load_documents(root: Path) -> Corpus:
         if not text.strip():
             skipped += 1
             continue
-        documents.append(Document(
-            id=path.relative_to(root).as_posix(), text=text, content_sha256=text_fingerprint(text),
-        ))
+        documents.append(
+            Document(
+                id=path.relative_to(root).as_posix(),
+                text=text,
+                content_sha256=text_fingerprint(text),
+            )
+        )
     if not documents:
         raise ValueError(f"No nonempty .txt or .md documents found in {root}")
     return Corpus(documents=tuple(documents), skipped_empty_files=skipped)

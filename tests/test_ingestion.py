@@ -11,16 +11,20 @@ def document(text: str, identifier: str = "source.md") -> Document:
     return Document(id=identifier, text=text, content_sha256=text_fingerprint(text))
 
 
-@pytest.mark.parametrize(("text", "size", "overlap", "expected"), [
-    ("a b c d e f g h", 5, 2, ["a b c d e", "d e f g h"]),
-    ("a b c d e f", 5, 2, ["a b c d e", "d e f"]),
-    ("a b c d e", 5, 2, ["a b c d e"]),
-    ("a b c d e f", 3, 0, ["a b c", "d e f"]),
-    ("a b c", 2, 1, ["a b", "b c"]),
-    ("a b", 1, 0, ["a", "b"]),
-    ("", 3, 0, []), (" \n\t ", 3, 1, []),
-    ("  café\n\t東京  hello  ", 2, 0, ["café\n\t東京", "hello"]),
-])
+@pytest.mark.parametrize(
+    ("text", "size", "overlap", "expected"),
+    [
+        ("a b c d e f g h", 5, 2, ["a b c d e", "d e f g h"]),
+        ("a b c d e f", 5, 2, ["a b c d e", "d e f"]),
+        ("a b c d e", 5, 2, ["a b c d e"]),
+        ("a b c d e f", 3, 0, ["a b c", "d e f"]),
+        ("a b c", 2, 1, ["a b", "b c"]),
+        ("a b", 1, 0, ["a", "b"]),
+        ("", 3, 0, []),
+        (" \n\t ", 3, 1, []),
+        ("  café\n\t東京  hello  ", 2, 0, ["café\n\t東京", "hello"]),
+    ],
+)
 def test_windows(text: str, size: int, overlap: int, expected: list[str]) -> None:
     result = chunk_document(document(text), ChunkingConfig(chunk_size=size, overlap=overlap))
     assert [chunk.text for chunk in result] == expected
@@ -34,7 +38,8 @@ def test_chunk_ids_are_stable_and_sensitive_to_inputs() -> None:
     assert original == chunk_document(source, config)
     assert len({chunk.id for chunk in original}) == len(original)
     for changed_source, changed_config in [
-        (document("a b c d e z"), config), (document(source.text, "renamed.md"), config),
+        (document("a b c d e z"), config),
+        (document(source.text, "renamed.md"), config),
         (source, ChunkingConfig(chunk_size=3, overlap=0)),
     ]:
         assert original[0].id != chunk_document(changed_source, changed_config)[0].id

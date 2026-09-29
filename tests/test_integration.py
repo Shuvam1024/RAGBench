@@ -25,10 +25,20 @@ def test_real_model_semantic_search(mode: str, tmp_path: Path) -> None:
     }.items():
         (docs / f"{name}.txt").write_text(text)
     benchmark = tmp_path / "benchmark.json"
-    benchmark.write_text(json.dumps({"questions": [{
-        "id": "sea", "question": "Which animals live in the sea?",
-        "expected_answer": "Whales and dolphins.", "relevant_document_ids": ["ocean.txt"],
-    }]}))
+    benchmark.write_text(
+        json.dumps(
+            {
+                "questions": [
+                    {
+                        "id": "sea",
+                        "question": "Which animals live in the sea?",
+                        "expected_answer": "Whales and dolphins.",
+                        "relevant_document_ids": ["ocean.txt"],
+                    }
+                ]
+            }
+        )
+    )
     source = Path(__file__).resolve().parents[1] / "configs" / f"{mode}.yaml"
     config = yaml.safe_load(source.read_text())
     config["dataset"] = {"documents_path": str(docs), "benchmark_path": str(benchmark)}
@@ -36,8 +46,19 @@ def test_real_model_semantic_search(mode: str, tmp_path: Path) -> None:
     config_path.write_text(yaml.safe_dump(config))
     report_path = tmp_path / "report.json"
     process = subprocess.run(
-        [sys.executable, "-m", "ragbench", "evaluate", "--config", str(config_path), "--output", str(report_path)],
-        capture_output=True, text=True, timeout=180,
+        [
+            sys.executable,
+            "-m",
+            "ragbench",
+            "evaluate",
+            "--config",
+            str(config_path),
+            "--output",
+            str(report_path),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=180,
     )
     assert process.returncode == 0, process.stdout + process.stderr
     report = json.loads(report_path.read_text())

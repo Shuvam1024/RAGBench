@@ -3,14 +3,30 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from ragbench.config import ChunkingConfig, DenseConfig, EvaluationConfig, HybridConfig, RunConfig, load_config
+from ragbench.config import (
+    ChunkingConfig,
+    DenseConfig,
+    EvaluationConfig,
+    HybridConfig,
+    RunConfig,
+    load_config,
+)
 
 
-@pytest.mark.parametrize("settings", [
-    {"chunk_size": 0}, {"chunk_size": -1}, {"chunk_size": True}, {"chunk_size": "30"},
-    {"chunk_size": 5, "overlap": 5}, {"overlap": -1}, {"overlap": 1.5}, {"overlap": False},
-    {"overlapp": 1},
-])
+@pytest.mark.parametrize(
+    "settings",
+    [
+        {"chunk_size": 0},
+        {"chunk_size": -1},
+        {"chunk_size": True},
+        {"chunk_size": "30"},
+        {"chunk_size": 5, "overlap": 5},
+        {"overlap": -1},
+        {"overlap": 1.5},
+        {"overlap": False},
+        {"overlapp": 1},
+    ],
+)
 def test_invalid_chunking(settings: dict[str, object]) -> None:
     with pytest.raises(ValidationError):
         ChunkingConfig.model_validate(settings)
@@ -31,8 +47,10 @@ def test_invalid_hybrid_weight(weight: object) -> None:
 def test_config_paths_follow_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     config = tmp_path / "configs" / "run.yaml"
     config.parent.mkdir()
-    config.write_text("dataset:\n  documents_path: ../docs\n  benchmark_path: ../questions.json\n"
-                      "output:\n  json_path: ../output.json\nretrieval:\n  type: dense\n")
+    config.write_text(
+        "dataset:\n  documents_path: ../docs\n  benchmark_path: ../questions.json\n"
+        "output:\n  json_path: ../output.json\nretrieval:\n  type: dense\n"
+    )
     monkeypatch.chdir(tmp_path.parent)
     parsed = load_config(config)
     assert parsed.dataset.documents_path == tmp_path / "docs"
@@ -49,11 +67,17 @@ def test_bad_yaml(tmp_path: Path, content: str) -> None:
         load_config(path)
 
 
-@pytest.mark.parametrize("extra", [
-    {"schema_version": True}, {"schema_version": 2}, {"typo": 1},
-    {"retrieval": {"type": "unknown"}}, {"retrieval": {"type": "bm25", "b": 2}},
-    {"retrieval": {"type": "bm25", "k1": 0}},
-])
+@pytest.mark.parametrize(
+    "extra",
+    [
+        {"schema_version": True},
+        {"schema_version": 2},
+        {"typo": 1},
+        {"retrieval": {"type": "unknown"}},
+        {"retrieval": {"type": "bm25", "b": 2}},
+        {"retrieval": {"type": "bm25", "k1": 0}},
+    ],
+)
 def test_bad_root_config(extra: dict[str, object]) -> None:
     raw = {"dataset": {"documents_path": "docs", "benchmark_path": "questions.json"}, **extra}
     with pytest.raises(ValueError):

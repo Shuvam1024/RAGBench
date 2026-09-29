@@ -49,5 +49,7 @@ class Retriever(ABC):
     def rank(self, scores: Sequence[float], k: int) -> list[SearchResult]:
         if len(scores) != len(self._chunks) or not all(math.isfinite(score) for score in scores):
             raise ValueError("Expected one finite score per indexed chunk")
-        pairs = sorted(zip(self._chunks, scores, strict=True), key=lambda pair: (-pair[1], pair[0].id))
+        pairs = sorted(
+            zip(self._chunks, scores, strict=True), key=lambda pair: (-pair[1], pair[0].id)
+        )
         return [SearchResult(chunk=chunk, score=float(score)) for chunk, score in pairs[:k]]

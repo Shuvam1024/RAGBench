@@ -19,7 +19,11 @@ def min_max_normalize(scores: Sequence[float]) -> list[float]:
 class HybridRetriever(Retriever):
     def __init__(self, bm25: Retriever, dense: Retriever, dense_weight: float = 0.5) -> None:
         super().__init__()
-        if isinstance(dense_weight, bool) or not math.isfinite(dense_weight) or not 0 <= dense_weight <= 1:
+        if (
+            isinstance(dense_weight, bool)
+            or not math.isfinite(dense_weight)
+            or not 0 <= dense_weight <= 1
+        ):
             raise ValueError("dense_weight must be between zero and one")
         self.bm25, self.dense, self.dense_weight = bm25, dense, dense_weight
 
@@ -31,7 +35,9 @@ class HybridRetriever(Retriever):
         self.dense.index(validated)
         self._chunks = validated
 
-    def _aligned_scores(self, results: Sequence[SearchResult], allow_empty: bool = False) -> list[float]:
+    def _aligned_scores(
+        self, results: Sequence[SearchResult], allow_empty: bool = False
+    ) -> list[float]:
         if not results and allow_empty:
             return [0.0] * len(self._chunks)
         scores = {result.chunk.id: result.score for result in results}
@@ -45,10 +51,14 @@ class HybridRetriever(Retriever):
         if not query.strip():
             return []
         size = len(self._chunks)
-        lexical = min_max_normalize(self._aligned_scores(self.bm25.retrieve(query, size), allow_empty=True))
+        lexical = min_max_normalize(
+            self._aligned_scores(self.bm25.retrieve(query, size), allow_empty=True)
+        )
         dense = min_max_normalize(self._aligned_scores(self.dense.retrieve(query, size)))
-        scores = [(1 - self.dense_weight) * left + self.dense_weight * right
-                  for left, right in zip(lexical, dense, strict=True)]
+        scores = [
+            (1 - self.dense_weight) * left + self.dense_weight * right
+            for left, right in zip(lexical, dense, strict=True)
+        ]
         return self.rank(scores, k)
 
     @property

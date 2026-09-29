@@ -33,7 +33,10 @@ class SentenceTransformerEmbedder:
         self._revision = Path(config_file).parent.name
         self._config = config
         self._model = SentenceTransformer(
-            config.model_name, revision=self._revision, device=config.device, trust_remote_code=False,
+            config.model_name,
+            revision=self._revision,
+            device=config.device,
+            trust_remote_code=False,
         )
         self._truncated_texts = 0
 
@@ -45,15 +48,26 @@ class SentenceTransformerEmbedder:
             warnings.warn(
                 f"{truncated} input text(s) exceed the embedding model's "
                 f"{self._model.max_seq_length}-token limit and will be truncated; reduce chunk_size.",
-                UserWarning, stacklevel=2,
+                UserWarning,
+                stacklevel=2,
             )
-        return np.asarray(self._model.encode(
-            list(texts), batch_size=self._config.batch_size, show_progress_bar=False,
-            convert_to_numpy=True, normalize_embeddings=False,
-        ), dtype=np.float32)
+        return np.asarray(
+            self._model.encode(
+                list(texts),
+                batch_size=self._config.batch_size,
+                show_progress_bar=False,
+                convert_to_numpy=True,
+                normalize_embeddings=False,
+            ),
+            dtype=np.float32,
+        )
 
     @property
     def metadata(self) -> dict[str, str | int]:
-        return {"model_name": self._config.model_name, "model_revision": self._revision,
-                "device": self._config.device, "cpu_threads": 1,
-                "truncated_texts": self._truncated_texts}
+        return {
+            "model_name": self._config.model_name,
+            "model_revision": self._revision,
+            "device": self._config.device,
+            "cpu_threads": 1,
+            "truncated_texts": self._truncated_texts,
+        }

@@ -8,21 +8,37 @@ from ragbench.evaluation.runner import load_benchmark
 
 
 def question() -> dict[str, object]:
-    return {"id": "q", "question": "What?", "expected_answer": "Answer", "relevant_document_ids": ["a.txt"]}
+    return {
+        "id": "q",
+        "question": "What?",
+        "expected_answer": "Answer",
+        "relevant_document_ids": ["a.txt"],
+    }
 
 
-@pytest.mark.parametrize("changes", [
-    {"id": " "}, {"question": "\n"}, {"expected_answer": ""}, {"relevant_document_ids": []},
-    {"relevant_document_ids": ["a", "a"]}, {"relevant_document_ids": [""]}, {"typo": "x"},
-])
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"id": " "},
+        {"question": "\n"},
+        {"expected_answer": ""},
+        {"relevant_document_ids": []},
+        {"relevant_document_ids": ["a", "a"]},
+        {"relevant_document_ids": [""]},
+        {"typo": "x"},
+    ],
+)
 def test_invalid_questions(changes: dict[str, object]) -> None:
     with pytest.raises(ValueError):
         Benchmark.model_validate({"questions": [{**question(), **changes}]})
 
 
 def test_empty_duplicates_and_version() -> None:
-    for raw in ({"questions": []}, {"questions": [question(), question()]},
-                {"schema_version": 2, "questions": [question()]}):
+    for raw in (
+        {"questions": []},
+        {"questions": [question(), question()]},
+        {"schema_version": 2, "questions": [question()]},
+    ):
         with pytest.raises(ValueError):
             Benchmark.model_validate(raw)
 
