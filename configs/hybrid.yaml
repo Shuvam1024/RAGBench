@@ -1,7 +1,7 @@
 schema_version: 1
 dataset:
-  documents_path: ../datasets/documents
-  benchmark_path: ../datasets/benchmark.json
+  documents_path: ../datasets/support/documents
+  benchmark_path: ../datasets/support/benchmark.json
 chunking:
   chunk_size: 120
   overlap: 20

@@ -3,8 +3,8 @@
 schema_version: 1
 
 dataset:
-  documents_path: ../datasets/support/documents
-  benchmark_path: ../datasets/support/benchmark.json
+  documents_path: ../datasets/documents
+  benchmark_path: ../datasets/benchmark.json
 
 chunking:
   chunk_size: 120  # Whitespace-delimited words, not model tokens.

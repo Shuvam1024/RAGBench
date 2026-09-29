@@ -1,0 +1,224 @@
+{
+  "schema_version": 1,
+  "questions": [
+    {
+      "id": "api-keys-1",
+      "question": "When do API credentials expire?",
+      "expected_answer": "API keys expire after 90 days.",
+      "relevant_document_ids": [
+        "api-keys.md"
+      ]
+    },
+    {
+      "id": "api-keys-2",
+      "question": "What is the process for replacing an API key?",
+      "expected_answer": "Create a replacement, update clients, and revoke the old key.",
+      "relevant_document_ids": [
+        "api-keys.md"
+      ]
+    },
+    {
+      "id": "rate-limits-1",
+      "question": "How many API calls can a workspace make each minute?",
+      "expected_answer": "120 requests per minute.",
+      "relevant_document_ids": [
+        "rate-limits.md"
+      ]
+    },
+    {
+      "id": "rate-limits-2",
+      "question": "How should clients handle HTTP 429?",
+      "expected_answer": "Wait for the Retry-After delay and use exponential backoff.",
+      "relevant_document_ids": [
+        "rate-limits.md"
+      ]
+    },
+    {
+      "id": "backups-1",
+      "question": "How frequently are database backups taken?",
+      "expected_answer": "Every six hours.",
+      "relevant_document_ids": [
+        "backups.md"
+      ]
+    },
+    {
+      "id": "backups-2",
+      "question": "Does a restore replace my current database?",
+      "expected_answer": "No. A restore creates a new database without overwriting the original.",
+      "relevant_document_ids": [
+        "backups.md"
+      ]
+    },
+    {
+      "id": "billing-1",
+      "question": "When are monthly invoices sent?",
+      "expected_answer": "On the first day of each month for the previous month of usage.",
+      "relevant_document_ids": [
+        "billing.md"
+      ]
+    },
+    {
+      "id": "billing-2",
+      "question": "How long is the grace period after a payment fails?",
+      "expected_answer": "Seven days.",
+      "relevant_document_ids": [
+        "billing.md"
+      ]
+    },
+    {
+      "id": "retention-1",
+      "question": "How long are standard application event logs kept?",
+      "expected_answer": "30 days.",
+      "relevant_document_ids": [
+        "retention.md"
+      ]
+    },
+    {
+      "id": "retention-2",
+      "question": "How long are audit records stored?",
+      "expected_answer": "365 days.",
+      "relevant_document_ids": [
+        "retention.md"
+      ]
+    },
+    {
+      "id": "indexing-1",
+      "question": "How soon will an updated document appear in search?",
+      "expected_answer": "On the next index refresh, which runs every five minutes.",
+      "relevant_document_ids": [
+        "indexing.md"
+      ]
+    },
+    {
+      "id": "indexing-2",
+      "question": "What is the largest source document accepted for indexing?",
+      "expected_answer": "10 MB.",
+      "relevant_document_ids": [
+        "indexing.md"
+      ]
+    },
+    {
+      "id": "deployment-1",
+      "question": "What happens when a new release fails its health check?",
+      "expected_answer": "An automatic rollback restores the previous release.",
+      "relevant_document_ids": [
+        "deployment.md"
+      ]
+    },
+    {
+      "id": "deployment-2",
+      "question": "How long can a deployment health check run before timing out?",
+      "expected_answer": "30 seconds.",
+      "relevant_document_ids": [
+        "deployment.md"
+      ]
+    },
+    {
+      "id": "support-1",
+      "question": "What is the initial response target for a critical production incident?",
+      "expected_answer": "Within one hour.",
+      "relevant_document_ids": [
+        "support.md"
+      ]
+    },
+    {
+      "id": "support-2",
+      "question": "What information should I attach to a support ticket?",
+      "expected_answer": "A request ID, timestamp, and reproduction steps.",
+      "relevant_document_ids": [
+        "support.md"
+      ]
+    },
+    {
+      "id": "exports-1",
+      "question": "In what format will I receive an export?",
+      "expected_answer": "Gzip-compressed JSON Lines files.",
+      "relevant_document_ids": [
+        "exports.md"
+      ]
+    },
+    {
+      "id": "exports-2",
+      "question": "When does an export download link stop working?",
+      "expected_answer": "After 24 hours.",
+      "relevant_document_ids": [
+        "exports.md"
+      ]
+    },
+    {
+      "id": "security-1",
+      "question": "Which encryption protects stored customer data?",
+      "expected_answer": "AES-256.",
+      "relevant_document_ids": [
+        "security.md"
+      ]
+    },
+    {
+      "id": "security-2",
+      "question": "What is the minimum TLS version for network connections?",
+      "expected_answer": "TLS 1.2.",
+      "relevant_document_ids": [
+        "security.md"
+      ]
+    },
+    {
+      "id": "sessions-1",
+      "question": "How long does an interactive login session last?",
+      "expected_answer": "Eight hours.",
+      "relevant_document_ids": [
+        "sessions.md"
+      ]
+    },
+    {
+      "id": "sessions-2",
+      "question": "Can I reuse a password reset link?",
+      "expected_answer": "No. It can be used only once and expires after 30 minutes.",
+      "relevant_document_ids": [
+        "sessions.md"
+      ]
+    },
+    {
+      "id": "regions-1",
+      "question": "Can I change an existing workspace to a different region?",
+      "expected_answer": "No. Export the data and import it into a new workspace in the target region.",
+      "relevant_document_ids": [
+        "regions.md"
+      ]
+    },
+    {
+      "id": "regions-2",
+      "question": "Is regional failover automatic?",
+      "expected_answer": "No. It is a manual operation coordinated with support.",
+      "relevant_document_ids": [
+        "regions.md"
+      ]
+    },
+    {
+      "id": "retention-comparison",
+      "question": "How do database backup and application event-log retention differ?",
+      "expected_answer": "Database backups are kept for 14 days and standard application event logs for 30 days.",
+      "relevant_document_ids": [
+        "backups.md",
+        "retention.md"
+      ]
+    },
+    {
+      "id": "credential-lifetimes",
+      "question": "How do API key expiration and interactive session expiration differ?",
+      "expected_answer": "API keys expire after 90 days; interactive sessions expire after eight hours.",
+      "relevant_document_ids": [
+        "api-keys.md",
+        "sessions.md"
+      ]
+    },
+    {
+      "id": "regional-migration",
+      "question": "How can I move a workspace to another region and what export format should I expect?",
+      "expected_answer": "Export data and import it into a new workspace in the target region. Exports are gzip-compressed JSON Lines.",
+      "relevant_document_ids": [
+        "regions.md",
+        "exports.md"
+      ]
+    }
+  ]
+}
