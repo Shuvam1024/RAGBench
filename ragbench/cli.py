@@ -12,6 +12,7 @@ from ragbench.config import RunConfig, load_config
 from ragbench.evaluation.comparison import compare as compare_reports
 from ragbench.evaluation.comparison import load_report, load_thresholds
 from ragbench.evaluation.runner import evaluate as run_evaluation
+from ragbench.storage import RunStore
 
 app = typer.Typer(
     no_args_is_help=True, help="Evaluate retrieval configurations on a labeled corpus."
@@ -65,17 +66,33 @@ def evaluate(
     output: Annotated[
         Path | None, typer.Option("--output", help="Optional JSON output path")
     ] = None,
+    db: Annotated[Path | None, typer.Option("--db", help="Optional SQLite run history")] = None,
 ) -> None:
     """Build an index and evaluate all benchmark questions."""
     try:
         settings = load_config(config)
         destination = output.resolve() if output is not None else settings.output.json_path
+        database = db.resolve() if db is not None else settings.storage.sqlite_path
         if destination is not None:
             validate_output(destination, config, settings)
+        if database is not None:
+            validate_output(database, config, settings)
+            if destination == database or (
+                destination is not None
+                and destination.exists()
+                and database.exists()
+                and destination.samefile(database)
+            ):
+                raise ValueError("JSON output and SQLite database must be different files")
         settings = settings.model_copy(
             update={"output": settings.output.model_copy(update={"json_path": destination})}
         )
+        settings = settings.model_copy(
+            update={"storage": settings.storage.model_copy(update={"sqlite_path": database})}
+        )
         result = run_evaluation(settings)
+        if database is not None:
+            RunStore(database).save(result)
         if destination is not None:
             save_result(result, destination)
     except (ValueError, OSError, ImportError, RuntimeError) as exc:
@@ -136,6 +153,36 @@ def compare_command(
     typer.echo("Regression check passed" if result.passed else "Regression detected")
     if not result.passed:
         raise typer.Exit(2)
+
+
+@app.command("history")
+def history_command(db: Annotated[Path, typer.Option("--db")], limit: int = 20) -> None:
+    """List saved runs without opening an API server."""
+    try:
+        for row in RunStore(db).list(limit):
+            typer.echo(
+                f"{row['run_id']}  {row['created_at']}  {row['retriever']}  MRR={row['mrr']:.4f}"
+            )
+    except (ValueError, OSError) as exc:
+        typer.echo(f"Error: {exc}", err=True)
+        raise typer.Exit(1) from exc
+
+
+@app.command("serve")
+def serve_command(
+    db: Annotated[Path, typer.Option("--db")], host: str = "127.0.0.1", port: int = 8000
+) -> None:
+    """Serve a local, read-only run-history API (requires the api extra)."""
+    try:
+        import uvicorn
+
+        from ragbench.api import create_app
+
+        RunStore(db).list(1)
+        uvicorn.run(create_app(db), host=host, port=port)
+    except (ValueError, OSError, ImportError) as exc:
+        typer.echo(f"Error: {exc}. Install the api extra if needed.", err=True)
+        raise typer.Exit(1) from exc
 
 
 if __name__ == "__main__":
