@@ -9,6 +9,8 @@ import typer
 from pydantic import BaseModel
 
 from ragbench.config import RunConfig, load_config
+from ragbench.evaluation.comparison import compare as compare_reports
+from ragbench.evaluation.comparison import load_report, load_thresholds
 from ragbench.evaluation.runner import evaluate as run_evaluation
 
 app = typer.Typer(
@@ -101,6 +103,39 @@ def evaluate(
         typer.echo(f"Estimated API cost: ${result.estimated_cost_usd:.6f}")
     if destination is not None:
         typer.echo(f"Saved: {destination}")
+
+
+@app.command("compare")
+def compare_command(
+    baseline: Annotated[Path, typer.Option("--baseline")],
+    candidate: Annotated[Path, typer.Option("--candidate")],
+    thresholds: Annotated[Path, typer.Option("--thresholds")],
+    output: Annotated[Path | None, typer.Option("--output")] = None,
+) -> None:
+    """Compare compatible reports; exit 2 when a regression exceeds tolerance."""
+    try:
+        if output is not None:
+            destination = output.resolve()
+            for source in (baseline, candidate, thresholds):
+                if destination == source.resolve() or (
+                    destination.exists() and destination.samefile(source)
+                ):
+                    raise ValueError("Comparison output would overwrite an input")
+        result = compare_reports(
+            load_report(baseline), load_report(candidate), load_thresholds(thresholds)
+        )
+        if output is not None:
+            save_result(result, output.resolve())
+    except (ValueError, OSError) as exc:
+        typer.echo(f"Error: {exc}", err=True)
+        raise typer.Exit(1) from exc
+    for check in result.checks:
+        typer.echo(
+            f"{'PASS' if check.passed else 'FAIL'} {check.metric}: {check.baseline:.6f} -> {check.candidate:.6f}"
+        )
+    typer.echo("Regression check passed" if result.passed else "Regression detected")
+    if not result.passed:
+        raise typer.Exit(2)
 
 
 if __name__ == "__main__":

@@ -160,7 +160,8 @@ def test_runner_local_answers() -> None:
     assert result.judge_metrics is None
 
 
-def test_runner_judge_totals() -> None:
+def test_runner_judge_totals_and_comparison_identity() -> None:
+    from ragbench.evaluation.comparison import Thresholds, compare
     from ragbench.evaluation.models import EvaluationResult
 
     config = load_config(Path(__file__).resolve().parents[1] / "configs/answers.yaml")
@@ -179,6 +180,14 @@ def test_runner_judge_totals() -> None:
     assert report.output_tokens == 10 * report.question_count
     assert report.estimated_cost_usd == pytest.approx(0.00026 * report.question_count)
     assert EvaluationResult.model_validate_json(report.model_dump_json()) == report
+    limits = Thresholds(max_drop={"judge_correctness": 0.0})
+    assert compare(report, report, limits).passed
+    changed = tuple(
+        q.model_copy(update={"judge": q.judge.model_copy(update={"rubric_version": "v2"})})
+        for q in report.questions
+    )
+    with pytest.raises(ValueError, match="resolved model and rubric"):
+        compare(report, report.model_copy(update={"questions": changed}), limits)
     with pytest.raises(ValueError, match="Aggregate judge_metrics"):
         EvaluationResult.model_validate_json(
             report.model_copy(

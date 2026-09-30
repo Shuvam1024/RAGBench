@@ -1,0 +1,2298 @@
+{
+  "schema_version": 2,
+  "run_id": "7e61dfcf-6d84-4c08-90cc-77a676fa6fb2",
+  "created_at": "2026-10-01T16:57:15.728692Z",
+  "config": {
+    "schema_version": 1,
+    "dataset": {
+      "documents_path": "datasets/support/documents",
+      "benchmark_path": "datasets/support/benchmark.json"
+    },
+    "chunking": {
+      "chunk_size": 120,
+      "overlap": 20
+    },
+    "retrieval": {
+      "type": "bm25",
+      "k1": 1.5,
+      "b": 0.75
+    },
+    "evaluation": {
+      "recall_at_k": [
+        1,
+        3,
+        5
+      ]
+    },
+    "output": {
+      "json_path": null
+    },
+    "generation": null,
+    "judge": null,
+    "storage": {
+      "sqlite_path": null
+    }
+  },
+  "corpus_sha256": "72c69ab87d52e07d0eca364171aa7dbdb0e6c377fb030ef137892ee86a60e33e",
+  "benchmark_sha256": "25c5ef66eee2bbb3b95ef3b47efcc85c480f4e51ee89e4989396fe5152702281",
+  "document_count": 12,
+  "chunk_count": 12,
+  "question_count": 27,
+  "skipped_empty_files": 0,
+  "retriever": {
+    "implementation": "BM25Retriever"
+  },
+  "versions": {
+    "python": "3.12.10",
+    "ragbench": "1.0.0",
+    "pydantic": "2.13.5",
+    "PyYAML": "6.0.3",
+    "rank-bm25": "0.2.2",
+    "numpy": "2.5.3",
+    "typer": "0.27.2"
+  },
+  "recall_at_k": {
+    "1": 0.8333333333333334,
+    "3": 1.0,
+    "5": 1.0
+  },
+  "mrr": 0.9382716049382716,
+  "questions": [
+    {
+      "id": "api-keys-1",
+      "question": "When do API credentials expire?",
+      "relevant_document_ids": [
+        "api-keys.md"
+      ],
+      "retrieved_documents": [
+        {
+          "document_id": "api-keys.md",
+          "chunk_id": "chunk-v1-cc62727c3a541f5acef807d2ba5244044879cd5ee706fb70359485722ace8c07",
+          "score": 3.7681652059265502
+        },
+        {
+          "document_id": "sessions.md",
+          "chunk_id": "chunk-v1-5ba066283eade061eda3f5d6e9c6ae955878693b3363e2cbe5d69f59bead4e40",
+          "score": 1.804137297956614
+        },
+        {
+          "document_id": "exports.md",
+          "chunk_id": "chunk-v1-dbcb848d58657d44a56263bfdbb901eb7f1dec13a4c0ec91f4518f512b2e4383",
+          "score": 0.9858535699263598
+        },
+        {
+          "document_id": "security.md",
+          "chunk_id": "chunk-v1-d7ad9d21df1fc7cc38a3b890f210861dfb9754ecc8bc15394c2a9f3b2c942a82",
+          "score": 0.3158400491892458
+        },
+        {
+          "document_id": "rate-limits.md",
+          "chunk_id": "chunk-v1-d5a578e8ed3cf92e457ee781521075326e6a41f4b7219c78a9b718cf19dbc96f",
+          "score": 0.3031394161026076
+        },
+        {
+          "document_id": "support.md",
+          "chunk_id": "chunk-v1-1ce0c94ce52c8e0d691fd3a6106c7b9bf144718be5689a6ca415478c0e8e0d0c",
+          "score": 0.300122269577948
+        },
+        {
+          "document_id": "backups.md",
+          "chunk_id": "chunk-v1-6e4d6ad8e173605f48f59fbc593b6d5e9471abe317e792294825946d6d68fa5d",
+          "score": 0.0
+        },
+        {
+          "document_id": "deployment.md",
+          "chunk_id": "chunk-v1-77499176e2a15e787acfd2f6de8a5c9a40d9c823b919a93b6b2100162b58453b",
+          "score": 0.0
+        },
+        {
+          "document_id": "billing.md",
+          "chunk_id": "chunk-v1-8f22dbec95b20f268a5549cad74a022122490b7f0acf74933bc75b41aebb6280",
+          "score": 0.0
+        },
+        {
+          "document_id": "regions.md",
+          "chunk_id": "chunk-v1-beb0cdb73a31fc1e41fd77af1c927ed7fa9d2896d953a56e958db48f3f2b50e5",
+          "score": 0.0
+        },
+        {
+          "document_id": "indexing.md",
+          "chunk_id": "chunk-v1-ed8a2544a50adbab5eca9bbe14ce20d484f7d1a79b125e2149f9c5b924f49838",
+          "score": 0.0
+        },
+        {
+          "document_id": "retention.md",
+          "chunk_id": "chunk-v1-fb92ee1b097f96d40f661b66b51458e34976903de8da7e43b0955c890731b4d9",
+          "score": 0.0
+        }
+      ],
+      "recall_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "reciprocal_rank": 1.0,
+      "retrieval_ms": 0.07412489503622055,
+      "generation_ms": null,
+      "judge_ms": null,
+      "answer": null,
+      "answer_metrics": null,
+      "context_chunk_ids": [],
+      "judge": null
+    },
+    {
+      "id": "api-keys-2",
+      "question": "What is the process for replacing an API key?",
+      "relevant_document_ids": [
+        "api-keys.md"
+      ],
+      "retrieved_documents": [
+        {
+          "document_id": "api-keys.md",
+          "chunk_id": "chunk-v1-cc62727c3a541f5acef807d2ba5244044879cd5ee706fb70359485722ace8c07",
+          "score": 3.4600459243250583
+        },
+        {
+          "document_id": "security.md",
+          "chunk_id": "chunk-v1-d7ad9d21df1fc7cc38a3b890f210861dfb9754ecc8bc15394c2a9f3b2c942a82",
+          "score": 3.250996577540625
+        },
+        {
+          "document_id": "support.md",
+          "chunk_id": "chunk-v1-1ce0c94ce52c8e0d691fd3a6106c7b9bf144718be5689a6ca415478c0e8e0d0c",
+          "score": 1.6933257399343145
+        },
+        {
+          "document_id": "retention.md",
+          "chunk_id": "chunk-v1-fb92ee1b097f96d40f661b66b51458e34976903de8da7e43b0955c890731b4d9",
+          "score": 1.6876451742027065
+        },
+        {
+          "document_id": "deployment.md",
+          "chunk_id": "chunk-v1-77499176e2a15e787acfd2f6de8a5c9a40d9c823b919a93b6b2100162b58453b",
+          "score": 1.6661955586217068
+        },
+        {
+          "document_id": "rate-limits.md",
+          "chunk_id": "chunk-v1-d5a578e8ed3cf92e457ee781521075326e6a41f4b7219c78a9b718cf19dbc96f",
+          "score": 1.6630999366950607
+        },
+        {
+          "document_id": "billing.md",
+          "chunk_id": "chunk-v1-8f22dbec95b20f268a5549cad74a022122490b7f0acf74933bc75b41aebb6280",
+          "score": 1.3717796484921312
+        },
+        {
+          "document_id": "backups.md",
+          "chunk_id": "chunk-v1-6e4d6ad8e173605f48f59fbc593b6d5e9471abe317e792294825946d6d68fa5d",
+          "score": 1.2630970606296876
+        },
+        {
+          "document_id": "indexing.md",
+          "chunk_id": "chunk-v1-ed8a2544a50adbab5eca9bbe14ce20d484f7d1a79b125e2149f9c5b924f49838",
+          "score": 0.7425466874903621
+        },
+        {
+          "document_id": "sessions.md",
+          "chunk_id": "chunk-v1-5ba066283eade061eda3f5d6e9c6ae955878693b3363e2cbe5d69f59bead4e40",
+          "score": 0.3260865872824986
+        },
+        {
+          "document_id": "regions.md",
+          "chunk_id": "chunk-v1-beb0cdb73a31fc1e41fd77af1c927ed7fa9d2896d953a56e958db48f3f2b50e5",
+          "score": 0.0
+        },
+        {
+          "document_id": "exports.md",
+          "chunk_id": "chunk-v1-dbcb848d58657d44a56263bfdbb901eb7f1dec13a4c0ec91f4518f512b2e4383",
+          "score": 0.0
+        }
+      ],
+      "recall_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "reciprocal_rank": 1.0,
+      "retrieval_ms": 0.05070795305073261,
+      "generation_ms": null,
+      "judge_ms": null,
+      "answer": null,
+      "answer_metrics": null,
+      "context_chunk_ids": [],
+      "judge": null
+    },
+    {
+      "id": "rate-limits-1",
+      "question": "How many API calls can a workspace make each minute?",
+      "relevant_document_ids": [
+        "rate-limits.md"
+      ],
+      "retrieved_documents": [
+        {
+          "document_id": "exports.md",
+          "chunk_id": "chunk-v1-dbcb848d58657d44a56263bfdbb901eb7f1dec13a4c0ec91f4518f512b2e4383",
+          "score": 3.812633226081202
+        },
+        {
+          "document_id": "rate-limits.md",
+          "chunk_id": "chunk-v1-d5a578e8ed3cf92e457ee781521075326e6a41f4b7219c78a9b718cf19dbc96f",
+          "score": 3.546142174439525
+        },
+        {
+          "document_id": "regions.md",
+          "chunk_id": "chunk-v1-beb0cdb73a31fc1e41fd77af1c927ed7fa9d2896d953a56e958db48f3f2b50e5",
+          "score": 2.341582402705489
+        },
+        {
+          "document_id": "billing.md",
+          "chunk_id": "chunk-v1-8f22dbec95b20f268a5549cad74a022122490b7f0acf74933bc75b41aebb6280",
+          "score": 2.037014732019856
+        },
+        {
+          "document_id": "indexing.md",
+          "chunk_id": "chunk-v1-ed8a2544a50adbab5eca9bbe14ce20d484f7d1a79b125e2149f9c5b924f49838",
+          "score": 1.370462254068638
+        },
+        {
+          "document_id": "api-keys.md",
+          "chunk_id": "chunk-v1-cc62727c3a541f5acef807d2ba5244044879cd5ee706fb70359485722ace8c07",
+          "score": 1.2523343715152406
+        },
+        {
+          "document_id": "retention.md",
+          "chunk_id": "chunk-v1-fb92ee1b097f96d40f661b66b51458e34976903de8da7e43b0955c890731b4d9",
+          "score": 1.0709300218792959
+        },
+        {
+          "document_id": "sessions.md",
+          "chunk_id": "chunk-v1-5ba066283eade061eda3f5d6e9c6ae955878693b3363e2cbe5d69f59bead4e40",
+          "score": 0.9947440470361749
+        },
+        {
+          "document_id": "support.md",
+          "chunk_id": "chunk-v1-1ce0c94ce52c8e0d691fd3a6106c7b9bf144718be5689a6ca415478c0e8e0d0c",
+          "score": 0.9261881432243964
+        },
+        {
+          "document_id": "deployment.md",
+          "chunk_id": "chunk-v1-77499176e2a15e787acfd2f6de8a5c9a40d9c823b919a93b6b2100162b58453b",
+          "score": 0.8225671043824097
+        },
+        {
+          "document_id": "backups.md",
+          "chunk_id": "chunk-v1-6e4d6ad8e173605f48f59fbc593b6d5e9471abe317e792294825946d6d68fa5d",
+          "score": 0.44301445530101996
+        },
+        {
+          "document_id": "security.md",
+          "chunk_id": "chunk-v1-d7ad9d21df1fc7cc38a3b890f210861dfb9754ecc8bc15394c2a9f3b2c942a82",
+          "score": 0.3158400491892458
+        }
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "reciprocal_rank": 0.5,
+      "retrieval_ms": 0.04620896652340889,
+      "generation_ms": null,
+      "judge_ms": null,
+      "answer": null,
+      "answer_metrics": null,
+      "context_chunk_ids": [],
+      "judge": null
+    },
+    {
+      "id": "rate-limits-2",
+      "question": "How should clients handle HTTP 429?",
+      "relevant_document_ids": [
+        "rate-limits.md"
+      ],
+      "retrieved_documents": [
+        {
+          "document_id": "rate-limits.md",
+          "chunk_id": "chunk-v1-d5a578e8ed3cf92e457ee781521075326e6a41f4b7219c78a9b718cf19dbc96f",
+          "score": 6.198680329782609
+        },
+        {
+          "document_id": "api-keys.md",
+          "chunk_id": "chunk-v1-cc62727c3a541f5acef807d2ba5244044879cd5ee706fb70359485722ace8c07",
+          "score": 1.5593902013389098
+        },
+        {
+          "document_id": "security.md",
+          "chunk_id": "chunk-v1-d7ad9d21df1fc7cc38a3b890f210861dfb9754ecc8bc15394c2a9f3b2c942a82",
+          "score": 1.4613895369545036
+        },
+        {
+          "document_id": "support.md",
+          "chunk_id": "chunk-v1-1ce0c94ce52c8e0d691fd3a6106c7b9bf144718be5689a6ca415478c0e8e0d0c",
+          "score": 1.388663488668131
+        },
+        {
+          "document_id": "sessions.md",
+          "chunk_id": "chunk-v1-5ba066283eade061eda3f5d6e9c6ae955878693b3363e2cbe5d69f59bead4e40",
+          "score": 0.0
+        },
+        {
+          "document_id": "backups.md",
+          "chunk_id": "chunk-v1-6e4d6ad8e173605f48f59fbc593b6d5e9471abe317e792294825946d6d68fa5d",
+          "score": 0.0
+        },
+        {
+          "document_id": "deployment.md",
+          "chunk_id": "chunk-v1-77499176e2a15e787acfd2f6de8a5c9a40d9c823b919a93b6b2100162b58453b",
+          "score": 0.0
+        },
+        {
+          "document_id": "billing.md",
+          "chunk_id": "chunk-v1-8f22dbec95b20f268a5549cad74a022122490b7f0acf74933bc75b41aebb6280",
+          "score": 0.0
+        },
+        {
+          "document_id": "regions.md",
+          "chunk_id": "chunk-v1-beb0cdb73a31fc1e41fd77af1c927ed7fa9d2896d953a56e958db48f3f2b50e5",
+          "score": 0.0
+        },
+        {
+          "document_id": "exports.md",
+          "chunk_id": "chunk-v1-dbcb848d58657d44a56263bfdbb901eb7f1dec13a4c0ec91f4518f512b2e4383",
+          "score": 0.0
+        },
+        {
+          "document_id": "indexing.md",
+          "chunk_id": "chunk-v1-ed8a2544a50adbab5eca9bbe14ce20d484f7d1a79b125e2149f9c5b924f49838",
+          "score": 0.0
+        },
+        {
+          "document_id": "retention.md",
+          "chunk_id": "chunk-v1-fb92ee1b097f96d40f661b66b51458e34976903de8da7e43b0955c890731b4d9",
+          "score": 0.0
+        }
+      ],
+      "recall_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "reciprocal_rank": 1.0,
+      "retrieval_ms": 0.031250063329935074,
+      "generation_ms": null,
+      "judge_ms": null,
+      "answer": null,
+      "answer_metrics": null,
+      "context_chunk_ids": [],
+      "judge": null
+    },
+    {
+      "id": "backups-1",
+      "question": "How frequently are database backups taken?",
+      "relevant_document_ids": [
+        "backups.md"
+      ],
+      "retrieved_documents": [
+        {
+          "document_id": "backups.md",
+          "chunk_id": "chunk-v1-6e4d6ad8e173605f48f59fbc593b6d5e9471abe317e792294825946d6d68fa5d",
+          "score": 4.042490324521784
+        },
+        {
+          "document_id": "retention.md",
+          "chunk_id": "chunk-v1-fb92ee1b097f96d40f661b66b51458e34976903de8da7e43b0955c890731b4d9",
+          "score": 1.4168676554337458
+        },
+        {
+          "document_id": "support.md",
+          "chunk_id": "chunk-v1-1ce0c94ce52c8e0d691fd3a6106c7b9bf144718be5689a6ca415478c0e8e0d0c",
+          "score": 0.0
+        },
+        {
+          "document_id": "sessions.md",
+          "chunk_id": "chunk-v1-5ba066283eade061eda3f5d6e9c6ae955878693b3363e2cbe5d69f59bead4e40",
+          "score": 0.0
+        },
+        {
+          "document_id": "deployment.md",
+          "chunk_id": "chunk-v1-77499176e2a15e787acfd2f6de8a5c9a40d9c823b919a93b6b2100162b58453b",
+          "score": 0.0
+        },
+        {
+          "document_id": "billing.md",
+          "chunk_id": "chunk-v1-8f22dbec95b20f268a5549cad74a022122490b7f0acf74933bc75b41aebb6280",
+          "score": 0.0
+        },
+        {
+          "document_id": "regions.md",
+          "chunk_id": "chunk-v1-beb0cdb73a31fc1e41fd77af1c927ed7fa9d2896d953a56e958db48f3f2b50e5",
+          "score": 0.0
+        },
+        {
+          "document_id": "api-keys.md",
+          "chunk_id": "chunk-v1-cc62727c3a541f5acef807d2ba5244044879cd5ee706fb70359485722ace8c07",
+          "score": 0.0
+        },
+        {
+          "document_id": "rate-limits.md",
+          "chunk_id": "chunk-v1-d5a578e8ed3cf92e457ee781521075326e6a41f4b7219c78a9b718cf19dbc96f",
+          "score": 0.0
+        },
+        {
+          "document_id": "security.md",
+          "chunk_id": "chunk-v1-d7ad9d21df1fc7cc38a3b890f210861dfb9754ecc8bc15394c2a9f3b2c942a82",
+          "score": 0.0
+        },
+        {
+          "document_id": "exports.md",
+          "chunk_id": "chunk-v1-dbcb848d58657d44a56263bfdbb901eb7f1dec13a4c0ec91f4518f512b2e4383",
+          "score": 0.0
+        },
+        {
+          "document_id": "indexing.md",
+          "chunk_id": "chunk-v1-ed8a2544a50adbab5eca9bbe14ce20d484f7d1a79b125e2149f9c5b924f49838",
+          "score": 0.0
+        }
+      ],
+      "recall_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "reciprocal_rank": 1.0,
+      "retrieval_ms": 0.06449990905821323,
+      "generation_ms": null,
+      "judge_ms": null,
+      "answer": null,
+      "answer_metrics": null,
+      "context_chunk_ids": [],
+      "judge": null
+    },
+    {
+      "id": "backups-2",
+      "question": "Does a restore replace my current database?",
+      "relevant_document_ids": [
+        "backups.md"
+      ],
+      "retrieved_documents": [
+        {
+          "document_id": "backups.md",
+          "chunk_id": "chunk-v1-6e4d6ad8e173605f48f59fbc593b6d5e9471abe317e792294825946d6d68fa5d",
+          "score": 4.485504779822803
+        },
+        {
+          "document_id": "billing.md",
+          "chunk_id": "chunk-v1-8f22dbec95b20f268a5549cad74a022122490b7f0acf74933bc75b41aebb6280",
+          "score": 2.591739753589782
+        },
+        {
+          "document_id": "retention.md",
+          "chunk_id": "chunk-v1-fb92ee1b097f96d40f661b66b51458e34976903de8da7e43b0955c890731b4d9",
+          "score": 1.8598821107347658
+        },
+        {
+          "document_id": "deployment.md",
+          "chunk_id": "chunk-v1-77499176e2a15e787acfd2f6de8a5c9a40d9c823b919a93b6b2100162b58453b",
+          "score": 0.8225671043824097
+        },
+        {
+          "document_id": "api-keys.md",
+          "chunk_id": "chunk-v1-cc62727c3a541f5acef807d2ba5244044879cd5ee706fb70359485722ace8c07",
+          "score": 0.7825043567723547
+        },
+        {
+          "document_id": "regions.md",
+          "chunk_id": "chunk-v1-beb0cdb73a31fc1e41fd77af1c927ed7fa9d2896d953a56e958db48f3f2b50e5",
+          "score": 0.7597901519313575
+        },
+        {
+          "document_id": "indexing.md",
+          "chunk_id": "chunk-v1-ed8a2544a50adbab5eca9bbe14ce20d484f7d1a79b125e2149f9c5b924f49838",
+          "score": 0.7425466874903621
+        },
+        {
+          "document_id": "rate-limits.md",
+          "chunk_id": "chunk-v1-d5a578e8ed3cf92e457ee781521075326e6a41f4b7219c78a9b718cf19dbc96f",
+          "score": 0.6305907424381111
+        },
+        {
+          "document_id": "support.md",
+          "chunk_id": "chunk-v1-1ce0c94ce52c8e0d691fd3a6106c7b9bf144718be5689a6ca415478c0e8e0d0c",
+          "score": 0.6260658736464484
+        },
+        {
+          "document_id": "exports.md",
+          "chunk_id": "chunk-v1-dbcb848d58657d44a56263bfdbb901eb7f1dec13a4c0ec91f4518f512b2e4383",
+          "score": 0.44301445530101996
+        },
+        {
+          "document_id": "sessions.md",
+          "chunk_id": "chunk-v1-5ba066283eade061eda3f5d6e9c6ae955878693b3363e2cbe5d69f59bead4e40",
+          "score": 0.0
+        },
+        {
+          "document_id": "security.md",
+          "chunk_id": "chunk-v1-d7ad9d21df1fc7cc38a3b890f210861dfb9754ecc8bc15394c2a9f3b2c942a82",
+          "score": 0.0
+        }
+      ],
+      "recall_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "reciprocal_rank": 1.0,
+      "retrieval_ms": 0.03450014628469944,
+      "generation_ms": null,
+      "judge_ms": null,
+      "answer": null,
+      "answer_metrics": null,
+      "context_chunk_ids": [],
+      "judge": null
+    },
+    {
+      "id": "billing-1",
+      "question": "When are monthly invoices sent?",
+      "relevant_document_ids": [
+        "billing.md"
+      ],
+      "retrieved_documents": [
+        {
+          "document_id": "billing.md",
+          "chunk_id": "chunk-v1-8f22dbec95b20f268a5549cad74a022122490b7f0acf74933bc75b41aebb6280",
+          "score": 2.7435392516504287
+        },
+        {
+          "document_id": "support.md",
+          "chunk_id": "chunk-v1-1ce0c94ce52c8e0d691fd3a6106c7b9bf144718be5689a6ca415478c0e8e0d0c",
+          "score": 0.0
+        },
+        {
+          "document_id": "sessions.md",
+          "chunk_id": "chunk-v1-5ba066283eade061eda3f5d6e9c6ae955878693b3363e2cbe5d69f59bead4e40",
+          "score": 0.0
+        },
+        {
+          "document_id": "backups.md",
+          "chunk_id": "chunk-v1-6e4d6ad8e173605f48f59fbc593b6d5e9471abe317e792294825946d6d68fa5d",
+          "score": 0.0
+        },
+        {
+          "document_id": "deployment.md",
+          "chunk_id": "chunk-v1-77499176e2a15e787acfd2f6de8a5c9a40d9c823b919a93b6b2100162b58453b",
+          "score": 0.0
+        },
+        {
+          "document_id": "regions.md",
+          "chunk_id": "chunk-v1-beb0cdb73a31fc1e41fd77af1c927ed7fa9d2896d953a56e958db48f3f2b50e5",
+          "score": 0.0
+        },
+        {
+          "document_id": "api-keys.md",
+          "chunk_id": "chunk-v1-cc62727c3a541f5acef807d2ba5244044879cd5ee706fb70359485722ace8c07",
+          "score": 0.0
+        },
+        {
+          "document_id": "rate-limits.md",
+          "chunk_id": "chunk-v1-d5a578e8ed3cf92e457ee781521075326e6a41f4b7219c78a9b718cf19dbc96f",
+          "score": 0.0
+        },
+        {
+          "document_id": "security.md",
+          "chunk_id": "chunk-v1-d7ad9d21df1fc7cc38a3b890f210861dfb9754ecc8bc15394c2a9f3b2c942a82",
+          "score": 0.0
+        },
+        {
+          "document_id": "exports.md",
+          "chunk_id": "chunk-v1-dbcb848d58657d44a56263bfdbb901eb7f1dec13a4c0ec91f4518f512b2e4383",
+          "score": 0.0
+        },
+        {
+          "document_id": "indexing.md",
+          "chunk_id": "chunk-v1-ed8a2544a50adbab5eca9bbe14ce20d484f7d1a79b125e2149f9c5b924f49838",
+          "score": 0.0
+        },
+        {
+          "document_id": "retention.md",
+          "chunk_id": "chunk-v1-fb92ee1b097f96d40f661b66b51458e34976903de8da7e43b0955c890731b4d9",
+          "score": 0.0
+        }
+      ],
+      "recall_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "reciprocal_rank": 1.0,
+      "retrieval_ms": 0.027667032554745674,
+      "generation_ms": null,
+      "judge_ms": null,
+      "answer": null,
+      "answer_metrics": null,
+      "context_chunk_ids": [],
+      "judge": null
+    },
+    {
+      "id": "billing-2",
+      "question": "How long is the grace period after a payment fails?",
+      "relevant_document_ids": [
+        "billing.md"
+      ],
+      "retrieved_documents": [
+        {
+          "document_id": "billing.md",
+          "chunk_id": "chunk-v1-8f22dbec95b20f268a5549cad74a022122490b7f0acf74933bc75b41aebb6280",
+          "score": 6.1208167038982655
+        },
+        {
+          "document_id": "indexing.md",
+          "chunk_id": "chunk-v1-ed8a2544a50adbab5eca9bbe14ce20d484f7d1a79b125e2149f9c5b924f49838",
+          "score": 1.4850933749807242
+        },
+        {
+          "document_id": "deployment.md",
+          "chunk_id": "chunk-v1-77499176e2a15e787acfd2f6de8a5c9a40d9c823b919a93b6b2100162b58453b",
+          "score": 1.4719308604469603
+        },
+        {
+          "document_id": "rate-limits.md",
+          "chunk_id": "chunk-v1-d5a578e8ed3cf92e457ee781521075326e6a41f4b7219c78a9b718cf19dbc96f",
+          "score": 1.368948167939811
+        },
+        {
+          "document_id": "api-keys.md",
+          "chunk_id": "chunk-v1-cc62727c3a541f5acef807d2ba5244044879cd5ee706fb70359485722ace8c07",
+          "score": 1.2700815824917324
+        },
+        {
+          "document_id": "backups.md",
+          "chunk_id": "chunk-v1-6e4d6ad8e173605f48f59fbc593b6d5e9471abe317e792294825946d6d68fa5d",
+          "score": 1.0781959493524318
+        },
+        {
+          "document_id": "retention.md",
+          "chunk_id": "chunk-v1-fb92ee1b097f96d40f661b66b51458e34976903de8da7e43b0955c890731b4d9",
+          "score": 1.0781959493524318
+        },
+        {
+          "document_id": "regions.md",
+          "chunk_id": "chunk-v1-beb0cdb73a31fc1e41fd77af1c927ed7fa9d2896d953a56e958db48f3f2b50e5",
+          "score": 0.7597901519313575
+        },
+        {
+          "document_id": "support.md",
+          "chunk_id": "chunk-v1-1ce0c94ce52c8e0d691fd3a6106c7b9bf144718be5689a6ca415478c0e8e0d0c",
+          "score": 0.6260658736464484
+        },
+        {
+          "document_id": "security.md",
+          "chunk_id": "chunk-v1-d7ad9d21df1fc7cc38a3b890f210861dfb9754ecc8bc15394c2a9f3b2c942a82",
+          "score": 0.45693518883971945
+        },
+        {
+          "document_id": "exports.md",
+          "chunk_id": "chunk-v1-dbcb848d58657d44a56263bfdbb901eb7f1dec13a4c0ec91f4518f512b2e4383",
+          "score": 0.44301445530101996
+        },
+        {
+          "document_id": "sessions.md",
+          "chunk_id": "chunk-v1-5ba066283eade061eda3f5d6e9c6ae955878693b3363e2cbe5d69f59bead4e40",
+          "score": 0.0
+        }
+      ],
+      "recall_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "reciprocal_rank": 1.0,
+      "retrieval_ms": 0.04454189911484718,
+      "generation_ms": null,
+      "judge_ms": null,
+      "answer": null,
+      "answer_metrics": null,
+      "context_chunk_ids": [],
+      "judge": null
+    },
+    {
+      "id": "retention-1",
+      "question": "How long are standard application event logs kept?",
+      "relevant_document_ids": [
+        "retention.md"
+      ],
+      "retrieved_documents": [
+        {
+          "document_id": "retention.md",
+          "chunk_id": "chunk-v1-fb92ee1b097f96d40f661b66b51458e34976903de8da7e43b0955c890731b4d9",
+          "score": 9.074066447081112
+        },
+        {
+          "document_id": "backups.md",
+          "chunk_id": "chunk-v1-6e4d6ad8e173605f48f59fbc593b6d5e9471abe317e792294825946d6d68fa5d",
+          "score": 2.8337353108674916
+        },
+        {
+          "document_id": "rate-limits.md",
+          "chunk_id": "chunk-v1-d5a578e8ed3cf92e457ee781521075326e6a41f4b7219c78a9b718cf19dbc96f",
+          "score": 0.9759427270005431
+        },
+        {
+          "document_id": "support.md",
+          "chunk_id": "chunk-v1-1ce0c94ce52c8e0d691fd3a6106c7b9bf144718be5689a6ca415478c0e8e0d0c",
+          "score": 0.9662291693085281
+        },
+        {
+          "document_id": "sessions.md",
+          "chunk_id": "chunk-v1-5ba066283eade061eda3f5d6e9c6ae955878693b3363e2cbe5d69f59bead4e40",
+          "score": 0.0
+        },
+        {
+          "document_id": "deployment.md",
+          "chunk_id": "chunk-v1-77499176e2a15e787acfd2f6de8a5c9a40d9c823b919a93b6b2100162b58453b",
+          "score": 0.0
+        },
+        {
+          "document_id": "billing.md",
+          "chunk_id": "chunk-v1-8f22dbec95b20f268a5549cad74a022122490b7f0acf74933bc75b41aebb6280",
+          "score": 0.0
+        },
+        {
+          "document_id": "regions.md",
+          "chunk_id": "chunk-v1-beb0cdb73a31fc1e41fd77af1c927ed7fa9d2896d953a56e958db48f3f2b50e5",
+          "score": 0.0
+        },
+        {
+          "document_id": "api-keys.md",
+          "chunk_id": "chunk-v1-cc62727c3a541f5acef807d2ba5244044879cd5ee706fb70359485722ace8c07",
+          "score": 0.0
+        },
+        {
+          "document_id": "security.md",
+          "chunk_id": "chunk-v1-d7ad9d21df1fc7cc38a3b890f210861dfb9754ecc8bc15394c2a9f3b2c942a82",
+          "score": 0.0
+        },
+        {
+          "document_id": "exports.md",
+          "chunk_id": "chunk-v1-dbcb848d58657d44a56263bfdbb901eb7f1dec13a4c0ec91f4518f512b2e4383",
+          "score": 0.0
+        },
+        {
+          "document_id": "indexing.md",
+          "chunk_id": "chunk-v1-ed8a2544a50adbab5eca9bbe14ce20d484f7d1a79b125e2149f9c5b924f49838",
+          "score": 0.0
+        }
+      ],
+      "recall_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "reciprocal_rank": 1.0,
+      "retrieval_ms": 0.03854185342788696,
+      "generation_ms": null,
+      "judge_ms": null,
+      "answer": null,
+      "answer_metrics": null,
+      "context_chunk_ids": [],
+      "judge": null
+    },
+    {
+      "id": "retention-2",
+      "question": "How long are audit records stored?",
+      "relevant_document_ids": [
+        "retention.md"
+      ],
+      "retrieved_documents": [
+        {
+          "document_id": "security.md",
+          "chunk_id": "chunk-v1-d7ad9d21df1fc7cc38a3b890f210861dfb9754ecc8bc15394c2a9f3b2c942a82",
+          "score": 2.0742178485346634
+        },
+        {
+          "document_id": "exports.md",
+          "chunk_id": "chunk-v1-dbcb848d58657d44a56263bfdbb901eb7f1dec13a4c0ec91f4518f512b2e4383",
+          "score": 2.0110258802295173
+        },
+        {
+          "document_id": "retention.md",
+          "chunk_id": "chunk-v1-fb92ee1b097f96d40f661b66b51458e34976903de8da7e43b0955c890731b4d9",
+          "score": 2.0110258802295173
+        },
+        {
+          "document_id": "support.md",
+          "chunk_id": "chunk-v1-1ce0c94ce52c8e0d691fd3a6106c7b9bf144718be5689a6ca415478c0e8e0d0c",
+          "score": 0.0
+        },
+        {
+          "document_id": "sessions.md",
+          "chunk_id": "chunk-v1-5ba066283eade061eda3f5d6e9c6ae955878693b3363e2cbe5d69f59bead4e40",
+          "score": 0.0
+        },
+        {
+          "document_id": "backups.md",
+          "chunk_id": "chunk-v1-6e4d6ad8e173605f48f59fbc593b6d5e9471abe317e792294825946d6d68fa5d",
+          "score": 0.0
+        },
+        {
+          "document_id": "deployment.md",
+          "chunk_id": "chunk-v1-77499176e2a15e787acfd2f6de8a5c9a40d9c823b919a93b6b2100162b58453b",
+          "score": 0.0
+        },
+        {
+          "document_id": "billing.md",
+          "chunk_id": "chunk-v1-8f22dbec95b20f268a5549cad74a022122490b7f0acf74933bc75b41aebb6280",
+          "score": 0.0
+        },
+        {
+          "document_id": "regions.md",
+          "chunk_id": "chunk-v1-beb0cdb73a31fc1e41fd77af1c927ed7fa9d2896d953a56e958db48f3f2b50e5",
+          "score": 0.0
+        },
+        {
+          "document_id": "api-keys.md",
+          "chunk_id": "chunk-v1-cc62727c3a541f5acef807d2ba5244044879cd5ee706fb70359485722ace8c07",
+          "score": 0.0
+        },
+        {
+          "document_id": "rate-limits.md",
+          "chunk_id": "chunk-v1-d5a578e8ed3cf92e457ee781521075326e6a41f4b7219c78a9b718cf19dbc96f",
+          "score": 0.0
+        },
+        {
+          "document_id": "indexing.md",
+          "chunk_id": "chunk-v1-ed8a2544a50adbab5eca9bbe14ce20d484f7d1a79b125e2149f9c5b924f49838",
+          "score": 0.0
+        }
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "reciprocal_rank": 0.3333333333333333,
+      "retrieval_ms": 0.040207989513874054,
+      "generation_ms": null,
+      "judge_ms": null,
+      "answer": null,
+      "answer_metrics": null,
+      "context_chunk_ids": [],
+      "judge": null
+    },
+    {
+      "id": "indexing-1",
+      "question": "How soon will an updated document appear in search?",
+      "relevant_document_ids": [
+        "indexing.md"
+      ],
+      "retrieved_documents": [
+        {
+          "document_id": "indexing.md",
+          "chunk_id": "chunk-v1-ed8a2544a50adbab5eca9bbe14ce20d484f7d1a79b125e2149f9c5b924f49838",
+          "score": 6.741453187152378
+        },
+        {
+          "document_id": "support.md",
+          "chunk_id": "chunk-v1-1ce0c94ce52c8e0d691fd3a6106c7b9bf144718be5689a6ca415478c0e8e0d0c",
+          "score": 2.3594326396648944
+        },
+        {
+          "document_id": "regions.md",
+          "chunk_id": "chunk-v1-beb0cdb73a31fc1e41fd77af1c927ed7fa9d2896d953a56e958db48f3f2b50e5",
+          "score": 1.027595091264024
+        },
+        {
+          "document_id": "deployment.md",
+          "chunk_id": "chunk-v1-77499176e2a15e787acfd2f6de8a5c9a40d9c823b919a93b6b2100162b58453b",
+          "score": 1.016831802557156
+        },
+        {
+          "document_id": "security.md",
+          "chunk_id": "chunk-v1-d7ad9d21df1fc7cc38a3b890f210861dfb9754ecc8bc15394c2a9f3b2c942a82",
+          "score": 1.016831802557156
+        },
+        {
+          "document_id": "backups.md",
+          "chunk_id": "chunk-v1-6e4d6ad8e173605f48f59fbc593b6d5e9471abe317e792294825946d6d68fa5d",
+          "score": 0.9858535699263598
+        },
+        {
+          "document_id": "sessions.md",
+          "chunk_id": "chunk-v1-5ba066283eade061eda3f5d6e9c6ae955878693b3363e2cbe5d69f59bead4e40",
+          "score": 0.0
+        },
+        {
+          "document_id": "billing.md",
+          "chunk_id": "chunk-v1-8f22dbec95b20f268a5549cad74a022122490b7f0acf74933bc75b41aebb6280",
+          "score": 0.0
+        },
+        {
+          "document_id": "api-keys.md",
+          "chunk_id": "chunk-v1-cc62727c3a541f5acef807d2ba5244044879cd5ee706fb70359485722ace8c07",
+          "score": 0.0
+        },
+        {
+          "document_id": "rate-limits.md",
+          "chunk_id": "chunk-v1-d5a578e8ed3cf92e457ee781521075326e6a41f4b7219c78a9b718cf19dbc96f",
+          "score": 0.0
+        },
+        {
+          "document_id": "exports.md",
+          "chunk_id": "chunk-v1-dbcb848d58657d44a56263bfdbb901eb7f1dec13a4c0ec91f4518f512b2e4383",
+          "score": 0.0
+        },
+        {
+          "document_id": "retention.md",
+          "chunk_id": "chunk-v1-fb92ee1b097f96d40f661b66b51458e34976903de8da7e43b0955c890731b4d9",
+          "score": 0.0
+        }
+      ],
+      "recall_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "reciprocal_rank": 1.0,
+      "retrieval_ms": 0.052416929975152016,
+      "generation_ms": null,
+      "judge_ms": null,
+      "answer": null,
+      "answer_metrics": null,
+      "context_chunk_ids": [],
+      "judge": null
+    },
+    {
+      "id": "indexing-2",
+      "question": "What is the largest source document accepted for indexing?",
+      "relevant_document_ids": [
+        "indexing.md"
+      ],
+      "retrieved_documents": [
+        {
+          "document_id": "indexing.md",
+          "chunk_id": "chunk-v1-ed8a2544a50adbab5eca9bbe14ce20d484f7d1a79b125e2149f9c5b924f49838",
+          "score": 11.018676606910272
+        },
+        {
+          "document_id": "retention.md",
+          "chunk_id": "chunk-v1-fb92ee1b097f96d40f661b66b51458e34976903de8da7e43b0955c890731b4d9",
+          "score": 1.6876451742027065
+        },
+        {
+          "document_id": "billing.md",
+          "chunk_id": "chunk-v1-8f22dbec95b20f268a5549cad74a022122490b7f0acf74933bc75b41aebb6280",
+          "score": 1.3717796484921312
+        },
+        {
+          "document_id": "rate-limits.md",
+          "chunk_id": "chunk-v1-d5a578e8ed3cf92e457ee781521075326e6a41f4b7219c78a9b718cf19dbc96f",
+          "score": 1.3599605205924532
+        },
+        {
+          "document_id": "backups.md",
+          "chunk_id": "chunk-v1-6e4d6ad8e173605f48f59fbc593b6d5e9471abe317e792294825946d6d68fa5d",
+          "score": 1.2630970606296876
+        },
+        {
+          "document_id": "deployment.md",
+          "chunk_id": "chunk-v1-77499176e2a15e787acfd2f6de8a5c9a40d9c823b919a93b6b2100162b58453b",
+          "score": 0.6493637560645507
+        },
+        {
+          "document_id": "api-keys.md",
+          "chunk_id": "chunk-v1-cc62727c3a541f5acef807d2ba5244044879cd5ee706fb70359485722ace8c07",
+          "score": 0.4875772257193777
+        },
+        {
+          "document_id": "security.md",
+          "chunk_id": "chunk-v1-d7ad9d21df1fc7cc38a3b890f210861dfb9754ecc8bc15394c2a9f3b2c942a82",
+          "score": 0.45693518883971945
+        },
+        {
+          "document_id": "support.md",
+          "chunk_id": "chunk-v1-1ce0c94ce52c8e0d691fd3a6106c7b9bf144718be5689a6ca415478c0e8e0d0c",
+          "score": 0.0
+        },
+        {
+          "document_id": "sessions.md",
+          "chunk_id": "chunk-v1-5ba066283eade061eda3f5d6e9c6ae955878693b3363e2cbe5d69f59bead4e40",
+          "score": 0.0
+        },
+        {
+          "document_id": "regions.md",
+          "chunk_id": "chunk-v1-beb0cdb73a31fc1e41fd77af1c927ed7fa9d2896d953a56e958db48f3f2b50e5",
+          "score": 0.0
+        },
+        {
+          "document_id": "exports.md",
+          "chunk_id": "chunk-v1-dbcb848d58657d44a56263bfdbb901eb7f1dec13a4c0ec91f4518f512b2e4383",
+          "score": 0.0
+        }
+      ],
+      "recall_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "reciprocal_rank": 1.0,
+      "retrieval_ms": 0.04683295264840126,
+      "generation_ms": null,
+      "judge_ms": null,
+      "answer": null,
+      "answer_metrics": null,
+      "context_chunk_ids": [],
+      "judge": null
+    },
+    {
+      "id": "deployment-1",
+      "question": "What happens when a new release fails its health check?",
+      "relevant_document_ids": [
+        "deployment.md"
+      ],
+      "retrieved_documents": [
+        {
+          "document_id": "deployment.md",
+          "chunk_id": "chunk-v1-77499176e2a15e787acfd2f6de8a5c9a40d9c823b919a93b6b2100162b58453b",
+          "score": 9.809078194724705
+        },
+        {
+          "document_id": "retention.md",
+          "chunk_id": "chunk-v1-fb92ee1b097f96d40f661b66b51458e34976903de8da7e43b0955c890731b4d9",
+          "score": 2.454040335530537
+        },
+        {
+          "document_id": "regions.md",
+          "chunk_id": "chunk-v1-beb0cdb73a31fc1e41fd77af1c927ed7fa9d2896d953a56e958db48f3f2b50e5",
+          "score": 1.7873852431953814
+        },
+        {
+          "document_id": "backups.md",
+          "chunk_id": "chunk-v1-6e4d6ad8e173605f48f59fbc593b6d5e9471abe317e792294825946d6d68fa5d",
+          "score": 1.4288680252273798
+        },
+        {
+          "document_id": "api-keys.md",
+          "chunk_id": "chunk-v1-cc62727c3a541f5acef807d2ba5244044879cd5ee706fb70359485722ace8c07",
+          "score": 0.7825043567723547
+        },
+        {
+          "document_id": "indexing.md",
+          "chunk_id": "chunk-v1-ed8a2544a50adbab5eca9bbe14ce20d484f7d1a79b125e2149f9c5b924f49838",
+          "score": 0.7425466874903621
+        },
+        {
+          "document_id": "billing.md",
+          "chunk_id": "chunk-v1-8f22dbec95b20f268a5549cad74a022122490b7f0acf74933bc75b41aebb6280",
+          "score": 0.7141820118427085
+        },
+        {
+          "document_id": "rate-limits.md",
+          "chunk_id": "chunk-v1-d5a578e8ed3cf92e457ee781521075326e6a41f4b7219c78a9b718cf19dbc96f",
+          "score": 0.6305907424381111
+        },
+        {
+          "document_id": "support.md",
+          "chunk_id": "chunk-v1-1ce0c94ce52c8e0d691fd3a6106c7b9bf144718be5689a6ca415478c0e8e0d0c",
+          "score": 0.6260658736464484
+        },
+        {
+          "document_id": "exports.md",
+          "chunk_id": "chunk-v1-dbcb848d58657d44a56263bfdbb901eb7f1dec13a4c0ec91f4518f512b2e4383",
+          "score": 0.44301445530101996
+        },
+        {
+          "document_id": "sessions.md",
+          "chunk_id": "chunk-v1-5ba066283eade061eda3f5d6e9c6ae955878693b3363e2cbe5d69f59bead4e40",
+          "score": 0.0
+        },
+        {
+          "document_id": "security.md",
+          "chunk_id": "chunk-v1-d7ad9d21df1fc7cc38a3b890f210861dfb9754ecc8bc15394c2a9f3b2c942a82",
+          "score": 0.0
+        }
+      ],
+      "recall_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "reciprocal_rank": 1.0,
+      "retrieval_ms": 0.047958921641111374,
+      "generation_ms": null,
+      "judge_ms": null,
+      "answer": null,
+      "answer_metrics": null,
+      "context_chunk_ids": [],
+      "judge": null
+    },
+    {
+      "id": "deployment-2",
+      "question": "How long can a deployment health check run before timing out?",
+      "relevant_document_ids": [
+        "deployment.md"
+      ],
+      "retrieved_documents": [
+        {
+          "document_id": "deployment.md",
+          "chunk_id": "chunk-v1-77499176e2a15e787acfd2f6de8a5c9a40d9c823b919a93b6b2100162b58453b",
+          "score": 9.665759263258124
+        },
+        {
+          "document_id": "backups.md",
+          "chunk_id": "chunk-v1-6e4d6ad8e173605f48f59fbc593b6d5e9471abe317e792294825946d6d68fa5d",
+          "score": 2.454040335530537
+        },
+        {
+          "document_id": "billing.md",
+          "chunk_id": "chunk-v1-8f22dbec95b20f268a5549cad74a022122490b7f0acf74933bc75b41aebb6280",
+          "score": 2.037014732019856
+        },
+        {
+          "document_id": "exports.md",
+          "chunk_id": "chunk-v1-dbcb848d58657d44a56263bfdbb901eb7f1dec13a4c0ec91f4518f512b2e4383",
+          "score": 1.4954781354523148
+        },
+        {
+          "document_id": "security.md",
+          "chunk_id": "chunk-v1-d7ad9d21df1fc7cc38a3b890f210861dfb9754ecc8bc15394c2a9f3b2c942a82",
+          "score": 1.4613895369545036
+        },
+        {
+          "document_id": "regions.md",
+          "chunk_id": "chunk-v1-beb0cdb73a31fc1e41fd77af1c927ed7fa9d2896d953a56e958db48f3f2b50e5",
+          "score": 1.4142919700789576
+        },
+        {
+          "document_id": "indexing.md",
+          "chunk_id": "chunk-v1-ed8a2544a50adbab5eca9bbe14ce20d484f7d1a79b125e2149f9c5b924f49838",
+          "score": 1.370462254068638
+        },
+        {
+          "document_id": "api-keys.md",
+          "chunk_id": "chunk-v1-cc62727c3a541f5acef807d2ba5244044879cd5ee706fb70359485722ace8c07",
+          "score": 0.7825043567723547
+        },
+        {
+          "document_id": "sessions.md",
+          "chunk_id": "chunk-v1-5ba066283eade061eda3f5d6e9c6ae955878693b3363e2cbe5d69f59bead4e40",
+          "score": 0.6686574597536763
+        },
+        {
+          "document_id": "rate-limits.md",
+          "chunk_id": "chunk-v1-d5a578e8ed3cf92e457ee781521075326e6a41f4b7219c78a9b718cf19dbc96f",
+          "score": 0.6305907424381111
+        },
+        {
+          "document_id": "support.md",
+          "chunk_id": "chunk-v1-1ce0c94ce52c8e0d691fd3a6106c7b9bf144718be5689a6ca415478c0e8e0d0c",
+          "score": 0.6260658736464484
+        },
+        {
+          "document_id": "retention.md",
+          "chunk_id": "chunk-v1-fb92ee1b097f96d40f661b66b51458e34976903de8da7e43b0955c890731b4d9",
+          "score": 0.44301445530101996
+        }
+      ],
+      "recall_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "reciprocal_rank": 1.0,
+      "retrieval_ms": 0.05687493830919266,
+      "generation_ms": null,
+      "judge_ms": null,
+      "answer": null,
+      "answer_metrics": null,
+      "context_chunk_ids": [],
+      "judge": null
+    },
+    {
+      "id": "support-1",
+      "question": "What is the initial response target for a critical production incident?",
+      "relevant_document_ids": [
+        "support.md"
+      ],
+      "retrieved_documents": [
+        {
+          "document_id": "support.md",
+          "chunk_id": "chunk-v1-1ce0c94ce52c8e0d691fd3a6106c7b9bf144718be5689a6ca415478c0e8e0d0c",
+          "score": 10.74293304671621
+        },
+        {
+          "document_id": "retention.md",
+          "chunk_id": "chunk-v1-fb92ee1b097f96d40f661b66b51458e34976903de8da7e43b0955c890731b4d9",
+          "score": 2.1306596295037266
+        },
+        {
+          "document_id": "billing.md",
+          "chunk_id": "chunk-v1-8f22dbec95b20f268a5549cad74a022122490b7f0acf74933bc75b41aebb6280",
+          "score": 2.0859616603348394
+        },
+        {
+          "document_id": "rate-limits.md",
+          "chunk_id": "chunk-v1-d5a578e8ed3cf92e457ee781521075326e6a41f4b7219c78a9b718cf19dbc96f",
+          "score": 1.9905512630305644
+        },
+        {
+          "document_id": "backups.md",
+          "chunk_id": "chunk-v1-6e4d6ad8e173605f48f59fbc593b6d5e9471abe317e792294825946d6d68fa5d",
+          "score": 1.7061115159307076
+        },
+        {
+          "document_id": "indexing.md",
+          "chunk_id": "chunk-v1-ed8a2544a50adbab5eca9bbe14ce20d484f7d1a79b125e2149f9c5b924f49838",
+          "score": 1.4850933749807242
+        },
+        {
+          "document_id": "deployment.md",
+          "chunk_id": "chunk-v1-77499176e2a15e787acfd2f6de8a5c9a40d9c823b919a93b6b2100162b58453b",
+          "score": 1.4719308604469603
+        },
+        {
+          "document_id": "api-keys.md",
+          "chunk_id": "chunk-v1-cc62727c3a541f5acef807d2ba5244044879cd5ee706fb70359485722ace8c07",
+          "score": 1.2700815824917324
+        },
+        {
+          "document_id": "regions.md",
+          "chunk_id": "chunk-v1-beb0cdb73a31fc1e41fd77af1c927ed7fa9d2896d953a56e958db48f3f2b50e5",
+          "score": 0.7597901519313575
+        },
+        {
+          "document_id": "security.md",
+          "chunk_id": "chunk-v1-d7ad9d21df1fc7cc38a3b890f210861dfb9754ecc8bc15394c2a9f3b2c942a82",
+          "score": 0.45693518883971945
+        },
+        {
+          "document_id": "exports.md",
+          "chunk_id": "chunk-v1-dbcb848d58657d44a56263bfdbb901eb7f1dec13a4c0ec91f4518f512b2e4383",
+          "score": 0.44301445530101996
+        },
+        {
+          "document_id": "sessions.md",
+          "chunk_id": "chunk-v1-5ba066283eade061eda3f5d6e9c6ae955878693b3363e2cbe5d69f59bead4e40",
+          "score": 0.0
+        }
+      ],
+      "recall_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "reciprocal_rank": 1.0,
+      "retrieval_ms": 0.051582930609583855,
+      "generation_ms": null,
+      "judge_ms": null,
+      "answer": null,
+      "answer_metrics": null,
+      "context_chunk_ids": [],
+      "judge": null
+    },
+    {
+      "id": "support-2",
+      "question": "What information should I attach to a support ticket?",
+      "relevant_document_ids": [
+        "support.md"
+      ],
+      "retrieved_documents": [
+        {
+          "document_id": "support.md",
+          "chunk_id": "chunk-v1-1ce0c94ce52c8e0d691fd3a6106c7b9bf144718be5689a6ca415478c0e8e0d0c",
+          "score": 7.722585399124609
+        },
+        {
+          "document_id": "deployment.md",
+          "chunk_id": "chunk-v1-77499176e2a15e787acfd2f6de8a5c9a40d9c823b919a93b6b2100162b58453b",
+          "score": 2.899389861675206
+        },
+        {
+          "document_id": "regions.md",
+          "chunk_id": "chunk-v1-beb0cdb73a31fc1e41fd77af1c927ed7fa9d2896d953a56e958db48f3f2b50e5",
+          "score": 2.2366486754575643
+        },
+        {
+          "document_id": "rate-limits.md",
+          "chunk_id": "chunk-v1-d5a578e8ed3cf92e457ee781521075326e6a41f4b7219c78a9b718cf19dbc96f",
+          "score": 2.0332145454296295
+        },
+        {
+          "document_id": "api-keys.md",
+          "chunk_id": "chunk-v1-cc62727c3a541f5acef807d2ba5244044879cd5ee706fb70359485722ace8c07",
+          "score": 0.7825043567723547
+        },
+        {
+          "document_id": "indexing.md",
+          "chunk_id": "chunk-v1-ed8a2544a50adbab5eca9bbe14ce20d484f7d1a79b125e2149f9c5b924f49838",
+          "score": 0.7425466874903621
+        },
+        {
+          "document_id": "billing.md",
+          "chunk_id": "chunk-v1-8f22dbec95b20f268a5549cad74a022122490b7f0acf74933bc75b41aebb6280",
+          "score": 0.7141820118427085
+        },
+        {
+          "document_id": "backups.md",
+          "chunk_id": "chunk-v1-6e4d6ad8e173605f48f59fbc593b6d5e9471abe317e792294825946d6d68fa5d",
+          "score": 0.44301445530101996
+        },
+        {
+          "document_id": "exports.md",
+          "chunk_id": "chunk-v1-dbcb848d58657d44a56263bfdbb901eb7f1dec13a4c0ec91f4518f512b2e4383",
+          "score": 0.44301445530101996
+        },
+        {
+          "document_id": "retention.md",
+          "chunk_id": "chunk-v1-fb92ee1b097f96d40f661b66b51458e34976903de8da7e43b0955c890731b4d9",
+          "score": 0.44301445530101996
+        },
+        {
+          "document_id": "sessions.md",
+          "chunk_id": "chunk-v1-5ba066283eade061eda3f5d6e9c6ae955878693b3363e2cbe5d69f59bead4e40",
+          "score": 0.0
+        },
+        {
+          "document_id": "security.md",
+          "chunk_id": "chunk-v1-d7ad9d21df1fc7cc38a3b890f210861dfb9754ecc8bc15394c2a9f3b2c942a82",
+          "score": 0.0
+        }
+      ],
+      "recall_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "reciprocal_rank": 1.0,
+      "retrieval_ms": 0.04016701132059097,
+      "generation_ms": null,
+      "judge_ms": null,
+      "answer": null,
+      "answer_metrics": null,
+      "context_chunk_ids": [],
+      "judge": null
+    },
+    {
+      "id": "exports-1",
+      "question": "In what format will I receive an export?",
+      "relevant_document_ids": [
+        "exports.md"
+      ],
+      "retrieved_documents": [
+        {
+          "document_id": "support.md",
+          "chunk_id": "chunk-v1-1ce0c94ce52c8e0d691fd3a6106c7b9bf144718be5689a6ca415478c0e8e0d0c",
+          "score": 4.3617431194387155
+        },
+        {
+          "document_id": "exports.md",
+          "chunk_id": "chunk-v1-dbcb848d58657d44a56263bfdbb901eb7f1dec13a4c0ec91f4518f512b2e4383",
+          "score": 3.370726593576189
+        },
+        {
+          "document_id": "billing.md",
+          "chunk_id": "chunk-v1-8f22dbec95b20f268a5549cad74a022122490b7f0acf74933bc75b41aebb6280",
+          "score": 1.9329597223446715
+        },
+        {
+          "document_id": "regions.md",
+          "chunk_id": "chunk-v1-beb0cdb73a31fc1e41fd77af1c927ed7fa9d2896d953a56e958db48f3f2b50e5",
+          "score": 1.027595091264024
+        },
+        {
+          "document_id": "deployment.md",
+          "chunk_id": "chunk-v1-77499176e2a15e787acfd2f6de8a5c9a40d9c823b919a93b6b2100162b58453b",
+          "score": 1.016831802557156
+        },
+        {
+          "document_id": "security.md",
+          "chunk_id": "chunk-v1-d7ad9d21df1fc7cc38a3b890f210861dfb9754ecc8bc15394c2a9f3b2c942a82",
+          "score": 1.016831802557156
+        },
+        {
+          "document_id": "backups.md",
+          "chunk_id": "chunk-v1-6e4d6ad8e173605f48f59fbc593b6d5e9471abe317e792294825946d6d68fa5d",
+          "score": 0.9858535699263598
+        },
+        {
+          "document_id": "sessions.md",
+          "chunk_id": "chunk-v1-5ba066283eade061eda3f5d6e9c6ae955878693b3363e2cbe5d69f59bead4e40",
+          "score": 0.0
+        },
+        {
+          "document_id": "api-keys.md",
+          "chunk_id": "chunk-v1-cc62727c3a541f5acef807d2ba5244044879cd5ee706fb70359485722ace8c07",
+          "score": 0.0
+        },
+        {
+          "document_id": "rate-limits.md",
+          "chunk_id": "chunk-v1-d5a578e8ed3cf92e457ee781521075326e6a41f4b7219c78a9b718cf19dbc96f",
+          "score": 0.0
+        },
+        {
+          "document_id": "indexing.md",
+          "chunk_id": "chunk-v1-ed8a2544a50adbab5eca9bbe14ce20d484f7d1a79b125e2149f9c5b924f49838",
+          "score": 0.0
+        },
+        {
+          "document_id": "retention.md",
+          "chunk_id": "chunk-v1-fb92ee1b097f96d40f661b66b51458e34976903de8da7e43b0955c890731b4d9",
+          "score": 0.0
+        }
+      ],
+      "recall_at_k": {
+        "1": 0.0,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "reciprocal_rank": 0.5,
+      "retrieval_ms": 0.03591692075133324,
+      "generation_ms": null,
+      "judge_ms": null,
+      "answer": null,
+      "answer_metrics": null,
+      "context_chunk_ids": [],
+      "judge": null
+    },
+    {
+      "id": "exports-2",
+      "question": "When does an export download link stop working?",
+      "relevant_document_ids": [
+        "exports.md"
+      ],
+      "retrieved_documents": [
+        {
+          "document_id": "exports.md",
+          "chunk_id": "chunk-v1-dbcb848d58657d44a56263bfdbb901eb7f1dec13a4c0ec91f4518f512b2e4383",
+          "score": 5.381752473805706
+        },
+        {
+          "document_id": "api-keys.md",
+          "chunk_id": "chunk-v1-cc62727c3a541f5acef807d2ba5244044879cd5ee706fb70359485722ace8c07",
+          "score": 2.2133147300259663
+        },
+        {
+          "document_id": "support.md",
+          "chunk_id": "chunk-v1-1ce0c94ce52c8e0d691fd3a6106c7b9bf144718be5689a6ca415478c0e8e0d0c",
+          "score": 1.3932034703563665
+        },
+        {
+          "document_id": "deployment.md",
+          "chunk_id": "chunk-v1-77499176e2a15e787acfd2f6de8a5c9a40d9c823b919a93b6b2100162b58453b",
+          "score": 1.016831802557156
+        },
+        {
+          "document_id": "security.md",
+          "chunk_id": "chunk-v1-d7ad9d21df1fc7cc38a3b890f210861dfb9754ecc8bc15394c2a9f3b2c942a82",
+          "score": 1.016831802557156
+        },
+        {
+          "document_id": "sessions.md",
+          "chunk_id": "chunk-v1-5ba066283eade061eda3f5d6e9c6ae955878693b3363e2cbe5d69f59bead4e40",
+          "score": 0.0
+        },
+        {
+          "document_id": "backups.md",
+          "chunk_id": "chunk-v1-6e4d6ad8e173605f48f59fbc593b6d5e9471abe317e792294825946d6d68fa5d",
+          "score": 0.0
+        },
+        {
+          "document_id": "billing.md",
+          "chunk_id": "chunk-v1-8f22dbec95b20f268a5549cad74a022122490b7f0acf74933bc75b41aebb6280",
+          "score": 0.0
+        },
+        {
+          "document_id": "regions.md",
+          "chunk_id": "chunk-v1-beb0cdb73a31fc1e41fd77af1c927ed7fa9d2896d953a56e958db48f3f2b50e5",
+          "score": 0.0
+        },
+        {
+          "document_id": "rate-limits.md",
+          "chunk_id": "chunk-v1-d5a578e8ed3cf92e457ee781521075326e6a41f4b7219c78a9b718cf19dbc96f",
+          "score": 0.0
+        },
+        {
+          "document_id": "indexing.md",
+          "chunk_id": "chunk-v1-ed8a2544a50adbab5eca9bbe14ce20d484f7d1a79b125e2149f9c5b924f49838",
+          "score": 0.0
+        },
+        {
+          "document_id": "retention.md",
+          "chunk_id": "chunk-v1-fb92ee1b097f96d40f661b66b51458e34976903de8da7e43b0955c890731b4d9",
+          "score": 0.0
+        }
+      ],
+      "recall_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "reciprocal_rank": 1.0,
+      "retrieval_ms": 0.03591692075133324,
+      "generation_ms": null,
+      "judge_ms": null,
+      "answer": null,
+      "answer_metrics": null,
+      "context_chunk_ids": [],
+      "judge": null
+    },
+    {
+      "id": "security-1",
+      "question": "Which encryption protects stored customer data?",
+      "relevant_document_ids": [
+        "security.md"
+      ],
+      "retrieved_documents": [
+        {
+          "document_id": "security.md",
+          "chunk_id": "chunk-v1-d7ad9d21df1fc7cc38a3b890f210861dfb9754ecc8bc15394c2a9f3b2c942a82",
+          "score": 7.239485348161146
+        },
+        {
+          "document_id": "regions.md",
+          "chunk_id": "chunk-v1-beb0cdb73a31fc1e41fd77af1c927ed7fa9d2896d953a56e958db48f3f2b50e5",
+          "score": 1.027595091264024
+        },
+        {
+          "document_id": "exports.md",
+          "chunk_id": "chunk-v1-dbcb848d58657d44a56263bfdbb901eb7f1dec13a4c0ec91f4518f512b2e4383",
+          "score": 0.9858535699263598
+        },
+        {
+          "document_id": "support.md",
+          "chunk_id": "chunk-v1-1ce0c94ce52c8e0d691fd3a6106c7b9bf144718be5689a6ca415478c0e8e0d0c",
+          "score": 0.0
+        },
+        {
+          "document_id": "sessions.md",
+          "chunk_id": "chunk-v1-5ba066283eade061eda3f5d6e9c6ae955878693b3363e2cbe5d69f59bead4e40",
+          "score": 0.0
+        },
+        {
+          "document_id": "backups.md",
+          "chunk_id": "chunk-v1-6e4d6ad8e173605f48f59fbc593b6d5e9471abe317e792294825946d6d68fa5d",
+          "score": 0.0
+        },
+        {
+          "document_id": "deployment.md",
+          "chunk_id": "chunk-v1-77499176e2a15e787acfd2f6de8a5c9a40d9c823b919a93b6b2100162b58453b",
+          "score": 0.0
+        },
+        {
+          "document_id": "billing.md",
+          "chunk_id": "chunk-v1-8f22dbec95b20f268a5549cad74a022122490b7f0acf74933bc75b41aebb6280",
+          "score": 0.0
+        },
+        {
+          "document_id": "api-keys.md",
+          "chunk_id": "chunk-v1-cc62727c3a541f5acef807d2ba5244044879cd5ee706fb70359485722ace8c07",
+          "score": 0.0
+        },
+        {
+          "document_id": "rate-limits.md",
+          "chunk_id": "chunk-v1-d5a578e8ed3cf92e457ee781521075326e6a41f4b7219c78a9b718cf19dbc96f",
+          "score": 0.0
+        },
+        {
+          "document_id": "indexing.md",
+          "chunk_id": "chunk-v1-ed8a2544a50adbab5eca9bbe14ce20d484f7d1a79b125e2149f9c5b924f49838",
+          "score": 0.0
+        },
+        {
+          "document_id": "retention.md",
+          "chunk_id": "chunk-v1-fb92ee1b097f96d40f661b66b51458e34976903de8da7e43b0955c890731b4d9",
+          "score": 0.0
+        }
+      ],
+      "recall_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "reciprocal_rank": 1.0,
+      "retrieval_ms": 0.030749943107366562,
+      "generation_ms": null,
+      "judge_ms": null,
+      "answer": null,
+      "answer_metrics": null,
+      "context_chunk_ids": [],
+      "judge": null
+    },
+    {
+      "id": "security-2",
+      "question": "What is the minimum TLS version for network connections?",
+      "relevant_document_ids": [
+        "security.md"
+      ],
+      "retrieved_documents": [
+        {
+          "document_id": "security.md",
+          "chunk_id": "chunk-v1-d7ad9d21df1fc7cc38a3b890f210861dfb9754ecc8bc15394c2a9f3b2c942a82",
+          "score": 8.42661447662486
+        },
+        {
+          "document_id": "retention.md",
+          "chunk_id": "chunk-v1-fb92ee1b097f96d40f661b66b51458e34976903de8da7e43b0955c890731b4d9",
+          "score": 1.6876451742027065
+        },
+        {
+          "document_id": "billing.md",
+          "chunk_id": "chunk-v1-8f22dbec95b20f268a5549cad74a022122490b7f0acf74933bc75b41aebb6280",
+          "score": 1.3717796484921312
+        },
+        {
+          "document_id": "rate-limits.md",
+          "chunk_id": "chunk-v1-d5a578e8ed3cf92e457ee781521075326e6a41f4b7219c78a9b718cf19dbc96f",
+          "score": 1.3599605205924532
+        },
+        {
+          "document_id": "backups.md",
+          "chunk_id": "chunk-v1-6e4d6ad8e173605f48f59fbc593b6d5e9471abe317e792294825946d6d68fa5d",
+          "score": 1.2630970606296876
+        },
+        {
+          "document_id": "indexing.md",
+          "chunk_id": "chunk-v1-ed8a2544a50adbab5eca9bbe14ce20d484f7d1a79b125e2149f9c5b924f49838",
+          "score": 0.7425466874903621
+        },
+        {
+          "document_id": "deployment.md",
+          "chunk_id": "chunk-v1-77499176e2a15e787acfd2f6de8a5c9a40d9c823b919a93b6b2100162b58453b",
+          "score": 0.6493637560645507
+        },
+        {
+          "document_id": "api-keys.md",
+          "chunk_id": "chunk-v1-cc62727c3a541f5acef807d2ba5244044879cd5ee706fb70359485722ace8c07",
+          "score": 0.4875772257193777
+        },
+        {
+          "document_id": "support.md",
+          "chunk_id": "chunk-v1-1ce0c94ce52c8e0d691fd3a6106c7b9bf144718be5689a6ca415478c0e8e0d0c",
+          "score": 0.0
+        },
+        {
+          "document_id": "sessions.md",
+          "chunk_id": "chunk-v1-5ba066283eade061eda3f5d6e9c6ae955878693b3363e2cbe5d69f59bead4e40",
+          "score": 0.0
+        },
+        {
+          "document_id": "regions.md",
+          "chunk_id": "chunk-v1-beb0cdb73a31fc1e41fd77af1c927ed7fa9d2896d953a56e958db48f3f2b50e5",
+          "score": 0.0
+        },
+        {
+          "document_id": "exports.md",
+          "chunk_id": "chunk-v1-dbcb848d58657d44a56263bfdbb901eb7f1dec13a4c0ec91f4518f512b2e4383",
+          "score": 0.0
+        }
+      ],
+      "recall_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "reciprocal_rank": 1.0,
+      "retrieval_ms": 0.03912486135959625,
+      "generation_ms": null,
+      "judge_ms": null,
+      "answer": null,
+      "answer_metrics": null,
+      "context_chunk_ids": [],
+      "judge": null
+    },
+    {
+      "id": "sessions-1",
+      "question": "How long does an interactive login session last?",
+      "relevant_document_ids": [
+        "sessions.md"
+      ],
+      "retrieved_documents": [
+        {
+          "document_id": "sessions.md",
+          "chunk_id": "chunk-v1-5ba066283eade061eda3f5d6e9c6ae955878693b3363e2cbe5d69f59bead4e40",
+          "score": 6.504569151777824
+        },
+        {
+          "document_id": "backups.md",
+          "chunk_id": "chunk-v1-6e4d6ad8e173605f48f59fbc593b6d5e9471abe317e792294825946d6d68fa5d",
+          "score": 2.0110258802295173
+        },
+        {
+          "document_id": "support.md",
+          "chunk_id": "chunk-v1-1ce0c94ce52c8e0d691fd3a6106c7b9bf144718be5689a6ca415478c0e8e0d0c",
+          "score": 1.3932034703563665
+        },
+        {
+          "document_id": "deployment.md",
+          "chunk_id": "chunk-v1-77499176e2a15e787acfd2f6de8a5c9a40d9c823b919a93b6b2100162b58453b",
+          "score": 1.016831802557156
+        },
+        {
+          "document_id": "security.md",
+          "chunk_id": "chunk-v1-d7ad9d21df1fc7cc38a3b890f210861dfb9754ecc8bc15394c2a9f3b2c942a82",
+          "score": 1.016831802557156
+        },
+        {
+          "document_id": "billing.md",
+          "chunk_id": "chunk-v1-8f22dbec95b20f268a5549cad74a022122490b7f0acf74933bc75b41aebb6280",
+          "score": 0.0
+        },
+        {
+          "document_id": "regions.md",
+          "chunk_id": "chunk-v1-beb0cdb73a31fc1e41fd77af1c927ed7fa9d2896d953a56e958db48f3f2b50e5",
+          "score": 0.0
+        },
+        {
+          "document_id": "api-keys.md",
+          "chunk_id": "chunk-v1-cc62727c3a541f5acef807d2ba5244044879cd5ee706fb70359485722ace8c07",
+          "score": 0.0
+        },
+        {
+          "document_id": "rate-limits.md",
+          "chunk_id": "chunk-v1-d5a578e8ed3cf92e457ee781521075326e6a41f4b7219c78a9b718cf19dbc96f",
+          "score": 0.0
+        },
+        {
+          "document_id": "exports.md",
+          "chunk_id": "chunk-v1-dbcb848d58657d44a56263bfdbb901eb7f1dec13a4c0ec91f4518f512b2e4383",
+          "score": 0.0
+        },
+        {
+          "document_id": "indexing.md",
+          "chunk_id": "chunk-v1-ed8a2544a50adbab5eca9bbe14ce20d484f7d1a79b125e2149f9c5b924f49838",
+          "score": 0.0
+        },
+        {
+          "document_id": "retention.md",
+          "chunk_id": "chunk-v1-fb92ee1b097f96d40f661b66b51458e34976903de8da7e43b0955c890731b4d9",
+          "score": 0.0
+        }
+      ],
+      "recall_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "reciprocal_rank": 1.0,
+      "retrieval_ms": 0.036125071346759796,
+      "generation_ms": null,
+      "judge_ms": null,
+      "answer": null,
+      "answer_metrics": null,
+      "context_chunk_ids": [],
+      "judge": null
+    },
+    {
+      "id": "sessions-2",
+      "question": "Can I reuse a password reset link?",
+      "relevant_document_ids": [
+        "sessions.md"
+      ],
+      "retrieved_documents": [
+        {
+          "document_id": "sessions.md",
+          "chunk_id": "chunk-v1-5ba066283eade061eda3f5d6e9c6ae955878693b3363e2cbe5d69f59bead4e40",
+          "score": 4.9516774329670366
+        },
+        {
+          "document_id": "exports.md",
+          "chunk_id": "chunk-v1-dbcb848d58657d44a56263bfdbb901eb7f1dec13a4c0ec91f4518f512b2e4383",
+          "score": 1.4954781354523148
+        },
+        {
+          "document_id": "regions.md",
+          "chunk_id": "chunk-v1-beb0cdb73a31fc1e41fd77af1c927ed7fa9d2896d953a56e958db48f3f2b50e5",
+          "score": 1.4142919700789576
+        },
+        {
+          "document_id": "indexing.md",
+          "chunk_id": "chunk-v1-ed8a2544a50adbab5eca9bbe14ce20d484f7d1a79b125e2149f9c5b924f49838",
+          "score": 1.370462254068638
+        },
+        {
+          "document_id": "deployment.md",
+          "chunk_id": "chunk-v1-77499176e2a15e787acfd2f6de8a5c9a40d9c823b919a93b6b2100162b58453b",
+          "score": 0.8225671043824097
+        },
+        {
+          "document_id": "api-keys.md",
+          "chunk_id": "chunk-v1-cc62727c3a541f5acef807d2ba5244044879cd5ee706fb70359485722ace8c07",
+          "score": 0.7825043567723547
+        },
+        {
+          "document_id": "billing.md",
+          "chunk_id": "chunk-v1-8f22dbec95b20f268a5549cad74a022122490b7f0acf74933bc75b41aebb6280",
+          "score": 0.7141820118427085
+        },
+        {
+          "document_id": "rate-limits.md",
+          "chunk_id": "chunk-v1-d5a578e8ed3cf92e457ee781521075326e6a41f4b7219c78a9b718cf19dbc96f",
+          "score": 0.6305907424381111
+        },
+        {
+          "document_id": "support.md",
+          "chunk_id": "chunk-v1-1ce0c94ce52c8e0d691fd3a6106c7b9bf144718be5689a6ca415478c0e8e0d0c",
+          "score": 0.6260658736464484
+        },
+        {
+          "document_id": "backups.md",
+          "chunk_id": "chunk-v1-6e4d6ad8e173605f48f59fbc593b6d5e9471abe317e792294825946d6d68fa5d",
+          "score": 0.44301445530101996
+        },
+        {
+          "document_id": "retention.md",
+          "chunk_id": "chunk-v1-fb92ee1b097f96d40f661b66b51458e34976903de8da7e43b0955c890731b4d9",
+          "score": 0.44301445530101996
+        },
+        {
+          "document_id": "security.md",
+          "chunk_id": "chunk-v1-d7ad9d21df1fc7cc38a3b890f210861dfb9754ecc8bc15394c2a9f3b2c942a82",
+          "score": 0.0
+        }
+      ],
+      "recall_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "reciprocal_rank": 1.0,
+      "retrieval_ms": 0.03687501884996891,
+      "generation_ms": null,
+      "judge_ms": null,
+      "answer": null,
+      "answer_metrics": null,
+      "context_chunk_ids": [],
+      "judge": null
+    },
+    {
+      "id": "regions-1",
+      "question": "Can I change an existing workspace to a different region?",
+      "relevant_document_ids": [
+        "regions.md"
+      ],
+      "retrieved_documents": [
+        {
+          "document_id": "regions.md",
+          "chunk_id": "chunk-v1-beb0cdb73a31fc1e41fd77af1c927ed7fa9d2896d953a56e958db48f3f2b50e5",
+          "score": 4.43775610026904
+        },
+        {
+          "document_id": "deployment.md",
+          "chunk_id": "chunk-v1-77499176e2a15e787acfd2f6de8a5c9a40d9c823b919a93b6b2100162b58453b",
+          "score": 3.916221664232362
+        },
+        {
+          "document_id": "support.md",
+          "chunk_id": "chunk-v1-1ce0c94ce52c8e0d691fd3a6106c7b9bf144718be5689a6ca415478c0e8e0d0c",
+          "score": 3.407932832670946
+        },
+        {
+          "document_id": "sessions.md",
+          "chunk_id": "chunk-v1-5ba066283eade061eda3f5d6e9c6ae955878693b3363e2cbe5d69f59bead4e40",
+          "score": 2.8101674463603565
+        },
+        {
+          "document_id": "exports.md",
+          "chunk_id": "chunk-v1-dbcb848d58657d44a56263bfdbb901eb7f1dec13a4c0ec91f4518f512b2e4383",
+          "score": 2.3957655706474563
+        },
+        {
+          "document_id": "indexing.md",
+          "chunk_id": "chunk-v1-ed8a2544a50adbab5eca9bbe14ce20d484f7d1a79b125e2149f9c5b924f49838",
+          "score": 1.370462254068638
+        },
+        {
+          "document_id": "rate-limits.md",
+          "chunk_id": "chunk-v1-d5a578e8ed3cf92e457ee781521075326e6a41f4b7219c78a9b718cf19dbc96f",
+          "score": 1.2521938375288646
+        },
+        {
+          "document_id": "retention.md",
+          "chunk_id": "chunk-v1-fb92ee1b097f96d40f661b66b51458e34976903de8da7e43b0955c890731b4d9",
+          "score": 1.0709300218792959
+        },
+        {
+          "document_id": "security.md",
+          "chunk_id": "chunk-v1-d7ad9d21df1fc7cc38a3b890f210861dfb9754ecc8bc15394c2a9f3b2c942a82",
+          "score": 1.016831802557156
+        },
+        {
+          "document_id": "api-keys.md",
+          "chunk_id": "chunk-v1-cc62727c3a541f5acef807d2ba5244044879cd5ee706fb70359485722ace8c07",
+          "score": 0.7825043567723547
+        },
+        {
+          "document_id": "billing.md",
+          "chunk_id": "chunk-v1-8f22dbec95b20f268a5549cad74a022122490b7f0acf74933bc75b41aebb6280",
+          "score": 0.7141820118427085
+        },
+        {
+          "document_id": "backups.md",
+          "chunk_id": "chunk-v1-6e4d6ad8e173605f48f59fbc593b6d5e9471abe317e792294825946d6d68fa5d",
+          "score": 0.44301445530101996
+        }
+      ],
+      "recall_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "reciprocal_rank": 1.0,
+      "retrieval_ms": 0.04270905628800392,
+      "generation_ms": null,
+      "judge_ms": null,
+      "answer": null,
+      "answer_metrics": null,
+      "context_chunk_ids": [],
+      "judge": null
+    },
+    {
+      "id": "regions-2",
+      "question": "Is regional failover automatic?",
+      "relevant_document_ids": [
+        "regions.md"
+      ],
+      "retrieved_documents": [
+        {
+          "document_id": "regions.md",
+          "chunk_id": "chunk-v1-beb0cdb73a31fc1e41fd77af1c927ed7fa9d2896d953a56e958db48f3f2b50e5",
+          "score": 5.0660077927160785
+        },
+        {
+          "document_id": "deployment.md",
+          "chunk_id": "chunk-v1-77499176e2a15e787acfd2f6de8a5c9a40d9c823b919a93b6b2100162b58453b",
+          "score": 2.0742178485346634
+        },
+        {
+          "document_id": "support.md",
+          "chunk_id": "chunk-v1-1ce0c94ce52c8e0d691fd3a6106c7b9bf144718be5689a6ca415478c0e8e0d0c",
+          "score": 0.0
+        },
+        {
+          "document_id": "sessions.md",
+          "chunk_id": "chunk-v1-5ba066283eade061eda3f5d6e9c6ae955878693b3363e2cbe5d69f59bead4e40",
+          "score": 0.0
+        },
+        {
+          "document_id": "backups.md",
+          "chunk_id": "chunk-v1-6e4d6ad8e173605f48f59fbc593b6d5e9471abe317e792294825946d6d68fa5d",
+          "score": 0.0
+        },
+        {
+          "document_id": "billing.md",
+          "chunk_id": "chunk-v1-8f22dbec95b20f268a5549cad74a022122490b7f0acf74933bc75b41aebb6280",
+          "score": 0.0
+        },
+        {
+          "document_id": "api-keys.md",
+          "chunk_id": "chunk-v1-cc62727c3a541f5acef807d2ba5244044879cd5ee706fb70359485722ace8c07",
+          "score": 0.0
+        },
+        {
+          "document_id": "rate-limits.md",
+          "chunk_id": "chunk-v1-d5a578e8ed3cf92e457ee781521075326e6a41f4b7219c78a9b718cf19dbc96f",
+          "score": 0.0
+        },
+        {
+          "document_id": "security.md",
+          "chunk_id": "chunk-v1-d7ad9d21df1fc7cc38a3b890f210861dfb9754ecc8bc15394c2a9f3b2c942a82",
+          "score": 0.0
+        },
+        {
+          "document_id": "exports.md",
+          "chunk_id": "chunk-v1-dbcb848d58657d44a56263bfdbb901eb7f1dec13a4c0ec91f4518f512b2e4383",
+          "score": 0.0
+        },
+        {
+          "document_id": "indexing.md",
+          "chunk_id": "chunk-v1-ed8a2544a50adbab5eca9bbe14ce20d484f7d1a79b125e2149f9c5b924f49838",
+          "score": 0.0
+        },
+        {
+          "document_id": "retention.md",
+          "chunk_id": "chunk-v1-fb92ee1b097f96d40f661b66b51458e34976903de8da7e43b0955c890731b4d9",
+          "score": 0.0
+        }
+      ],
+      "recall_at_k": {
+        "1": 1.0,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "reciprocal_rank": 1.0,
+      "retrieval_ms": 0.023833010345697403,
+      "generation_ms": null,
+      "judge_ms": null,
+      "answer": null,
+      "answer_metrics": null,
+      "context_chunk_ids": [],
+      "judge": null
+    },
+    {
+      "id": "retention-comparison",
+      "question": "How do database backup and application event-log retention differ?",
+      "relevant_document_ids": [
+        "backups.md",
+        "retention.md"
+      ],
+      "retrieved_documents": [
+        {
+          "document_id": "backups.md",
+          "chunk_id": "chunk-v1-6e4d6ad8e173605f48f59fbc593b6d5e9471abe317e792294825946d6d68fa5d",
+          "score": 11.574336018025221
+        },
+        {
+          "document_id": "retention.md",
+          "chunk_id": "chunk-v1-fb92ee1b097f96d40f661b66b51458e34976903de8da7e43b0955c890731b4d9",
+          "score": 9.714523022844121
+        },
+        {
+          "document_id": "rate-limits.md",
+          "chunk_id": "chunk-v1-d5a578e8ed3cf92e457ee781521075326e6a41f4b7219c78a9b718cf19dbc96f",
+          "score": 0.6305907424381111
+        },
+        {
+          "document_id": "api-keys.md",
+          "chunk_id": "chunk-v1-cc62727c3a541f5acef807d2ba5244044879cd5ee706fb70359485722ace8c07",
+          "score": 0.4875772257193777
+        },
+        {
+          "document_id": "sessions.md",
+          "chunk_id": "chunk-v1-5ba066283eade061eda3f5d6e9c6ae955878693b3363e2cbe5d69f59bead4e40",
+          "score": 0.4717591601207918
+        },
+        {
+          "document_id": "regions.md",
+          "chunk_id": "chunk-v1-beb0cdb73a31fc1e41fd77af1c927ed7fa9d2896d953a56e958db48f3f2b50e5",
+          "score": 0.4617719035701605
+        },
+        {
+          "document_id": "security.md",
+          "chunk_id": "chunk-v1-d7ad9d21df1fc7cc38a3b890f210861dfb9754ecc8bc15394c2a9f3b2c942a82",
+          "score": 0.45693518883971945
+        },
+        {
+          "document_id": "indexing.md",
+          "chunk_id": "chunk-v1-ed8a2544a50adbab5eca9bbe14ce20d484f7d1a79b125e2149f9c5b924f49838",
+          "score": 0.44301445530101996
+        },
+        {
+          "document_id": "support.md",
+          "chunk_id": "chunk-v1-1ce0c94ce52c8e0d691fd3a6106c7b9bf144718be5689a6ca415478c0e8e0d0c",
+          "score": 0.4341958097987603
+        },
+        {
+          "document_id": "billing.md",
+          "chunk_id": "chunk-v1-8f22dbec95b20f268a5549cad74a022122490b7f0acf74933bc75b41aebb6280",
+          "score": 0.4136123897924982
+        },
+        {
+          "document_id": "deployment.md",
+          "chunk_id": "chunk-v1-77499176e2a15e787acfd2f6de8a5c9a40d9c823b919a93b6b2100162b58453b",
+          "score": 0.0
+        },
+        {
+          "document_id": "exports.md",
+          "chunk_id": "chunk-v1-dbcb848d58657d44a56263bfdbb901eb7f1dec13a4c0ec91f4518f512b2e4383",
+          "score": 0.0
+        }
+      ],
+      "recall_at_k": {
+        "1": 0.5,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "reciprocal_rank": 1.0,
+      "retrieval_ms": 0.04291604273021221,
+      "generation_ms": null,
+      "judge_ms": null,
+      "answer": null,
+      "answer_metrics": null,
+      "context_chunk_ids": [],
+      "judge": null
+    },
+    {
+      "id": "credential-lifetimes",
+      "question": "How do API key expiration and interactive session expiration differ?",
+      "relevant_document_ids": [
+        "api-keys.md",
+        "sessions.md"
+      ],
+      "retrieved_documents": [
+        {
+          "document_id": "sessions.md",
+          "chunk_id": "chunk-v1-5ba066283eade061eda3f5d6e9c6ae955878693b3363e2cbe5d69f59bead4e40",
+          "score": 3.812896178959069
+        },
+        {
+          "document_id": "api-keys.md",
+          "chunk_id": "chunk-v1-cc62727c3a541f5acef807d2ba5244044879cd5ee706fb70359485722ace8c07",
+          "score": 3.4600459243250588
+        },
+        {
+          "document_id": "security.md",
+          "chunk_id": "chunk-v1-d7ad9d21df1fc7cc38a3b890f210861dfb9754ecc8bc15394c2a9f3b2c942a82",
+          "score": 2.2341647749834688
+        },
+        {
+          "document_id": "rate-limits.md",
+          "chunk_id": "chunk-v1-d5a578e8ed3cf92e457ee781521075326e6a41f4b7219c78a9b718cf19dbc96f",
+          "score": 0.9337301585407187
+        },
+        {
+          "document_id": "support.md",
+          "chunk_id": "chunk-v1-1ce0c94ce52c8e0d691fd3a6106c7b9bf144718be5689a6ca415478c0e8e0d0c",
+          "score": 0.7343180793767083
+        },
+        {
+          "document_id": "backups.md",
+          "chunk_id": "chunk-v1-6e4d6ad8e173605f48f59fbc593b6d5e9471abe317e792294825946d6d68fa5d",
+          "score": 0.6351814940514118
+        },
+        {
+          "document_id": "regions.md",
+          "chunk_id": "chunk-v1-beb0cdb73a31fc1e41fd77af1c927ed7fa9d2896d953a56e958db48f3f2b50e5",
+          "score": 0.4617719035701605
+        },
+        {
+          "document_id": "indexing.md",
+          "chunk_id": "chunk-v1-ed8a2544a50adbab5eca9bbe14ce20d484f7d1a79b125e2149f9c5b924f49838",
+          "score": 0.44301445530101996
+        },
+        {
+          "document_id": "retention.md",
+          "chunk_id": "chunk-v1-fb92ee1b097f96d40f661b66b51458e34976903de8da7e43b0955c890731b4d9",
+          "score": 0.44301445530101996
+        },
+        {
+          "document_id": "billing.md",
+          "chunk_id": "chunk-v1-8f22dbec95b20f268a5549cad74a022122490b7f0acf74933bc75b41aebb6280",
+          "score": 0.4136123897924982
+        },
+        {
+          "document_id": "deployment.md",
+          "chunk_id": "chunk-v1-77499176e2a15e787acfd2f6de8a5c9a40d9c823b919a93b6b2100162b58453b",
+          "score": 0.0
+        },
+        {
+          "document_id": "exports.md",
+          "chunk_id": "chunk-v1-dbcb848d58657d44a56263bfdbb901eb7f1dec13a4c0ec91f4518f512b2e4383",
+          "score": 0.0
+        }
+      ],
+      "recall_at_k": {
+        "1": 0.5,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "reciprocal_rank": 1.0,
+      "retrieval_ms": 0.04404108040034771,
+      "generation_ms": null,
+      "judge_ms": null,
+      "answer": null,
+      "answer_metrics": null,
+      "context_chunk_ids": [],
+      "judge": null
+    },
+    {
+      "id": "regional-migration",
+      "question": "How can I move a workspace to another region and what export format should I expect?",
+      "relevant_document_ids": [
+        "regions.md",
+        "exports.md"
+      ],
+      "retrieved_documents": [
+        {
+          "document_id": "exports.md",
+          "chunk_id": "chunk-v1-dbcb848d58657d44a56263bfdbb901eb7f1dec13a4c0ec91f4518f512b2e4383",
+          "score": 5.766492164223646
+        },
+        {
+          "document_id": "regions.md",
+          "chunk_id": "chunk-v1-beb0cdb73a31fc1e41fd77af1c927ed7fa9d2896d953a56e958db48f3f2b50e5",
+          "score": 4.899528003839201
+        },
+        {
+          "document_id": "support.md",
+          "chunk_id": "chunk-v1-1ce0c94ce52c8e0d691fd3a6106c7b9bf144718be5689a6ca415478c0e8e0d0c",
+          "score": 3.8375886607814707
+        },
+        {
+          "document_id": "rate-limits.md",
+          "chunk_id": "chunk-v1-d5a578e8ed3cf92e457ee781521075326e6a41f4b7219c78a9b718cf19dbc96f",
+          "score": 3.2854083829584946
+        },
+        {
+          "document_id": "deployment.md",
+          "chunk_id": "chunk-v1-77499176e2a15e787acfd2f6de8a5c9a40d9c823b919a93b6b2100162b58453b",
+          "score": 2.899389861675206
+        },
+        {
+          "document_id": "indexing.md",
+          "chunk_id": "chunk-v1-ed8a2544a50adbab5eca9bbe14ce20d484f7d1a79b125e2149f9c5b924f49838",
+          "score": 1.813476709369658
+        },
+        {
+          "document_id": "retention.md",
+          "chunk_id": "chunk-v1-fb92ee1b097f96d40f661b66b51458e34976903de8da7e43b0955c890731b4d9",
+          "score": 1.5139444771803159
+        },
+        {
+          "document_id": "api-keys.md",
+          "chunk_id": "chunk-v1-cc62727c3a541f5acef807d2ba5244044879cd5ee706fb70359485722ace8c07",
+          "score": 1.2700815824917324
+        },
+        {
+          "document_id": "sessions.md",
+          "chunk_id": "chunk-v1-5ba066283eade061eda3f5d6e9c6ae955878693b3363e2cbe5d69f59bead4e40",
+          "score": 1.140416619874468
+        },
+        {
+          "document_id": "billing.md",
+          "chunk_id": "chunk-v1-8f22dbec95b20f268a5549cad74a022122490b7f0acf74933bc75b41aebb6280",
+          "score": 1.1277944016352066
+        },
+        {
+          "document_id": "backups.md",
+          "chunk_id": "chunk-v1-6e4d6ad8e173605f48f59fbc593b6d5e9471abe317e792294825946d6d68fa5d",
+          "score": 1.0781959493524318
+        },
+        {
+          "document_id": "security.md",
+          "chunk_id": "chunk-v1-d7ad9d21df1fc7cc38a3b890f210861dfb9754ecc8bc15394c2a9f3b2c942a82",
+          "score": 0.45693518883971945
+        }
+      ],
+      "recall_at_k": {
+        "1": 0.5,
+        "3": 1.0,
+        "5": 1.0
+      },
+      "reciprocal_rank": 1.0,
+      "retrieval_ms": 0.06283307448029518,
+      "generation_ms": null,
+      "judge_ms": null,
+      "answer": null,
+      "answer_metrics": null,
+      "context_chunk_ids": [],
+      "judge": null
+    }
+  ],
+  "timings": {
+    "ingestion_ms": 0.881875166669488,
+    "index_ms": 0.18145889043807983,
+    "retrieval_p50_ms": 0.04270905628800392,
+    "retrieval_p95_ms": 0.06399985868483782,
+    "generation_p95_ms": null,
+    "judge_p95_ms": null
+  },
+  "environment": {
+    "platform": "macOS-15.6-arm64-arm-64bit",
+    "python": "3.12.10",
+    "cpu_count": "14",
+    "pytorch_threads": "1"
+  },
+  "answer_metrics": null,
+  "judge_metrics": null,
+  "input_tokens": null,
+  "output_tokens": null,
+  "estimated_cost_usd": null
+}
