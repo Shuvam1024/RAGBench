@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ragbench"
+version = "0.1.0"
+authors = [{ name = "Shuvam Mukherjee" }]
+description = "Configurable retrieval evaluation for RAG systems."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = [
+    "pydantic>=2,<3",
+    "typer>=0.12,<1",
+    "PyYAML>=6,<7",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10"]
+
+[project.urls]
+Repository = "https://github.com/Shuvam1024/RAGBench"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["ragbench", "ragbench.*"]
+namespaces = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["--strict-config", "--strict-markers", "--import-mode=importlib"]
+markers = [
+    "integration: opt-in checks using a real embedding model; may download model weights",
+]
