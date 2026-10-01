@@ -1,0 +1,12 @@
+schema_version: 1
+dataset:
+  documents_path: ../datasets/support/documents
+  benchmark_path: ../datasets/support/benchmark.json
+retrieval:
+  type: bm25
+generation:
+  provider: extractive
+  context_k: 3
+  max_context_chars: 16000
+evaluation:
+  recall_at_k: [1, 3, 5]

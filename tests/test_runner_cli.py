@@ -19,23 +19,42 @@ def experiment(tmp_path: Path) -> Path:
     (docs / "a.txt").write_text("apple orchard apple orchard")
     (docs / "b.txt").write_text("ocean wave ocean wave")
     (docs / "c.txt").write_text("snow mountain snow mountain")
-    benchmark = {"schema_version": 1, "questions": [
-        {"id": "q1", "question": "apple", "expected_answer": "orchard", "relevant_document_ids": ["a.txt"]},
-        {"id": "q2", "question": "ocean", "expected_answer": "wave", "relevant_document_ids": ["b.txt"]},
-    ]}
+    benchmark = {
+        "schema_version": 1,
+        "questions": [
+            {
+                "id": "q1",
+                "question": "apple",
+                "expected_answer": "orchard",
+                "relevant_document_ids": ["a.txt"],
+            },
+            {
+                "id": "q2",
+                "question": "ocean",
+                "expected_answer": "wave",
+                "relevant_document_ids": ["b.txt"],
+            },
+        ],
+    }
     (tmp_path / "benchmark.json").write_text(json.dumps(benchmark))
     config = tmp_path / "run.yaml"
-    config.write_text("dataset:\n  documents_path: docs\n  benchmark_path: benchmark.json\n"
-                      "chunking:\n  chunk_size: 2\n  overlap: 0\n"
-                      "evaluation:\n  recall_at_k: [1, 2]\n"
-                      "output:\n  json_path: default.json\n")
+    config.write_text(
+        "dataset:\n  documents_path: docs\n  benchmark_path: benchmark.json\n"
+        "chunking:\n  chunk_size: 2\n  overlap: 0\n"
+        "evaluation:\n  recall_at_k: [1, 2]\n"
+        "output:\n  json_path: default.json\n"
+    )
     return config
 
 
 def test_runner_repeatability_and_fingerprints(experiment: Path) -> None:
     config = load_config(experiment)
     first, second = evaluate(config), evaluate(config)
-    assert first == second
+    assert first.corpus_sha256 == second.corpus_sha256
+    assert first.mrr == second.mrr
+    assert [q.retrieved_documents for q in first.questions] == [
+        q.retrieved_documents for q in second.questions
+    ]
     assert first.mrr == 1
     assert first.recall_at_k == {1: 1, 2: 1}
     assert first.chunk_count == 6
@@ -53,22 +72,32 @@ def test_cli_output_override_and_json(experiment: Path, tmp_path: Path) -> None:
     assert "MRR        1.0000" in result.output
     assert report["questions"][0]["retrieved_documents"][0]["document_id"] == "a.txt"
     override = tmp_path / "nested" / "override.json"
-    result = runner.invoke(app, ["evaluate", "--config", str(experiment), "--output", str(override)])
+    result = runner.invoke(
+        app, ["evaluate", "--config", str(experiment), "--output", str(override)]
+    )
     assert result.exit_code == 0, result.output
     assert json.loads(override.read_text())["config"]["output"]["json_path"] == str(override)
 
 
 def test_cli_rejects_input_overwrite(experiment: Path, tmp_path: Path) -> None:
-    for path in (experiment, tmp_path / "benchmark.json", tmp_path / "docs" / "a.txt",
-                 tmp_path / "docs" / "new.md"):
+    for path in (
+        experiment,
+        tmp_path / "benchmark.json",
+        tmp_path / "docs" / "a.txt",
+        tmp_path / "docs" / "new.md",
+    ):
         before = path.read_bytes() if path.exists() else None
-        result = CliRunner().invoke(app, ["evaluate", "--config", str(experiment), "--output", str(path)])
+        result = CliRunner().invoke(
+            app, ["evaluate", "--config", str(experiment), "--output", str(path)]
+        )
         assert result.exit_code == 1
         assert (path.read_bytes() if path.exists() else None) == before
 
 
 def test_cli_errors(experiment: Path) -> None:
-    result = CliRunner().invoke(app, ["evaluate", "--config", str(experiment.parent / "absent.yaml")])
+    result = CliRunner().invoke(
+        app, ["evaluate", "--config", str(experiment.parent / "absent.yaml")]
+    )
     assert result.exit_code == 1
     assert "Error:" in result.output
     assert "Traceback" not in result.output

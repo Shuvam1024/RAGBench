@@ -73,6 +73,45 @@ class OutputConfig(ConfigModel):
     json_path: Path | None = None
 
 
+NonnegativeFloat = Annotated[float, Field(strict=True, ge=0, allow_inf_nan=False)]
+
+
+class Pricing(ConfigModel):
+    """User-supplied USD per million tokens; never inferred from a model name."""
+
+    input_per_million: NonnegativeFloat
+    cached_input_per_million: NonnegativeFloat
+    output_per_million: NonnegativeFloat
+
+
+class OpenAIConfig(ConfigModel):
+    model: Nonblank
+    max_output_tokens: PositiveInt = 512
+    timeout_seconds: Annotated[float, Field(strict=True, gt=0, le=300)] = 60.0
+    pricing: Pricing | None = None
+
+
+class GenerationConfig(ConfigModel):
+    provider: Literal["extractive", "openai"] = "extractive"
+    context_k: PositiveInt = 3
+    max_context_chars: PositiveInt = 16000
+    openai: OpenAIConfig | None = None
+
+    @model_validator(mode="after")
+    def provider_settings(self) -> Self:
+        if (self.provider == "openai") != (self.openai is not None):
+            raise ValueError("openai settings are required only for provider=openai")
+        return self
+
+
+class JudgeConfig(OpenAIConfig):
+    max_output_tokens: PositiveInt = 1024
+
+
+class StorageConfig(ConfigModel):
+    sqlite_path: Path | None = None
+
+
 class RunConfig(ConfigModel):
     schema_version: SchemaVersion = 1
     dataset: DatasetConfig
@@ -80,6 +119,15 @@ class RunConfig(ConfigModel):
     retrieval: RetrieverConfig = Field(default_factory=BM25Config)
     evaluation: EvaluationConfig = Field(default_factory=EvaluationConfig)
     output: OutputConfig = Field(default_factory=OutputConfig)
+    generation: GenerationConfig | None = None
+    judge: JudgeConfig | None = None
+    storage: StorageConfig = Field(default_factory=StorageConfig)
+
+    @model_validator(mode="after")
+    def judge_needs_answers(self) -> Self:
+        if self.judge is not None and self.generation is None:
+            raise ValueError("judge requires generation to be configured")
+        return self
 
 
 def load_config(path: Path) -> RunConfig:
@@ -92,11 +140,18 @@ def load_config(path: Path) -> RunConfig:
     if not isinstance(raw, dict):
         raise ValueError(f"Configuration {path} must be a YAML mapping")
     config = RunConfig.model_validate(raw)
-    dataset = config.dataset.model_copy(update={
-        "documents_path": (path.parent / config.dataset.documents_path).resolve(),
-        "benchmark_path": (path.parent / config.dataset.benchmark_path).resolve(),
-    })
+    dataset = config.dataset.model_copy(
+        update={
+            "documents_path": (path.parent / config.dataset.documents_path).resolve(),
+            "benchmark_path": (path.parent / config.dataset.benchmark_path).resolve(),
+        }
+    )
     output = config.output
     if output.json_path is not None:
         output = output.model_copy(update={"json_path": (path.parent / output.json_path).resolve()})
-    return config.model_copy(update={"dataset": dataset, "output": output})
+    storage = config.storage
+    if storage.sqlite_path is not None:
+        storage = storage.model_copy(
+            update={"sqlite_path": (path.parent / storage.sqlite_path).resolve()}
+        )
+    return config.model_copy(update={"dataset": dataset, "output": output, "storage": storage})

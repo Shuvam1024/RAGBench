@@ -1,0 +1,25 @@
+# Copy and set models you can access. Using this config makes billable API calls.
+# Read docs/providers.md before running. OPENAI_API_KEY comes from the environment.
+schema_version: 1
+dataset:
+  documents_path: ../datasets/support/documents
+  benchmark_path: ../datasets/support/benchmark.json
+retrieval:
+  type: bm25
+generation:
+  provider: openai
+  context_k: 3
+  max_context_chars: 16000
+  openai:
+    model: YOUR_GENERATION_MODEL
+    max_output_tokens: 512
+    timeout_seconds: 60.0
+    # Supply current USD-per-million rates to enable cost estimates:
+    # pricing:
+    #   input_per_million: <rate>
+    #   cached_input_per_million: <rate>
+    #   output_per_million: <rate>
+judge:
+  model: YOUR_JUDGE_MODEL
+  max_output_tokens: 1024
+  timeout_seconds: 60.0

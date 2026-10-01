@@ -26,3 +26,6 @@ results/
 .DS_Store
 .idea/
 .vscode/
+
+# Machine-local provider configuration
+configs/*.local.yaml
