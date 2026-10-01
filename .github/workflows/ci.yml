@@ -1,0 +1,58 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: python -m pip install -e '.[dev,api]'
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: python -m pytest -q --cov=ragbench --cov-report=term-missing
+      - name: Evaluate candidate
+        run: ragbench evaluate --config configs/baseline.yaml --output results/candidate.json
+      - name: Enforce quality thresholds
+        run: ragbench compare --baseline benchmarks/baseline.json --candidate results/candidate.json --thresholds configs/thresholds.yaml --output results/comparison.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reports-${{ matrix.os }}
+          path: results/*.json
+  dense:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      HF_HOME: /home/runner/.cache/huggingface
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - uses: actions/cache@v4
+        with:
+          path: /home/runner/.cache/huggingface
+          key: minilm-${{ runner.os }}-${{ hashFiles('configs/dense.yaml') }}
+      - run: python -m pip install -e '.[dev,dense]'
+      - run: python -m pytest -q tests/test_dense.py tests/test_integration.py --run-integration
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t ragbench-test .
+      - run: docker run --rm ragbench-test
