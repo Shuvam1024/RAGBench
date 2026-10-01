@@ -11,7 +11,7 @@ import yaml
 
 
 @pytest.mark.integration
-@pytest.mark.parametrize("mode", ["dense"])
+@pytest.mark.parametrize("mode", ["dense", "hybrid"])
 def test_real_model_semantic_search(mode: str, tmp_path: Path) -> None:
     for dependency in ("faiss", "sentence_transformers"):
         if importlib.util.find_spec(dependency) is None:

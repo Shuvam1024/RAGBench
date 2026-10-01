@@ -7,7 +7,7 @@ import platform
 from pathlib import Path
 from statistics import fmean
 
-from ragbench.config import BM25Config, DenseConfig, RetrieverConfig, RunConfig
+from ragbench.config import BM25Config, DenseConfig, HybridConfig, RetrieverConfig, RunConfig
 from ragbench.evaluation.models import Benchmark, DocumentHit, EvaluationResult, QuestionResult
 from ragbench.evaluation.retrieval import recall_at_k, reciprocal_rank
 from ragbench.ingestion.chunker import chunk_documents
@@ -42,6 +42,9 @@ def build_retriever(config: RetrieverConfig) -> Retriever:
         raise ValueError('Dense retrieval requires: python -m pip install -e ".[dense]"') from exc
     if isinstance(config, DenseConfig):
         return DenseRetriever(config)
+    if isinstance(config, HybridConfig):
+        from ragbench.retrieval.hybrid import HybridRetriever
+        return HybridRetriever(BM25Retriever(config.bm25), DenseRetriever(config.dense), config.dense_weight)
     raise ValueError(f"Unsupported retrieval configuration: {config}")
 
 
