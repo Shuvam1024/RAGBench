@@ -1,7 +1,7 @@
 # Architecture decisions
 
-These are the implemented contracts for version 0.1.0. Read the accompanying
-tests and learning guide to connect each decision to its behavior.
+These are the implemented contracts for version 1.0.0. Tests exercise each
+boundary independently and through the CLI.
 
 ## 1. A small, synchronous pipeline
 
@@ -217,18 +217,53 @@ and at least one question per benchmark. A metric called MRR@K would be
 truncated; the current metric uses the complete document ranking.
 
 Full-corpus scoring and sorting costs more than bounded retrieval. That is an
-accepted first-version limit. For the three-document teaching corpus,
-Recall@3 and Recall@5 can be trivially perfect; Recall@1 and MRR are more
-informative, but still do not constitute a realistic performance benchmark.
+accepted first-version limit. The default synthetic fixture contains 12 documents and 27 questions. It checks
+engineering behavior, not accuracy on unseen domains. The original three-document
+fixture remains available through `configs/smoke.yaml`.
 
-## 10. Reproducibility and boundaries
+## 10. Results and comparison
 
-Version the YAML, benchmark, and result formats with `schema_version: 1`.
-Record effective settings, normalized corpus and benchmark fingerprints, and
-library/model versions in results. Ranking tie rules and sorted input paths
-support reproducibility; exact floating-point scores can still vary across
-hardware and library versions.
+YAML and benchmark inputs use schema 1; reports use schema 2. Reports record a
+run UUID, UTC timestamp, effective settings, normalized input fingerprints,
+library/model versions, per-question evidence, timings, and optional answer data.
+Ranking tie rules and sorted input paths support reproducibility; floating-point
+scores can still vary across hardware and library versions. Timestamps and timings
+are expected to differ between repeated runs.
 
-Keep indexes in memory and write results as JSON. Add SQLite only when run
-history is needed. Add the API and CI comparison layer after the retrieval
-evaluation contract is working and covered by tests.
+`evaluation/comparison.py` validates compatible inputs and checks absolute quality
+drops and relative resource increases. Missing measurements fail rather than pass.
+Aggregate retrieval and answer/judge scores must match their per-question values.
+See [regression semantics](regression.md).
+
+## 11. Optional generation and judging
+
+`generation/providers.py` defines a small generator protocol, deterministic local
+extraction, and a direct HTTP adapter. The runner selects one best chunk per unique
+document and bounds total context characters. Reference answers are used only by
+metrics and the separate judge. Each stage records its own timing and responses.
+
+Lexical answer metrics live in `evaluation/answers.py`; versioned judge instructions
+and strict score validation live in `evaluation/judge.py`. Keeping these separate
+makes their different assumptions visible. The provider returns actual token usage
+and model identity; prices are configuration data. See [providers](providers.md).
+
+## 12. Persistence and delivery
+
+`storage.py` stores complete report JSON plus summary columns in SQLite. Each save
+is transactional, and duplicate run IDs fail. Read connections use SQLite read-only
+mode so a missing database is never created as a side effect. Database schema uses
+`PRAGMA user_version = 1`; incompatible versions fail clearly.
+
+The CLI writes SQLite before optional JSON. Each output is atomic independently;
+there is no transaction spanning SQLite and the filesystem. If JSON writing fails,
+the successfully saved database run remains available.
+
+`api.py` exposes only health, run listing, and run detail. The service defaults to
+loopback and provides interactive OpenAPI documentation. Evaluation remains a CLI
+operation, so HTTP requests cannot trigger provider spending. There is no multi-user
+authentication or hosted deployment in this release.
+
+The Docker image runs as a non-root user. CI checks supported commands, retrieval
+regression gates, model integration, and the container entry point. Indexes remain
+in-memory and are rebuilt per run; persistent vector databases and approximate
+search would require separate scale-driven tradeoffs.
