@@ -146,4 +146,4 @@ hosting are outside this release.
 - [Regression testing](docs/regression.md)
 - [Generation, judging, and cost accounting](docs/providers.md)
 - [Testing](tests/README.md) · [Contributing](CONTRIBUTING.md)
-- [Changelog](CHANGELOG.md) · [MIT license](LICENSE)
+- [MIT license](LICENSE)
