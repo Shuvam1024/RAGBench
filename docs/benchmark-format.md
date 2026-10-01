@@ -21,7 +21,7 @@ the runner builds an index. Models live in `ragbench/evaluation/models.py`.
 
 - `id`: a nonblank question identifier, unique within the benchmark.
 - `question`: the nonblank search query passed to the retriever.
-- `expected_answer`: a nonblank reference answer reserved for later answer scoring.
+- `expected_answer`: a nonblank reference answer for optional answer scoring.
 - `relevant_document_ids`: a nonempty list of distinct document IDs in the corpus.
 
 Document IDs are paths relative to `dataset.documents_path`, using `/` as the
@@ -89,17 +89,17 @@ The CLI supports `--output results/baseline.json`, and YAML supports
   Recall@K values, and reciprocal rank.
 - Aggregate Recall@K and MRR.
 
-The top-level fields are `schema_version`, `config`, `corpus_sha256`,
+The core top-level fields include `schema_version`, `config`, `corpus_sha256`,
 `benchmark_sha256`, `document_count`, `chunk_count`, `question_count`,
 `skipped_empty_files`, `retriever`, `versions`, `recall_at_k`, `mrr`, and `questions`.
-Each question records `id`, `question`, `relevant_document_ids`,
+Each question includes `id`, `question`, `relevant_document_ids`,
 `retrieved_documents`, `recall_at_k`, and `reciprocal_rank`. A retrieved document
 contains `document_id`, `chunk_id`, and `score` for its best-ranked chunk.
 
 Recall cutoff keys become strings in JSON. Scores are comparable within a
 retriever's ranking; a BM25 raw score and a dense cosine score have different
 scales. Hybrid reports its normalized weighted scores. The CLI exports actual
-measurements and does not populate unimplemented answer/cost metrics with zero.
+measurements; disabled answer stages and unknown provider prices remain null.
 
 Fingerprints use SHA-256 over compact, sorted-key JSON. The corpus fingerprint
 covers sorted pairs of document IDs and normalized-text hashes. The benchmark
@@ -107,3 +107,11 @@ fingerprint covers the validated benchmark, including reference answers. Changin
 an expected answer therefore changes provenance even though it does not affect
 retrieval scores. Reports include local absolute data/output paths; review those
 paths before sharing a generated report.
+
+
+Report schema 2 additionally records `run_id`, `created_at`, `timings`, and
+`environment`. Optional fields include `answer_metrics`, `judge_metrics`,
+`input_tokens`, `output_tokens`, and `estimated_cost_usd`. Each question can include
+an answer, context chunk IDs, judge scores and explanation, and stage timings.
+See the Pydantic models for the complete machine-readable field definitions and
+[providers](providers.md) for metric semantics.

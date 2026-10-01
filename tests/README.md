@@ -1,10 +1,10 @@
 # Testing RAGBench
 
-With the dense extra installed, the release has 82 offline tests and two
-explicit real-model integration tests. The full run passed all 84 tests.
+The suite separates offline correctness checks from two explicit real-model
+integration tests. Provider tests use mocked HTTP responses and make no paid calls.
 
 ```bash
-python -m pip install -e ".[dev,dense]"
+python -m pip install -e ".[dev,api,llm,dense]"
 python -m pytest -q
 python -m pytest -q --run-integration
 ```
@@ -35,6 +35,14 @@ optionally set `HF_HUB_OFFLINE=1` after the model is cached.
   endpoint weights, empty lexical signals, and aligned chunk identities.
 - `test_integration.py`: real MiniLM semantic retrieval through dense and hybrid
   CLI commands, including report contents and resolved model revision.
+
+- `test_comparison.py`: tolerance boundaries, incompatible inputs, missing metrics,
+  zero cost baselines, and CLI pass/regression/error exit codes.
+- `test_generation.py`: prompt payloads, usage/cost arithmetic, strict judge JSON,
+  malformed/incomplete responses, timeout/error redaction, lexical metrics,
+  aggregate consistency, judge identity gates, and local answer evaluation.
+- `test_storage_api.py`: transactional inserts, duplicates, read-only missing-file
+  behavior, parameterized queries, API responses, and CLI output collisions.
 
 ## Why inject embeddings?
 

@@ -1,7 +1,7 @@
 # Run and inspect RAGBench
 
-RAGBench 0.1.0 implements the first retrieval evaluation milestone. It includes
-BM25, dense, and hybrid search, Recall@K, full-ranking MRR, JSON export, and tests.
+RAGBench 1.0 evaluates retrieval and optional answers, checks quality regressions,
+and records results as JSON or SQLite.
 
 ## Environment
 
@@ -10,7 +10,7 @@ From the repository root:
 ```bash
 python3.12 -m venv .venv
 source .venv/bin/activate
-python -m pip install -e ".[dev]"
+python -m pip install -e ".[dev,api]"
 python -m pip check
 ragbench evaluate --config configs/baseline.yaml
 ```
@@ -51,8 +51,8 @@ python -m pip install -c requirements/constraints-py312.txt -e ".[dev,dense]"
 ```
 
 The constraints file is a snapshot from Python 3.12.10 on macOS 15.6 arm64,
-including development and dense dependencies. It is not a universal lockfile;
-other platforms have not been verified. A bare install uses the compatible
+including development, API, LLM, and dense dependencies. It is not a universal
+lockfile; platform-specific packages may need different versions. A bare install uses the compatible
 version ranges in `pyproject.toml`.
 
 ## Understand your experiment
@@ -86,7 +86,8 @@ Open a report under `results/`. Begin with one entry in `questions`:
 The report also contains effective configuration, input fingerprints, dependency
 versions, model revision, and skipped-empty-file counts. JSON object keys for
 Recall@K are strings (`"1"`, `"3"`, `"5"`) because JSON object keys are textual.
-Expected answers stay in the benchmark for a future answer-evaluation milestone.
+When generation is enabled, reference answers are used for lexical metrics and
+optional judging. See [providers and scoring](providers.md).
 
 ## Tests
 
@@ -97,7 +98,7 @@ python -m pytest -q --run-integration
 
 The first command keeps model downloads disabled and runs the offline suite.
 The second also runs semantic-search checks through the dense and hybrid CLIs.
-With the complete dependency set, the release was verified with 84 passing tests.
+The complete dependency set also exercises storage/API and mocked provider contracts.
 See [test coverage](../tests/README.md).
 
 ## macOS native library behavior
@@ -118,9 +119,21 @@ libraries in an existing notebook or long-lived application may still fail.
 No unsafe duplicate-runtime override is set. Future latency comparisons must
 record the thread setting; the current report includes it in retriever metadata.
 
-## Setup history
+## Regression checks and run history
 
-The first foundation session could not install packages because package-server
-DNS resolution failed. The later installation succeeded. Editable installation,
-`pip check`, all three benchmark commands, and the complete test suite have now
-been verified. The application is no longer a docstring-only scaffold.
+```bash
+ragbench evaluate --config configs/baseline.yaml --output results/candidate.json
+ragbench compare --baseline benchmarks/baseline.json \
+  --candidate results/candidate.json --thresholds configs/thresholds.yaml
+ragbench evaluate --config configs/answers.yaml --db results/runs.sqlite
+ragbench history --db results/runs.sqlite
+ragbench serve --db results/runs.sqlite
+```
+
+Open `http://127.0.0.1:8000/docs` for the local API explorer. Use `--limit` with
+`history` to bound the listing. The `--db` option overrides `storage.sqlite_path`
+in YAML. JSON and SQLite destinations must differ and cannot overwrite inputs.
+
+See [regression rules](regression.md), [optional paid providers](providers.md), and
+the [Docker commands](../README.md#docker). Keep custom provider config and API keys
+out of Git. The default workflows never require credentials.
