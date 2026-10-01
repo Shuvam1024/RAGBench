@@ -1,6 +1,6 @@
 # Architecture decisions
 
-These are the implemented contracts for version 1.0.0. Tests exercise each
+These are the implemented contracts for version 1.1.0. Tests exercise each
 boundary independently and through the CLI.
 
 ## 1. A small, synchronous pipeline
@@ -19,7 +19,7 @@ UTF-8 files -> Documents -> Chunks -> Retriever index
                               Collapse document IDs
                                          |
                                          v
-                            Recall@K + reciprocal rank
+                  Recall@K + nDCG@K + precision@K + MAP + MRR
                                          |
                               Average across questions
                                          |
@@ -75,6 +75,11 @@ Moving an unchanged corpus to another machine preserves its document IDs.
 Renaming a file changes its ID. Editing its contents preserves the document ID
 but changes the content fingerprint, which lets us detect changed inputs.
 Files with identical content and different paths remain distinct documents.
+
+A directory that contains `documents.jsonl`, or a path that is itself a
+`.jsonl` file, is loaded as JSONL instead of a text walk. Each line is one
+object with `id` and `text`. IDs are sorted lexicographically. This is how the
+SciFact materializer hands the corpus to the same loader the file walk uses.
 
 ## 4. Chunking counts whitespace-delimited words
 
@@ -195,10 +200,16 @@ to hybrid scoring. Require `0 <= dense_weight <= 1`; start at `0.5`.
 This weight means the dense contribution; zero selects lexical ranking and
 one selects dense ranking. Ties use the shared chunk-ID ordering.
 
-Normalizing the whole corpus makes results independent of the requested K and
-avoids losing candidates before fusion. This is intentionally a small-corpus
-design. A bounded candidate pool can be introduced later with explicit recall
-and normalization tradeoffs.
+`fusion: rrf` is the other hybrid option. Reciprocal rank fusion ignores
+`dense_weight` and scores each chunk as the sum of `1 / (rrf_k + rank)` over
+the two full rankings. The default `rrf_k` is 60. Chunk-ID tie breaks happen
+before ranks are assigned, so tied raw scores still receive distinct ranks.
+An empty lexical ranking contributes zeros, the same as min-max fusion.
+
+Normalizing or fusing the whole corpus makes results independent of the
+requested K and avoids losing candidates before fusion. This is intentionally
+a small-corpus design. A bounded candidate pool can be introduced later with
+explicit recall and normalization tradeoffs.
 
 ## 9. Retrieve chunks, evaluate documents
 
@@ -207,14 +218,23 @@ each document ID. This is equivalent to ranking each document by its best chunk
 score, with ordering inherited from the sorted chunk hits.
 
 Apply K after removing duplicate document IDs. A document with many matching
-chunks must not consume several document-ranking positions. The first version
-requests the full chunk ranking, so it can calculate document Recall@K and
-**full-ranking MRR** without accidentally truncating either metric.
+chunks must not consume several document-ranking positions. Metrics are
+computed on the full document ranking. `evaluation.stored_hits` then keeps
+only the first K retrieved documents in the JSON report, so a large corpus
+does not write every chunk score. MRR and MAP still use the complete ranking.
+
+Recall@K is `|relevant ∩ top K| / |relevant|`. Precision@K uses K as the
+denominator, not the number of relevant documents. Average precision walks
+the full unique-document ranking and MAP is the unweighted mean of those
+values. nDCG@K uses gains `(2^grade - 1) / log2(rank + 1)`. When a question
+has no `relevance_grades`, every relevant document has grade 1. SciFact's
+published test qrels are all grade 1, so that run's nDCG is binary even
+though the metric accepts graded labels.
 
 Average each metric equally across questions. Do not micro-average relevance
 counts across the dataset. Require at least one relevant document per question
 and at least one question per benchmark. A metric called MRR@K would be
-truncated; the current metric uses the complete document ranking.
+truncated; the current MRR uses the complete document ranking.
 
 Full-corpus scoring and sorting costs more than bounded retrieval. That is an
 accepted first-version limit. The default synthetic fixture contains 12 documents and 27 questions. It checks
@@ -233,7 +253,12 @@ are expected to differ between repeated runs.
 `evaluation/comparison.py` validates compatible inputs and checks absolute quality
 drops and relative resource increases. Missing measurements fail rather than pass.
 Aggregate retrieval and answer/judge scores must match their per-question values.
-See [regression semantics](regression.md).
+Optional `statistics` settings add a seeded paired bootstrap percentile interval
+and a two-sided sign-flip permutation test on per-question deltas. `gate_on_ci`
+replaces the point-drop rule: the check fails only when the confidence-interval
+upper bound of `(candidate - baseline)` is below `-tolerance`. The comparison
+also lists questions that improved, regressed, or stayed unchanged on each gated
+quality metric. See [regression semantics](regression.md).
 
 ## 11. Optional generation and judging
 
@@ -263,7 +288,19 @@ loopback and provides interactive OpenAPI documentation. Evaluation remains a CL
 operation, so HTTP requests cannot trigger provider spending. There is no multi-user
 authentication or hosted deployment in this release.
 
-The Docker image runs as a non-root user. CI checks supported commands, retrieval
-regression gates, model integration, and the container entry point. Indexes remain
-in-memory and are rebuilt per run; persistent vector databases and approximate
-search would require separate scale-driven tradeoffs.
+The Docker image runs as a non-root user and installs from `uv.lock`. CI checks
+supported commands, the support-fixture gate, a checksum-verified SciFact BM25
+gate, model integration, type checking, coverage, and the container entry point.
+Indexes remain in-memory and are rebuilt per run; persistent vector databases and
+approximate search would require separate scale-driven tradeoffs.
+
+## 13. Public BEIR materialization
+
+`ragbench dataset scifact` downloads the SciFact zip, checks its SHA-256, and
+writes `documents.jsonl` plus `benchmark.json` under the cache directory. Title
+and body are joined with a newline when both are non-empty. Query identifiers
+are sorted numerically when every ID is digits. Relevance grades are written
+only when some qrel score is not 1. The command also writes a corpus-length
+manifest. FiQA and NFCorpus are not wired up: SciFact is large enough for
+chunking to split thousands of documents, and a 57k-passage corpus would
+multiply CPU embedding time without changing the method.

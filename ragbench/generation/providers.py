@@ -69,7 +69,7 @@ class ExtractiveGenerator:
 
         def score(sentence: str) -> float:
             tokens = re.findall(r"\w+", sentence.casefold())
-            return len(set(tokens) & query) / max(len(tokens), 1) ** 0.5
+            return float(len(set(tokens) & query) / max(len(tokens), 1) ** 0.5)
 
         selected = max(sentences, key=score, default="")
         text = (

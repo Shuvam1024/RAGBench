@@ -21,8 +21,12 @@ the runner builds an index. Models live in `ragbench/evaluation/models.py`.
 
 - `id`: a nonblank question identifier, unique within the benchmark.
 - `question`: the nonblank search query passed to the retriever.
-- `expected_answer`: a nonblank reference answer for optional answer scoring.
+- `expected_answer`: reference text for answer scoring and judging. It may be
+  empty for a retrieval-only benchmark. Generation refuses a blank reference.
 - `relevant_document_ids`: a nonempty list of distinct document IDs in the corpus.
+- `relevance_grades`: optional map from those document IDs to positive grades.
+  Omitted grades are binary (every relevant document has grade 1) and are not
+  stored, so adding the field as null does not change the benchmark fingerprint.
 
 Document IDs are paths relative to `dataset.documents_path`, using `/` as the
 separator and preserving case. For `datasets/documents/guides/setup.md`, the ID
@@ -56,6 +60,25 @@ If K exceeds the ranking length, use all available results; keep the denominator
 equal to the total number of relevant documents. An empty ranking scores zero.
 An empty relevance set is invalid, because the denominator would be zero.
 
+## Precision@K and average precision
+
+Precision@K is the fraction of the top K unique document slots that are relevant.
+The denominator is K, even when the question has fewer than K relevant documents.
+On a corpus with about one relevant document per question, Precision@10 therefore
+cannot exceed about 0.1.
+
+Average precision walks the full unique-document ranking. Each time a relevant
+document appears at rank `r` as the `h`-th hit, it contributes `h / r`. Divide by
+the number of relevant documents. MAP is the unweighted mean of those values.
+The JSON field is `mean_average_precision`; the threshold name is `map`.
+
+## nDCG@K
+
+Discounted cumulative gain at K is the sum of `(2^grade - 1) / log2(rank + 1)`
+over the top K unique documents. Unlisted documents have grade 0. nDCG divides
+that sum by the ideal DCG of the highest grades, also truncated at K. Binary
+relevance is grade 1. Graded qrels are accepted when `relevance_grades` is set.
+
 ## Reciprocal rank and MRR
 
 ```text
@@ -87,7 +110,10 @@ The CLI supports `--output results/baseline.json`, and YAML supports
 - Retrieval implementation and dependency/model versions.
 - For each question: relevant IDs, retrieved document IDs and best-chunk scores,
   Recall@K values, and reciprocal rank.
-- Aggregate Recall@K and MRR.
+- Aggregate Recall@K, nDCG@K, Precision@K, MAP, and full-ranking MRR.
+- `multi_chunk_documents`: how many documents produced more than one chunk.
+- `stored_hits`: how many retrieved documents are written per question. Metrics
+  still use the full ranking.
 
 The core top-level fields include `schema_version`, `config`, `corpus_sha256`,
 `benchmark_sha256`, `document_count`, `chunk_count`, `question_count`,

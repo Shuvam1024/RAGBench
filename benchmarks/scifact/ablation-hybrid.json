@@ -1,0 +1,140 @@
+{
+  "schema_version": 1,
+  "base_config": "scifact-hybrid.yaml",
+  "corpus_sha256": "0ae06d7ccabbb805d0018de482423ddd32dcc8aa60df71fe46cd74727888a70f",
+  "benchmark_sha256": "cc8042c8f9795069c1af76cf033eb43f54832b03a2d231fe664a53f843722f10",
+  "rows": [
+    {
+      "name": "base",
+      "axis": "base",
+      "field": "",
+      "value": "base",
+      "document_count": 5183,
+      "chunk_count": 12647,
+      "multi_chunk_documents": 4738,
+      "question_count": 300,
+      "metrics": {
+        "mrr": 0.6763456448001468,
+        "map": 0.6699003860776047,
+        "recall@10": 0.8337777777777777,
+        "recall@100": 0.9443333333333334,
+        "ndcg@10": 0.7086771422459537,
+        "precision@10": 0.09266666666666667
+      },
+      "index_ms": 1655.331771000192,
+      "retrieval_p50_ms": 239.63039250008933,
+      "retriever": "hybrid",
+      "fusion": "minmax"
+    },
+    {
+      "name": "dense_weight=0",
+      "axis": "dense_weight",
+      "field": "retrieval.dense_weight",
+      "value": "0",
+      "document_count": 5183,
+      "chunk_count": 12647,
+      "multi_chunk_documents": 4738,
+      "question_count": 300,
+      "metrics": {
+        "mrr": 0.6136324295824112,
+        "map": 0.6034257029278666,
+        "recall@10": 0.7706666666666666,
+        "recall@100": 0.8728888888888889,
+        "ndcg@10": 0.6433126633988724,
+        "precision@10": 0.08433333333333333
+      },
+      "index_ms": 1730.9798579999551,
+      "retrieval_p50_ms": 244.59912199995415,
+      "retriever": "hybrid",
+      "fusion": "minmax"
+    },
+    {
+      "name": "dense_weight=0.25",
+      "axis": "dense_weight",
+      "field": "retrieval.dense_weight",
+      "value": "0.25",
+      "document_count": 5183,
+      "chunk_count": 12647,
+      "multi_chunk_documents": 4738,
+      "question_count": 300,
+      "metrics": {
+        "mrr": 0.6469993777795833,
+        "map": 0.6368858684859617,
+        "recall@10": 0.8085,
+        "recall@100": 0.9132222222222222,
+        "ndcg@10": 0.6789228904880594,
+        "precision@10": 0.08933333333333333
+      },
+      "index_ms": 1687.7112980000675,
+      "retrieval_p50_ms": 240.16121900012877,
+      "retriever": "hybrid",
+      "fusion": "minmax"
+    },
+    {
+      "name": "dense_weight=0.75",
+      "axis": "dense_weight",
+      "field": "retrieval.dense_weight",
+      "value": "0.75",
+      "document_count": 5183,
+      "chunk_count": 12647,
+      "multi_chunk_documents": 4738,
+      "question_count": 300,
+      "metrics": {
+        "mrr": 0.7006330362736721,
+        "map": 0.6899922087149296,
+        "recall@10": 0.8371111111111111,
+        "recall@100": 0.9566666666666667,
+        "ndcg@10": 0.7252294354215534,
+        "precision@10": 0.09366666666666668
+      },
+      "index_ms": 1698.2443009997041,
+      "retrieval_p50_ms": 245.19272849988738,
+      "retriever": "hybrid",
+      "fusion": "minmax"
+    },
+    {
+      "name": "dense_weight=1",
+      "axis": "dense_weight",
+      "field": "retrieval.dense_weight",
+      "value": "1",
+      "document_count": 5183,
+      "chunk_count": 12647,
+      "multi_chunk_documents": 4738,
+      "question_count": 300,
+      "metrics": {
+        "mrr": 0.631546372294966,
+        "map": 0.621310775891958,
+        "recall@10": 0.8243333333333334,
+        "recall@100": 0.9426666666666667,
+        "ndcg@10": 0.6698756028274417,
+        "precision@10": 0.09233333333333334
+      },
+      "index_ms": 1650.2798139999868,
+      "retrieval_p50_ms": 243.7964219998321,
+      "retriever": "hybrid",
+      "fusion": "minmax"
+    },
+    {
+      "name": "fusion=rrf",
+      "axis": "fusion",
+      "field": "retrieval.fusion",
+      "value": "rrf",
+      "document_count": 5183,
+      "chunk_count": 12647,
+      "multi_chunk_documents": 4738,
+      "question_count": 300,
+      "metrics": {
+        "mrr": 0.6736098317639135,
+        "map": 0.661227195495906,
+        "recall@10": 0.8171111111111111,
+        "recall@100": 0.9610000000000001,
+        "ndcg@10": 0.6978116364934386,
+        "precision@10": 0.091
+      },
+      "index_ms": 1710.1851099996566,
+      "retrieval_p50_ms": 265.55451299987,
+      "retriever": "hybrid",
+      "fusion": "rrf"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "questions": [
+    {
+      "id": "api-keys-1",
+      "question": "When do API credentials expire?",
+      "expected_answer": "API keys expire after 90 days.",
+      "relevant_document_ids": ["api-keys.md"]
+    },
+    {
+      "id": "rate-limits-1",
+      "question": "How many API calls can a workspace make each minute?",
+      "expected_answer": "120 requests per minute.",
+      "relevant_document_ids": ["rate-limits.md"]
+    }
+  ]
+}

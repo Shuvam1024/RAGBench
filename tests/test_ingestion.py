@@ -69,6 +69,21 @@ def test_corpus_relocation_preserves_ids(tmp_path: Path) -> None:
     assert before == load_documents(tmp_path / "after")
 
 
+def test_jsonl_documents_use_ids_and_skip_blanks(tmp_path: Path) -> None:
+    path = tmp_path / "documents.jsonl"
+    path.write_text(
+        '\n{"id": "b", "text": "beta"}\n{"id": "a", "text": "  "}\n{"id": "c", "text": "caf\\u00e9"}\n',
+        encoding="utf-8",
+    )
+    corpus = load_documents(tmp_path)
+    assert [document.id for document in corpus.documents] == ["b", "c"]
+    assert corpus.skipped_empty_files == 1
+    assert load_documents(path).documents[1].text == "café"
+    path.write_text('{"id": "a", "text": "one"}\n{"id": "a", "text": "two"}\n', encoding="utf-8")
+    with pytest.raises(ValueError, match="Duplicate"):
+        load_documents(path)
+
+
 def test_loader_errors(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="No nonempty"):
         load_documents(tmp_path)

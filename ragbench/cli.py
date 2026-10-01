@@ -9,9 +9,12 @@ import typer
 from pydantic import BaseModel
 
 from ragbench.config import RunConfig, load_config
+from ragbench.datasets.beir import DATASETS, prepare_dataset
 from ragbench.evaluation.comparison import compare as compare_reports
 from ragbench.evaluation.comparison import load_report, load_thresholds
 from ragbench.evaluation.runner import evaluate as run_evaluation
+from ragbench.evaluation.runner import relativize_result
+from ragbench.evaluation.sweep import load_sweep, run_sweep
 from ragbench.storage import RunStore
 
 app = typer.Typer(
@@ -67,6 +70,10 @@ def evaluate(
         Path | None, typer.Option("--output", help="Optional JSON output path")
     ] = None,
     db: Annotated[Path | None, typer.Option("--db", help="Optional SQLite run history")] = None,
+    portable: Annotated[
+        bool,
+        typer.Option("--portable", help="Store paths relative to the working directory"),
+    ] = False,
 ) -> None:
     """Build an index and evaluate all benchmark questions."""
     try:
@@ -91,6 +98,8 @@ def evaluate(
             update={"storage": settings.storage.model_copy(update={"sqlite_path": database})}
         )
         result = run_evaluation(settings)
+        if portable:
+            result = relativize_result(result, Path.cwd())
         if database is not None:
             RunStore(database).save(result)
         if destination is not None:
@@ -100,12 +109,21 @@ def evaluate(
         raise typer.Exit(code=1) from exc
     typer.echo(f"RAGBench | {settings.retrieval.type}")
     typer.echo(
-        f"Documents: {result.document_count} | Chunks: {result.chunk_count} | Questions: {result.question_count}"
+        f"Documents: {result.document_count} | Chunks: {result.chunk_count} | "
+        f"Questions: {result.question_count}"
     )
+    if result.multi_chunk_documents is not None:
+        typer.echo(f"Multi-chunk documents: {result.multi_chunk_documents}")
     if result.skipped_empty_files:
         typer.echo(f"Skipped empty files: {result.skipped_empty_files}")
     for k, value in result.recall_at_k.items():
         typer.echo(f"Recall@{k:<3} {value:.4f}")
+    for k, value in (result.ndcg_at_k or {}).items():
+        typer.echo(f"nDCG@{k:<5} {value:.4f}")
+    for k, value in (result.precision_at_k or {}).items():
+        typer.echo(f"P@{k:<8} {value:.4f}")
+    if result.mean_average_precision is not None:
+        typer.echo(f"MAP        {result.mean_average_precision:.4f}")
     typer.echo(f"MRR        {result.mrr:.4f} (full document ranking)")
     typer.echo(f"Retrieval p95: {result.timings.retrieval_p95_ms:.3f} ms | Run: {result.run_id}")
     for name, value in (result.answer_metrics or {}).items():
@@ -147,9 +165,32 @@ def compare_command(
         typer.echo(f"Error: {exc}", err=True)
         raise typer.Exit(1) from exc
     for check in result.checks:
+        interval = ""
+        if check.ci_low is not None and check.ci_high is not None and check.mean_delta is not None:
+            interval = (
+                f" | delta {check.mean_delta:+.6f} CI [{check.ci_low:+.6f}, {check.ci_high:+.6f}]"
+            )
+            if check.permutation_p_value is not None:
+                interval += f" p={check.permutation_p_value:.4f}"
         typer.echo(
-            f"{'PASS' if check.passed else 'FAIL'} {check.metric}: {check.baseline:.6f} -> {check.candidate:.6f}"
+            f"{'PASS' if check.passed else 'FAIL'} {check.metric}: "
+            f"{check.baseline:.6f} -> {check.candidate:.6f}{interval}"
         )
+        changed = [
+            item
+            for item in result.question_changes
+            if item.metric == check.metric and item.direction != "unchanged"
+        ]
+        improved = [item.question_id for item in changed if item.direction == "improved"]
+        regressed = [item.question_id for item in changed if item.direction == "regressed"]
+        typer.echo(
+            f"  improved {len(improved)} | regressed {len(regressed)} | "
+            f"unchanged {sum(item.metric == check.metric for item in result.question_changes) - len(changed)}"
+        )
+        if regressed:
+            typer.echo("  regressed questions: " + ", ".join(regressed[:20]))
+        if improved:
+            typer.echo("  improved questions: " + ", ".join(improved[:20]))
     typer.echo("Regression check passed" if result.passed else "Regression detected")
     if not result.passed:
         raise typer.Exit(2)
@@ -183,6 +224,62 @@ def serve_command(
     except (ValueError, OSError, ImportError) as exc:
         typer.echo(f"Error: {exc}. Install the api extra if needed.", err=True)
         raise typer.Exit(1) from exc
+
+
+@app.command("dataset")
+def dataset_command(
+    name: Annotated[str, typer.Argument(help="Public dataset name, such as scifact")],
+    cache: Annotated[Path, typer.Option("--cache")] = Path(".cache/beir"),
+    manifest: Annotated[Path | None, typer.Option("--manifest")] = None,
+    force: Annotated[bool, typer.Option("--force")] = False,
+) -> None:
+    """Download a checksum-verified corpus and write documents.jsonl plus a benchmark."""
+    try:
+        result = prepare_dataset(name, cache, manifest_path=manifest, force=force)
+    except (ValueError, OSError) as exc:
+        typer.echo(f"Error: {exc}", err=True)
+        raise typer.Exit(1) from exc
+    typer.echo(
+        f"Prepared {result.dataset} {result.split}: {result.document_count} documents, "
+        f"{result.query_count} questions, sha256 {result.sha256}"
+    )
+    typer.echo(
+        f"Words: min {result.word_length.minimum} | p50 {result.word_length.p50:.1f} | "
+        f"mean {result.word_length.mean:.1f} | max {result.word_length.maximum}"
+    )
+    known = ", ".join(sorted(DATASETS))
+    typer.echo(f"Cache: {(cache / name).resolve()} | known datasets: {known}")
+
+
+@app.command("sweep")
+def sweep_command(
+    config: Annotated[Path, typer.Option("--config", help="YAML one-factor sweep")],
+    output: Annotated[Path | None, typer.Option("--output")] = None,
+) -> None:
+    """Re-run a base configuration, changing one field at a time."""
+    try:
+        _base_path, sweep, base = load_sweep(config)
+        result = run_sweep(base, sweep, sweep.base)
+        if output is not None:
+            destination = output.resolve()
+            if destination == config.resolve() or (
+                destination.exists() and destination.samefile(config)
+            ):
+                raise ValueError("Sweep output would overwrite the sweep configuration")
+            save_result(result, destination)
+    except (ValueError, OSError, ImportError, RuntimeError) as exc:
+        typer.echo(f"Error: {exc}", err=True)
+        raise typer.Exit(1) from exc
+    for row in result.rows:
+        mrr = row.metrics.get("mrr", float("nan"))
+        ndcg = row.metrics.get("ndcg@10")
+        extra = f" nDCG@10={ndcg:.4f}" if ndcg is not None else ""
+        typer.echo(
+            f"{row.name}: chunks={row.chunk_count} multi={row.multi_chunk_documents} "
+            f"MRR={mrr:.4f}{extra}"
+        )
+    if output is not None:
+        typer.echo(f"Saved: {output.resolve()}")
 
 
 if __name__ == "__main__":

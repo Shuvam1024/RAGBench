@@ -21,7 +21,7 @@ def question() -> dict[str, object]:
     [
         {"id": " "},
         {"question": "\n"},
-        {"expected_answer": ""},
+        {"expected_answer": "   "},
         {"relevant_document_ids": []},
         {"relevant_document_ids": ["a", "a"]},
         {"relevant_document_ids": [""]},
@@ -31,6 +31,16 @@ def question() -> dict[str, object]:
 def test_invalid_questions(changes: dict[str, object]) -> None:
     with pytest.raises(ValueError):
         Benchmark.model_validate({"questions": [{**question(), **changes}]})
+
+
+def test_retrieval_only_questions_may_omit_answers() -> None:
+    raw = question()
+    raw["expected_answer"] = ""
+    parsed = Benchmark.model_validate({"questions": [raw]})
+    assert parsed.questions[0].grades() == {"a.txt": 1}
+    raw["relevance_grades"] = {"a.txt": 2}
+    graded = Benchmark.model_validate({"questions": [raw]})
+    assert graded.questions[0].grades() == {"a.txt": 2}
 
 
 def test_empty_duplicates_and_version() -> None:

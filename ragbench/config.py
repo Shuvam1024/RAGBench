@@ -51,7 +51,9 @@ class DenseConfig(ConfigModel):
 
 class HybridConfig(ConfigModel):
     type: Literal["hybrid"] = "hybrid"
+    fusion: Literal["minmax", "rrf"] = "minmax"
     dense_weight: UnitFloat = 0.5
+    rrf_k: PositiveInt = 60
     bm25: BM25Config = Field(default_factory=BM25Config)
     dense: DenseConfig = Field(default_factory=DenseConfig)
 
@@ -61,12 +63,25 @@ RetrieverConfig = Annotated[BM25Config | DenseConfig | HybridConfig, Field(discr
 
 class EvaluationConfig(ConfigModel):
     recall_at_k: tuple[PositiveInt, ...] = (1, 3, 5)
+    ndcg_at_k: tuple[PositiveInt, ...] | None = None
+    precision_at_k: tuple[PositiveInt, ...] | None = None
+    stored_hits: PositiveInt | None = None
 
     @model_validator(mode="after")
     def validate_cutoffs(self) -> Self:
-        if not self.recall_at_k or len(set(self.recall_at_k)) != len(self.recall_at_k):
-            raise ValueError("recall_at_k must contain distinct positive cutoffs")
+        for name in ("recall_at_k", "ndcg_at_k", "precision_at_k"):
+            values = getattr(self, name)
+            if values is None:
+                continue
+            if not values or len(set(values)) != len(values):
+                raise ValueError(f"{name} must contain distinct positive cutoffs")
         return self
+
+    def ndcg_cutoffs(self) -> tuple[int, ...]:
+        return self.ndcg_at_k if self.ndcg_at_k is not None else self.recall_at_k
+
+    def precision_cutoffs(self) -> tuple[int, ...]:
+        return self.precision_at_k if self.precision_at_k is not None else self.recall_at_k
 
 
 class OutputConfig(ConfigModel):

@@ -1,5 +1,6 @@
 """An injectable embedding boundary and the real Sentence Transformers adapter."""
 
+import hashlib
 import warnings
 from collections.abc import Sequence
 from pathlib import Path
@@ -16,6 +17,9 @@ class EmbeddingProvider(Protocol):
 
     @property
     def metadata(self) -> dict[str, str | int]: ...
+
+
+_ENCODE_CACHE: dict[tuple[str, str, str], NDArray[np.float32]] = {}
 
 
 class SentenceTransformerEmbedder:
@@ -42,7 +46,10 @@ class SentenceTransformerEmbedder:
 
     def encode(self, texts: Sequence[str]) -> NDArray[np.float32]:
         tokens = self._model.tokenizer(list(texts), truncation=False, padding=False, verbose=False)
-        truncated = sum(len(ids) > self._model.max_seq_length for ids in tokens["input_ids"])
+        limit = self._model.max_seq_length
+        if not isinstance(limit, int):
+            raise ValueError("Embedding model did not report an integer sequence limit")
+        truncated = sum(len(ids) > limit for ids in tokens["input_ids"])
         self._truncated_texts += truncated
         if truncated:
             warnings.warn(
@@ -51,7 +58,15 @@ class SentenceTransformerEmbedder:
                 UserWarning,
                 stacklevel=2,
             )
-        return np.asarray(
+        digest = hashlib.sha256()
+        for text in texts:
+            digest.update(text.encode("utf-8"))
+            digest.update(b"\0")
+        key = (self._config.model_name, self._revision, digest.hexdigest())
+        cached = _ENCODE_CACHE.get(key)
+        if cached is not None and len(cached) == len(texts):
+            return cached
+        vectors = np.asarray(
             self._model.encode(
                 list(texts),
                 batch_size=self._config.batch_size,
@@ -61,6 +76,9 @@ class SentenceTransformerEmbedder:
             ),
             dtype=np.float32,
         )
+        if len(texts) > 1:
+            _ENCODE_CACHE[key] = vectors
+        return vectors
 
     @property
     def metadata(self) -> dict[str, str | int]:

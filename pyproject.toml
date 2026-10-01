@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ragbench"
-version = "1.0.0"
+version = "1.1.0"
 authors = [{ name = "Shuvam Mukherjee" }]
 description = "Evaluation and regression testing for RAG systems."
 readme = "README.md"
@@ -19,13 +19,21 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8,<10", "pytest-cov>=6,<8", "ruff>=0.12,<1", "httpx>=0.28,<1"]
+dev = [
+    "pytest>=8,<10",
+    "pytest-cov>=6,<8",
+    "ruff>=0.12,<1",
+    "mypy>=1.13,<2",
+    "numpy>=1.26,<3",
+    "httpx>=0.28,<1",
+]
 llm = ["httpx>=0.28,<1"]
 api = ["fastapi>=0.115,<1", "uvicorn>=0.30,<1"]
 dense = [
-    "sentence-transformers>=3",
-    "faiss-cpu>=1.8",
-    "numpy>=1.26",
+    "sentence-transformers>=3,<7",
+    "faiss-cpu>=1.8,<2",
+    "numpy>=1.26,<3",
+    "torch>=2,<3",
 ]
 
 [project.scripts]
@@ -33,6 +41,14 @@ ragbench = "ragbench.cli:app"
 
 [project.urls]
 Repository = "https://github.com/Shuvam1024/RAGBench"
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu", marker = "sys_platform != 'darwin'" }]
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -46,9 +62,38 @@ markers = [
     "integration: opt-in checks using a real embedding model; may download model weights",
 ]
 
+[tool.coverage.run]
+source = ["ragbench"]
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true
+
 [tool.ruff]
 target-version = "py312"
 line-length = 100
 
 [tool.ruff.lint]
-select = ["E4", "E7", "E9", "F", "I"]
+select = ["E", "W", "F", "I", "B", "UP", "C4", "SIM", "PIE", "RUF", "RET"]
+ignore = ["B008", "E501", "SIM102", "SIM108", "SIM117", "RUF043"]
+
+[tool.mypy]
+python_version = "3.12"
+packages = ["ragbench"]
+disallow_untyped_defs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+no_implicit_optional = true
+warn_return_any = true
+
+[[tool.mypy.overrides]]
+module = [
+    "faiss",
+    "torch",
+    "sentence_transformers",
+    "huggingface_hub",
+    "uvicorn",
+    "rank_bm25",
+    "yaml",
+]
+ignore_missing_imports = true

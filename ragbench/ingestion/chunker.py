@@ -20,6 +20,11 @@ class Chunk(BaseModel):
     end_word: int
 
 
+def count_words(text: str) -> int:
+    """Count the same non-whitespace spans the chunk windows use."""
+    return len(re.findall(r"\S+", text))
+
+
 def chunk_document(document: Document, config: ChunkingConfig) -> list[Chunk]:
     """Advance by size minus overlap; stop once a window reaches the final word."""
     words = list(re.finditer(r"\S+", document.text))

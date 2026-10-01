@@ -3,16 +3,18 @@
 import math
 import re
 from pathlib import Path
-from typing import Self
+from typing import Literal, Self
 
 import yaml
 from pydantic import Field, model_validator
 
-from ragbench.config import ConfigModel, NonnegativeFloat, UnitFloat
-from ragbench.evaluation.models import EvaluationResult, Record
+from ragbench.config import ConfigModel, NonnegativeFloat, PositiveInt, UnitFloat
+from ragbench.evaluation.models import EvaluationResult, QuestionResult, Record
+from ragbench.evaluation.statistics import bootstrap_mean_ci, signflip_p_value
 
 QUALITY = {
     "mrr",
+    "map",
     "answer_exact_match",
     "answer_token_f1",
     "context_token_precision",
@@ -20,18 +22,30 @@ QUALITY = {
     "judge_faithfulness",
 }
 RESOURCES = {"retrieval_p95_ms", "generation_p95_ms", "estimated_cost_usd"}
+CUTOFF_METRIC = re.compile(r"(recall|ndcg|precision)@[1-9][0-9]*")
+
+
+class StatisticsConfig(ConfigModel):
+    """Paired uncertainty over the benchmark's questions. Off unless configured."""
+
+    seed: int = Field(default=0, ge=0)
+    bootstrap_samples: PositiveInt = 10_000
+    permutation_samples: PositiveInt = 10_000
+    confidence: float = Field(gt=0, lt=1, default=0.95)
+    gate_on_ci: bool = False
 
 
 class Thresholds(ConfigModel):
     max_drop: dict[str, UnitFloat] = Field(default_factory=lambda: {"mrr": 0.0, "recall@1": 0.0})
     max_increase_ratio: dict[str, NonnegativeFloat] = Field(default_factory=dict)
+    statistics: StatisticsConfig | None = None
 
     @model_validator(mode="after")
     def known_metrics(self) -> Self:
         if not self.max_drop and not self.max_increase_ratio:
             raise ValueError("At least one regression threshold is required")
         for name in self.max_drop:
-            if name not in QUALITY and not re.fullmatch(r"recall@[1-9][0-9]*", name):
+            if name not in QUALITY and CUTOFF_METRIC.fullmatch(name) is None:
                 raise ValueError(f"Unknown quality metric: {name}")
         if set(self.max_increase_ratio) - RESOURCES:
             raise ValueError("Unknown resource metric in max_increase_ratio")
@@ -46,6 +60,19 @@ class MetricCheck(Record):
     change: float | None
     passed: bool
     rule: str
+    mean_delta: float | None = None
+    ci_low: float | None = None
+    ci_high: float | None = None
+    permutation_p_value: float | None = None
+
+
+class QuestionChange(Record):
+    question_id: str
+    metric: str
+    baseline: float
+    candidate: float
+    delta: float
+    direction: Literal["improved", "regressed", "unchanged"]
 
 
 class Comparison(Record):
@@ -53,6 +80,7 @@ class Comparison(Record):
     candidate_run_id: str
     passed: bool
     checks: tuple[MetricCheck, ...]
+    question_changes: tuple[QuestionChange, ...] = ()
 
 
 def load_report(path: Path) -> EvaluationResult:
@@ -73,8 +101,18 @@ def metric(report: EvaluationResult, name: str) -> float:
     value: float | None
     if name == "mrr":
         value = report.mrr
+    elif name == "map":
+        value = report.mean_average_precision
     elif name.startswith("recall@"):
         value = report.recall_at_k.get(int(name.split("@")[1]))
+    elif name.startswith("ndcg@"):
+        value = None if report.ndcg_at_k is None else report.ndcg_at_k.get(int(name.split("@")[1]))
+    elif name.startswith("precision@"):
+        value = (
+            None
+            if report.precision_at_k is None
+            else report.precision_at_k.get(int(name.split("@")[1]))
+        )
     elif name in {"retrieval_p95_ms", "generation_p95_ms"}:
         value = getattr(report.timings, name)
     elif name == "estimated_cost_usd":
@@ -86,6 +124,71 @@ def metric(report: EvaluationResult, name: str) -> float:
     if value is None or not math.isfinite(value):
         raise ValueError(f"Report {report.run_id} has no finite measurement for {name}")
     return value
+
+
+def question_metric(question: QuestionResult, name: str) -> float:
+    value: float | None
+    if name == "mrr":
+        value = question.reciprocal_rank
+    elif name == "map":
+        value = question.average_precision
+    elif name.startswith("recall@"):
+        value = question.recall_at_k.get(int(name.split("@")[1]))
+    elif name.startswith("ndcg@"):
+        value = (
+            None if question.ndcg_at_k is None else question.ndcg_at_k.get(int(name.split("@")[1]))
+        )
+    elif name.startswith("precision@"):
+        value = (
+            None
+            if question.precision_at_k is None
+            else question.precision_at_k.get(int(name.split("@")[1]))
+        )
+    elif name.startswith("judge_"):
+        value = (
+            None
+            if question.judge is None
+            else {
+                "judge_correctness": question.judge.scores.correctness / 4,
+                "judge_faithfulness": question.judge.scores.faithfulness / 4,
+            }.get(name)
+        )
+    else:
+        value = None if question.answer_metrics is None else question.answer_metrics.get(name)
+    if value is None or not math.isfinite(value):
+        raise ValueError(f"Question {question.id} has no finite measurement for {name}")
+    return value
+
+
+def _direction(delta: float) -> Literal["improved", "regressed", "unchanged"]:
+    if math.isclose(delta, 0.0, abs_tol=1e-12):
+        return "unchanged"
+    return "improved" if delta > 0 else "regressed"
+
+
+def _statistics_fields(
+    name: str,
+    baseline: EvaluationResult,
+    candidate: EvaluationResult,
+    settings: StatisticsConfig,
+) -> tuple[float, float, float, float]:
+    by_id = {question.id: question for question in candidate.questions}
+    deltas = [
+        question_metric(by_id[question.id], name) - question_metric(question, name)
+        for question in baseline.questions
+    ]
+    mean_delta, low, high = bootstrap_mean_ci(
+        deltas,
+        samples=settings.bootstrap_samples,
+        seed=f"ragbench-stats-v1:{settings.seed}:bootstrap:{name}",
+        confidence=settings.confidence,
+    )
+    p_value = signflip_p_value(
+        deltas,
+        samples=settings.permutation_samples,
+        seed=f"ragbench-stats-v1:{settings.seed}:permutation:{name}",
+    )
+    return mean_delta, low, high, p_value
 
 
 def compare(
@@ -113,10 +216,24 @@ def compare(
         if len(identities[0]) != 1 or identities[0] != identities[1]:
             raise ValueError("Judge gates require the same resolved model and rubric")
     checks: list[MetricCheck] = []
+    changes: list[QuestionChange] = []
+    candidate_by_id = {question.id: question for question in candidate.questions}
     for name, tolerance in limits.max_drop.items():
         old, new = metric(baseline, name), metric(candidate, name)
         drop = old - new
-        passed = drop <= tolerance or math.isclose(drop, tolerance, rel_tol=0, abs_tol=1e-12)
+        point_passed = drop <= tolerance or math.isclose(drop, tolerance, rel_tol=0, abs_tol=1e-12)
+        mean_delta = ci_low = ci_high = p_value = None
+        if limits.statistics is not None:
+            mean_delta, ci_low, ci_high, p_value = _statistics_fields(
+                name, baseline, candidate, limits.statistics
+            )
+        if limits.statistics is not None and limits.statistics.gate_on_ci:
+            assert ci_high is not None
+            passed = ci_high > -tolerance or math.isclose(ci_high, -tolerance, abs_tol=1e-12)
+            rule = "CI upper bound of (candidate - baseline) is at least -tolerance"
+        else:
+            passed = point_passed
+            rule = "maximum absolute drop"
         checks.append(
             MetricCheck(
                 metric=name,
@@ -125,9 +242,27 @@ def compare(
                 tolerance=tolerance,
                 change=drop,
                 passed=passed,
-                rule="maximum absolute drop",
+                rule=rule,
+                mean_delta=mean_delta,
+                ci_low=ci_low,
+                ci_high=ci_high,
+                permutation_p_value=p_value,
             )
         )
+        for question in baseline.questions:
+            base_value = question_metric(question, name)
+            cand_value = question_metric(candidate_by_id[question.id], name)
+            delta = cand_value - base_value
+            changes.append(
+                QuestionChange(
+                    question_id=question.id,
+                    metric=name,
+                    baseline=base_value,
+                    candidate=cand_value,
+                    delta=delta,
+                    direction=_direction(delta),
+                )
+            )
     for name, tolerance in limits.max_increase_ratio.items():
         old, new = metric(baseline, name), metric(candidate, name)
         change = (new - old) / old if old else (0.0 if new == 0 else None)
@@ -150,4 +285,5 @@ def compare(
         candidate_run_id=candidate.run_id,
         passed=all(item.passed for item in checks),
         checks=tuple(checks),
+        question_changes=tuple(sorted(changes, key=lambda item: (item.metric, item.question_id))),
     )

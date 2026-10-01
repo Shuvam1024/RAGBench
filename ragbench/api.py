@@ -1,5 +1,6 @@
 """Read-only API for a local run database; evaluation stays in the CLI."""
 
+import importlib.metadata
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Query
@@ -9,8 +10,19 @@ from ragbench.evaluation.models import EvaluationResult
 from ragbench.storage import RunStore
 
 
+def package_version() -> str:
+    try:
+        return importlib.metadata.version("ragbench")
+    except importlib.metadata.PackageNotFoundError:
+        return "0+unknown"
+
+
 def create_app(database: Path) -> FastAPI:
-    app = FastAPI(title="RAGBench", version="1.0.0", description="Read-only evaluation run history")
+    app = FastAPI(
+        title="RAGBench",
+        version=package_version(),
+        description="Read-only evaluation run history",
+    )
     store = RunStore(database)
 
     @app.exception_handler(ValueError)
