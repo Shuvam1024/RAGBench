@@ -1,0 +1,126 @@
+# Run and inspect RAGBench
+
+RAGBench 0.1.0 implements the first retrieval evaluation milestone. It includes
+BM25, dense, and hybrid search, Recall@K, full-ranking MRR, JSON export, and tests.
+
+## Environment
+
+From the repository root:
+
+```bash
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e ".[dev]"
+python -m pip check
+ragbench evaluate --config configs/baseline.yaml
+```
+
+If the environment already exists, start with `source .venv/bin/activate`.
+An editable install means Python imports this working copy. Reinstall when
+package metadata, dependencies, or console entry points change.
+
+`pyproject.toml` defines the package and dependency groups. `.python-version`
+records Python 3.12 for tools that read it. `.venv`, `.cache`, and generated
+`results` are local and excluded from Git. Do not move an existing virtual
+environment between directories: its activation script and executables contain
+absolute paths. Recreate it after relocating the repository.
+
+The [Python packaging guide](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/)
+explains editable installs and dependency groups.
+
+## Run all three retrievers
+
+```bash
+python -m pip install -e ".[dev,dense]"
+export HF_HOME="$PWD/.cache/huggingface"
+ragbench evaluate --config configs/baseline.yaml --output results/baseline.json
+ragbench evaluate --config configs/dense.yaml --output results/dense.json
+ragbench evaluate --config configs/hybrid.yaml --output results/hybrid.json
+```
+
+The dense extra adds sentence-transformers, FAISS, and their numerical
+libraries. The first dense or hybrid run downloads MiniLM weights. No paid API
+key is required. The example model revision is pinned in YAML and the resolved
+revision appears in the report. Once cached, `HF_HUB_OFFLINE=1` prevents Hub
+network calls.
+
+For the tested package versions:
+
+```bash
+python -m pip install -c requirements/constraints-py312.txt -e ".[dev,dense]"
+```
+
+The constraints file is a snapshot from Python 3.12.10 on macOS 15.6 arm64,
+including development and dense dependencies. It is not a universal lockfile;
+other platforms have not been verified. A bare install uses the compatible
+version ranges in `pyproject.toml`.
+
+## Understand your experiment
+
+`configs/baseline.yaml` chooses the corpus, benchmark, chunk size, overlap,
+retriever, and recall cutoffs. Paths in YAML resolve from that YAML file's
+folder. The CLI's `--config` and `--output` paths resolve from your terminal's
+working directory.
+
+You can copy the baseline YAML, point it at your `.txt`/`.md` documents, and
+write questions in the [benchmark format](benchmark-format.md). Each relevance
+label must match a path relative to the documents root. Unknown labels fail
+before the index or model is loaded.
+
+`output.json_path` is optional. An explicit `--output` takes precedence. Parent
+output directories are created automatically, and complete JSON reports replace
+older reports atomically. Output inside the corpus or over a source/configuration
+file is rejected to avoid changing the next run's inputs.
+
+## Inspect the result
+
+Open a report under `results/`. Begin with one entry in `questions`:
+
+1. Read the query and `relevant_document_ids`.
+2. Inspect `retrieved_documents`, ordered from best to worst. Each entry records
+   a document ID, its best chunk ID, and that chunk's retrieval score.
+3. Calculate Recall@1 and reciprocal rank by hand.
+4. Compare your answer with the recorded per-question values.
+5. Average the values across questions to reproduce the aggregate metrics.
+
+The report also contains effective configuration, input fingerprints, dependency
+versions, model revision, and skipped-empty-file counts. JSON object keys for
+Recall@K are strings (`"1"`, `"3"`, `"5"`) because JSON object keys are textual.
+Expected answers stay in the benchmark for a future answer-evaluation milestone.
+
+## Tests
+
+```bash
+python -m pytest -q
+python -m pytest -q --run-integration
+```
+
+The first command keeps model downloads disabled and runs the offline suite.
+The second also runs semantic-search checks through the dense and hybrid CLIs.
+With the complete dependency set, the release was verified with 84 passing tests.
+See [test coverage](../tests/README.md).
+
+## macOS native library behavior
+
+The initial real-model attempt crashed after loading weights. PyTorch and FAISS
+ship native OpenMP runtimes that can conflict on macOS; this is also reported
+[upstream](https://github.com/pytorch/pytorch/issues/149201).
+
+The model adapter sets PyTorch inference to one CPU thread. Verified dense and
+hybrid CLI runs then completed. A separate test-order issue occurred when FAISS
+had already executed before PyTorch was imported into the same test process.
+Real-model integration tests therefore invoke the public CLI in fresh subprocesses,
+which is also the recommended macOS workflow. Offline FAISS tests still use the
+real index in the test process.
+
+This does not claim to repair the underlying native libraries. Mixing these
+libraries in an existing notebook or long-lived application may still fail.
+No unsafe duplicate-runtime override is set. Future latency comparisons must
+record the thread setting; the current report includes it in retriever metadata.
+
+## Setup history
+
+The first foundation session could not install packages because package-server
+DNS resolution failed. The later installation succeeded. Editable installation,
+`pip check`, all three benchmark commands, and the complete test suite have now
+been verified. The application is no longer a docstring-only scaffold.
