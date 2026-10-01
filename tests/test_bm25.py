@@ -8,8 +8,13 @@ from ragbench.retrieval.bm25 import BM25Retriever
 
 def test_keyword_ranking_and_case(make_chunk: Callable[..., Chunk]) -> None:
     retriever = BM25Retriever()
-    retriever.index([make_chunk("apple orchard", "a"), make_chunk("ocean wave", "b"),
-                     make_chunk("mountain snow", "c")])
+    retriever.index(
+        [
+            make_chunk("apple orchard", "a"),
+            make_chunk("ocean wave", "b"),
+            make_chunk("mountain snow", "c"),
+        ]
+    )
     hits = retriever.retrieve("OCEAN!", 10)
     assert hits[0].chunk.id == "b"
     assert hits[0].score > hits[1].score

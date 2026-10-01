@@ -28,12 +28,17 @@ def test_normalization() -> None:
             min_max_normalize(scores)
 
 
-@pytest.mark.parametrize(("weight", "order", "scores"), [
-    (0.0, ["a", "b", "c"], [1, 0.5, 0]),
-    (1.0, ["c", "b", "a"], [1, 0.8, 0]),
-    (0.5, ["b", "a", "c"], [0.65, 0.5, 0.5]),
-])
-def test_manual_fusion(make_chunk: Callable[..., Chunk], weight: float, order: list[str], scores: list[float]) -> None:
+@pytest.mark.parametrize(
+    ("weight", "order", "scores"),
+    [
+        (0.0, ["a", "b", "c"], [1, 0.5, 0]),
+        (1.0, ["c", "b", "a"], [1, 0.8, 0]),
+        (0.5, ["b", "a", "c"], [0.65, 0.5, 0.5]),
+    ],
+)
+def test_manual_fusion(
+    make_chunk: Callable[..., Chunk], weight: float, order: list[str], scores: list[float]
+) -> None:
     retriever = HybridRetriever(ScoredRetriever([10, 5, 0]), ScoredRetriever([-1, 0.6, 1]), weight)
     retriever.index([make_chunk("text", name) for name in ("a", "b", "c")])
     hits = retriever.retrieve("query", 10)

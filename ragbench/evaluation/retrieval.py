@@ -27,7 +27,12 @@ def reciprocal_rank(ranked_ids: Sequence[str], relevant_ids: Iterable[str]) -> f
     return 0.0
 
 
-def mean_reciprocal_rank(rankings: Sequence[Sequence[str]], relevance: Sequence[Iterable[str]]) -> float:
+def mean_reciprocal_rank(
+    rankings: Sequence[Sequence[str]], relevance: Sequence[Iterable[str]]
+) -> float:
     if not rankings or len(rankings) != len(relevance):
         raise ValueError("Provide equally sized, nonempty rankings and relevance collections")
-    return fmean(reciprocal_rank(ranked, relevant) for ranked, relevant in zip(rankings, relevance, strict=True))
+    return fmean(
+        reciprocal_rank(ranked, relevant)
+        for ranked, relevant in zip(rankings, relevance, strict=True)
+    )

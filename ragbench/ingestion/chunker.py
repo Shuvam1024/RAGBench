@@ -26,15 +26,30 @@ def chunk_document(document: Document, config: ChunkingConfig) -> list[Chunk]:
     chunks: list[Chunk] = []
     for start in range(0, len(words), config.chunk_size - config.overlap):
         end = min(start + config.chunk_size, len(words))
-        identity = [document.id, document.content_sha256, config.chunk_size, config.overlap, start, end]
-        digest = hashlib.sha256(json.dumps(
-            identity, ensure_ascii=False, separators=(",", ":"),
-        ).encode("utf-8")).hexdigest()
-        chunks.append(Chunk(
-            id=f"chunk-v1-{digest}", document_id=document.id,
-            text=document.text[words[start].start():words[end - 1].end()],
-            start_word=start, end_word=end,
-        ))
+        identity = [
+            document.id,
+            document.content_sha256,
+            config.chunk_size,
+            config.overlap,
+            start,
+            end,
+        ]
+        digest = hashlib.sha256(
+            json.dumps(
+                identity,
+                ensure_ascii=False,
+                separators=(",", ":"),
+            ).encode("utf-8")
+        ).hexdigest()
+        chunks.append(
+            Chunk(
+                id=f"chunk-v1-{digest}",
+                document_id=document.id,
+                text=document.text[words[start].start() : words[end - 1].end()],
+                start_word=start,
+                end_word=end,
+            )
+        )
         if end == len(words):
             break
     return chunks
