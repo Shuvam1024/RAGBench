@@ -1,0 +1,7 @@
+# Absolute drops on [0,1] metrics; 0.02 means two percentage points.
+max_drop:
+  mrr: 0.02
+  recall@1: 0.02
+  recall@3: 0.02
+# Timing gates are opt-in because shared CI runners vary in load.
+max_increase_ratio: {}
