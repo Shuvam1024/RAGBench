@@ -1,0 +1,16 @@
+# One factor at a time around the SciFact BM25 configuration.
+schema_version: 1
+base: scifact-bm25.yaml
+axes:
+  - name: chunk_size
+    field: chunking.chunk_size
+    values: [60, 120, 240, 480]
+  - name: overlap
+    field: chunking.overlap
+    values: [0, 20, 40, 80]
+  - name: bm25_k1
+    field: retrieval.k1
+    values: [0.5, 1.2, 1.5, 2.0]
+  - name: bm25_b
+    field: retrieval.b
+    values: [0.0, 0.3, 0.75, 1.0]

@@ -1,0 +1,14 @@
+# BM25 on SciFact is deterministic. Any quality movement fails the gate.
+max_drop:
+  mrr: 0.0
+  map: 0.0
+  recall@10: 0.0
+  recall@100: 0.0
+  ndcg@10: 0.0
+max_increase_ratio: {}
+statistics:
+  seed: 0
+  bootstrap_samples: 10000
+  permutation_samples: 10000
+  confidence: 0.95
+  gate_on_ci: false

@@ -1,7 +1,8 @@
 # Run and inspect RAGBench
 
-RAGBench 1.0 evaluates retrieval and optional answers, checks quality regressions,
-and records results as JSON or SQLite.
+RAGBench evaluates retrieval and optional answers, checks quality regressions,
+and records results as JSON or SQLite. Install from `uv.lock` when you want the
+same versions CI uses.
 
 ## Environment
 
@@ -50,10 +51,17 @@ For the tested package versions:
 python -m pip install -c requirements/constraints-py312.txt -e ".[dev,dense]"
 ```
 
-The constraints file is a snapshot from Python 3.12.10 on macOS 15.6 arm64,
-including development, API, LLM, and dense dependencies. It is not a universal
-lockfile; platform-specific packages may need different versions. A bare install uses the compatible
-version ranges in `pyproject.toml`.
+`requirements/constraints-py312.txt` is a historical snapshot from Python 3.12.10
+on macOS 15.6 arm64. CI and Docker install from `uv.lock` instead:
+
+```bash
+uv sync --frozen --python 3.12 --extra dev --extra api
+uv run ragbench evaluate --config configs/baseline.yaml
+```
+
+The lock resolves CPU torch on non-macOS through the PyTorch CPU index. Dense
+extras stay upper-bounded in `pyproject.toml` (`sentence-transformers`, `faiss-cpu`,
+`numpy`, `torch`).
 
 ## Understand your experiment
 
@@ -88,6 +96,18 @@ versions, model revision, and skipped-empty-file counts. JSON object keys for
 Recall@K are strings (`"1"`, `"3"`, `"5"`) because JSON object keys are textual.
 When generation is enabled, reference answers are used for lexical metrics and
 optional judging. See [providers and scoring](providers.md).
+
+## SciFact
+
+```bash
+uv run ragbench dataset scifact --cache .cache/beir --manifest benchmarks/scifact/corpus_stats.json
+uv run ragbench evaluate --config configs/scifact-bm25.yaml --output results/scifact-bm25.json --portable
+uv run ragbench sweep --config configs/scifact-ablation.yaml --output results/ablation-bm25.json
+```
+
+The dataset command downloads the BEIR SciFact zip and rejects it unless the
+SHA-256 matches. Dense and hybrid configs need the `dense` extra and a Hugging
+Face cache. Reports under `benchmarks/scifact/` are the committed measurements.
 
 ## Tests
 

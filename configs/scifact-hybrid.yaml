@@ -1,0 +1,29 @@
+schema_version: 1
+dataset:
+  documents_path: ../.cache/beir/scifact
+  benchmark_path: ../.cache/beir/scifact/benchmark.json
+chunking:
+  chunk_size: 120
+  overlap: 20
+retrieval:
+  type: hybrid
+  fusion: minmax
+  dense_weight: 0.5
+  rrf_k: 60
+  bm25:
+    type: bm25
+    k1: 1.5
+    b: 0.75
+  dense:
+    type: dense
+    model_name: sentence-transformers/all-MiniLM-L6-v2
+    revision: 1110a243fdf4706b3f48f1d95db1a4f5529b4d41
+    device: cpu
+    batch_size: 32
+evaluation:
+  recall_at_k: [10, 100]
+  ndcg_at_k: [10]
+  precision_at_k: [10]
+  stored_hits: 10
+output:
+  json_path: null

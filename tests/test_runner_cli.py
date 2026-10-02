@@ -117,6 +117,69 @@ class DuplicateHits(Retriever):
         return self.rank([float(order[chunk.document_id]) for chunk in self._chunks], k)
 
 
+def test_support_fixture_hash_and_new_metrics_stay_consistent() -> None:
+    import importlib.util
+
+    root = Path(__file__).resolve().parents[1]
+    committed = json.loads((root / "benchmarks" / "baseline.json").read_text(encoding="utf-8"))
+    result = evaluate(load_config(root / "configs" / "baseline.yaml"))
+    assert result.corpus_sha256 == committed["corpus_sha256"]
+    assert result.benchmark_sha256 == committed["benchmark_sha256"]
+    assert result.mrr == pytest.approx(committed["mrr"])
+    assert result.recall_at_k[1] == pytest.approx(committed["recall_at_k"]["1"])
+    assert result.chunk_count == result.document_count
+    assert result.multi_chunk_documents == 0
+    assert result.mean_average_precision is not None
+    assert result.ndcg_at_k is not None
+    if importlib.util.find_spec("torch") is None:
+        assert result.environment["pytorch_threads"] == "not-installed"
+    else:
+        import torch
+
+        assert result.environment["pytorch_threads"] == str(torch.get_num_threads())
+
+
+def test_stored_hits_do_not_change_full_ranking_metrics(experiment: Path) -> None:
+    full = evaluate(load_config(experiment))
+    text = experiment.read_text(encoding="utf-8").replace(
+        "recall_at_k: [1, 2]\n", "recall_at_k: [1, 2]\n  stored_hits: 1\n"
+    )
+    experiment.write_text(text, encoding="utf-8")
+    stored = evaluate(load_config(experiment))
+    assert len(stored.questions[0].retrieved_documents) == 1
+    assert stored.mrr == full.mrr
+    assert stored.mean_average_precision == full.mean_average_precision
+    assert stored.questions[0].ndcg_at_k == full.questions[0].ndcg_at_k
+
+
+def test_generation_requires_reference_answers(experiment: Path) -> None:
+    benchmark = experiment.parent / "benchmark.json"
+    payload = json.loads(benchmark.read_text(encoding="utf-8"))
+    payload["questions"][0]["expected_answer"] = ""
+    benchmark.write_text(json.dumps(payload), encoding="utf-8")
+    experiment.write_text(
+        experiment.read_text(encoding="utf-8") + "generation:\n  provider: extractive\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="expected_answer"):
+        evaluate(load_config(experiment))
+
+
+def test_portable_paths_are_relative(
+    experiment: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    destination = tmp_path / "out.json"
+    result = CliRunner().invoke(
+        app,
+        ["evaluate", "--config", str(experiment), "--output", str(destination), "--portable"],
+    )
+    assert result.exit_code == 0, result.output
+    report = json.loads(destination.read_text(encoding="utf-8"))
+    assert report["config"]["dataset"]["documents_path"] == "docs"
+    assert report["config"]["output"]["json_path"] == "out.json"
+
+
 def test_document_ranks_collapse_duplicate_chunk_hits(experiment: Path) -> None:
     result = evaluate(load_config(experiment), DuplicateHits())
     assert result.questions[0].reciprocal_rank == 0.5

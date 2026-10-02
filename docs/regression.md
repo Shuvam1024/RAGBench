@@ -28,10 +28,39 @@ baseline permits only a zero candidate. Missing measurements fail validation;
 omit optional metrics when those stages are disabled. Empty threshold sets and
 unknown names are rejected.
 
-Supported quality names: `mrr`, `recall@K` for measured positive K,
-`answer_exact_match`, `answer_token_f1`, `context_token_precision`,
-`judge_correctness`, `judge_faithfulness`. Resource names:
-`retrieval_p95_ms`, `generation_p95_ms`, `estimated_cost_usd`.
+Supported quality names: `mrr`, `map`, `recall@K`, `ndcg@K`, and `precision@K`
+for measured positive K, `answer_exact_match`, `answer_token_f1`,
+`context_token_precision`, `judge_correctness`, `judge_faithfulness`. Resource
+names: `retrieval_p95_ms`, `generation_p95_ms`, `estimated_cost_usd`.
+
+## Paired statistics
+
+```yaml
+statistics:
+  seed: 0
+  bootstrap_samples: 10000
+  permutation_samples: 10000
+  confidence: 0.95
+  gate_on_ci: false
+```
+
+When `statistics` is set, each quality threshold also records the mean paired
+delta `(candidate - baseline)`, a percentile bootstrap interval for that mean,
+and a two-sided sign-flip permutation p-value. Seeds are the strings
+`ragbench-stats-v1:{seed}:bootstrap:{metric}` and
+`ragbench-stats-v1:{seed}:permutation:{metric}`, drawn with `random.Random`.
+The interval is uncertainty from resampling this fixed question list. It is not
+a model of retrieval noise or hardware. The permutation p-value is
+`(extreme + 1) / (samples + 1)` and cannot be zero.
+
+`gate_on_ci: false` keeps the point-drop rule. `gate_on_ci: true` replaces it:
+the check fails only when the interval's upper bound is below `-tolerance`.
+That is a more conservative failure rule than the point estimate. Resource
+thresholds stay relative and are not bootstrapped.
+
+Every gated quality metric also lists per-question changes, sorted by metric
+then question ID, with direction `improved`, `regressed`, or `unchanged`
+(absolute tolerance `1e-12`).
 
 Exit codes: **0** passes; **2** means a measured regression; **1** means invalid
 inputs, missing metrics, incompatible reports, or another execution error.
@@ -64,7 +93,9 @@ reports from private corpora. Reports also include questions and generated text.
 
 ## CI contract
 
-`.github/workflows/ci.yml` runs lint, tests, evaluation, and comparison on Python
-3.12/Linux and macOS. Separate Linux jobs run real-model retrieval and Docker.
-Candidate/comparison JSON is uploaded as a workflow artifact, including on failure.
-No credentials or paid provider calls are needed.
+`.github/workflows/ci.yml` installs from `uv.lock` with uv, then runs Ruff,
+mypy, tests with a coverage floor, the support-fixture gate, and a SciFact BM25
+gate on Python 3.12/Linux and macOS. Separate Linux jobs run real-model retrieval
+and Docker. Candidate/comparison JSON is uploaded as a workflow artifact,
+including on failure. No credentials or paid provider calls are needed. The
+SciFact zip is downloaded in CI and rejected unless its SHA-256 matches.

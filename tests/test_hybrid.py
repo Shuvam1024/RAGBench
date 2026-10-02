@@ -57,6 +57,35 @@ def test_empty_lexical_and_constant_vectors(make_chunk: Callable[..., Chunk]) ->
     assert [hit.score for hit in hits] == [0, 0]
 
 
+def test_reciprocal_rank_fusion(make_chunk: Callable[..., Chunk]) -> None:
+    retriever = HybridRetriever(
+        ScoredRetriever([10, 5, 0]), ScoredRetriever([-1, 0.6, 1]), fusion="rrf", rrf_k=1
+    )
+    retriever.index([make_chunk("text", name) for name in ("a", "b", "c")])
+    hits = retriever.retrieve("query", 3)
+    # BM25 order a, b, c and dense order c, b, a. k=1 ties a and c; chunk id breaks the tie.
+    assert [hit.chunk.id for hit in hits] == ["a", "c", "b"]
+    assert [hit.score for hit in hits] == pytest.approx([0.75, 0.75, 2 / 3])
+    assert retriever.metadata["fusion"] == "rrf"
+    assert retriever.metadata["rrf_k"] == 1
+
+
+def test_rrf_ignores_empty_lexical_ranking(make_chunk: Callable[..., Chunk]) -> None:
+    retriever = HybridRetriever(
+        ScoredRetriever([], empty=True), ScoredRetriever([1, 4]), fusion="rrf", rrf_k=60
+    )
+    retriever.index([make_chunk("text", name) for name in ("b", "a")])
+    hits = retriever.retrieve("!!!", 2)
+    assert [hit.chunk.id for hit in hits] == ["a", "b"]
+    assert hits[0].score == pytest.approx(1 / 61)
+    for value in ("minmax", "rrf"):
+        HybridRetriever(ScoredRetriever([1]), ScoredRetriever([1]), fusion=value)
+    with pytest.raises(ValueError, match="fusion"):
+        HybridRetriever(ScoredRetriever([1]), ScoredRetriever([1]), fusion="blend")
+    with pytest.raises(ValueError, match="rrf_k"):
+        HybridRetriever(ScoredRetriever([1]), ScoredRetriever([1]), fusion="rrf", rrf_k=0)
+
+
 def test_misalignment_and_bad_weights(make_chunk: Callable[..., Chunk]) -> None:
     for weight in (-1, 2, float("nan"), True):
         with pytest.raises(ValueError):

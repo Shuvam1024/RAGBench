@@ -5,3 +5,9 @@ max_drop:
   recall@3: 0.02
 # Timing gates are opt-in because shared CI runners vary in load.
 max_increase_ratio: {}
+statistics:
+  seed: 0
+  bootstrap_samples: 10000
+  permutation_samples: 10000
+  confidence: 0.95
+  gate_on_ci: false

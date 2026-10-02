@@ -1,3 +1,4 @@
+import importlib.metadata
 from pathlib import Path
 
 import pytest
@@ -43,6 +44,7 @@ def test_read_only_api(tmp_path: Path, report: EvaluationResult) -> None:
 
     path = tmp_path / "runs.sqlite"
     client = TestClient(create_app(path))
+    assert client.app.version == importlib.metadata.version("ragbench")
     assert client.get("/health").status_code == 503
     assert not path.exists()
     RunStore(path).save(report)

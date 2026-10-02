@@ -11,6 +11,7 @@ dist/
 .ruff_cache/
 .mypy_cache/
 .coverage
+coverage.json
 htmlcov/
 
 # Local data, model caches, and benchmark outputs

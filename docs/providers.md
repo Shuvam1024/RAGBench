@@ -64,9 +64,14 @@ A strict JSON schema and Pydantic validation reject missing/extra fields,
 booleans, non-integer scores, and values outside the rubric. Prompt instructions
 treat supplied fields as untrusted data; this is not a guarantee against prompt
 injection. The tests verify protocol behavior and validation using mock HTTP
-responses. No live paid judge run or human-label calibration is claimed. Model
-bias, variability, and reference quality remain limitations. Pin model versions
-and calibrate against human judgments before using judge gates for release policy.
+responses. One committed live sample, `benchmarks/support/judge-sample.json`,
+judges two existing support-fixture questions with extractive answers and
+`gpt-5-nano`. The response model is `gpt-5-nano-2025-08-07`. That file records
+token usage and the cost estimated from the rates in `configs/support-judge.yaml`.
+It is not a calibration set: there are no human labels and no agreement
+statistics. Model bias, variability, and reference quality remain limitations.
+Pin model versions and calibrate against human judgments before using judge
+gates for release policy.
 
 ## Tokens, cost, and timing
 

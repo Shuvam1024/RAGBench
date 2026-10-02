@@ -12,21 +12,29 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-          cache: pip
-      - run: python -m pip install -e '.[dev,api]'
-      - run: ruff check .
-      - run: ruff format --check .
-      - run: python -m pytest -q --cov=ragbench --cov-report=term-missing
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --frozen --python 3.12 --extra dev --extra api
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy
+      - run: uv run pytest -q --cov=ragbench --cov-report=term-missing --cov-fail-under=85
       - name: Evaluate candidate
-        run: ragbench evaluate --config configs/baseline.yaml --output results/candidate.json
+        run: uv run ragbench evaluate --config configs/baseline.yaml --output results/candidate.json
       - name: Enforce quality thresholds
-        run: ragbench compare --baseline benchmarks/baseline.json --candidate results/candidate.json --thresholds configs/thresholds.yaml --output results/comparison.json
+        run: uv run ragbench compare --baseline benchmarks/baseline.json --candidate results/candidate.json --thresholds configs/thresholds.yaml --output results/comparison.json
+      - name: Prepare SciFact and enforce the BM25 gate
+        run: |
+          uv run ragbench dataset scifact --cache .cache/beir
+          uv run ragbench evaluate --config configs/scifact-bm25.yaml --output results/scifact-bm25.json
+          uv run ragbench compare --baseline benchmarks/scifact/bm25.json --candidate results/scifact-bm25.json --thresholds configs/scifact-thresholds.yaml --output results/scifact-comparison.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -41,17 +49,19 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-          cache: pip
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
       - uses: actions/cache@v4
         with:
           path: /home/runner/.cache/huggingface
           key: minilm-${{ runner.os }}-${{ hashFiles('configs/dense.yaml') }}
-      - run: python -m pip install -e '.[dev,dense]'
-      - run: python -m pytest -q tests/test_dense.py tests/test_integration.py --run-integration
+      - run: uv sync --frozen --python 3.12 --extra dev --extra dense
+      - run: uv run pytest -q tests/test_dense.py tests/test_integration.py --run-integration
   docker:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - run: docker build -t ragbench-test .

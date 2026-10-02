@@ -5,8 +5,8 @@ integration tests. Provider tests use mocked HTTP responses and make no paid cal
 
 ```bash
 python -m pip install -e ".[dev,api,llm,dense]"
-python -m pytest -q
-python -m pytest -q --run-integration
+uv run pytest -q --cov=ragbench --cov-fail-under=85
+uv run pytest -q --run-integration
 ```
 
 A bare pytest run skips the two integration cases and never downloads model
@@ -23,8 +23,14 @@ optionally set `HF_HUB_OFFLINE=1` after the model is cached.
   symlink handling, corpus relocation, and invalid input.
 - `test_bm25.py`: known keyword rankings, case/punctuation handling, tied and
   negative scores, invalid K, empty input, duplicate IDs, and index replacement.
-- `test_metrics.py`: hand-calculated Recall@K and MRR, duplicate hits, multiple
-  relevant documents, no matches, and invalid metric arguments.
+- `test_metrics.py`: hand-calculated Recall@K, MRR, Precision@K, average
+  precision, and nDCG, duplicate hits, multiple relevant documents, no matches,
+  and invalid metric arguments.
+- `test_statistics.py`: seeded bootstrap intervals and sign-flip p-values.
+- `test_dataset.py`: SciFact zip checksum, path safety, JSONL ordering, and
+  grade handling on a synthetic archive.
+- `test_sweep.py`: a one-factor sweep changes only the named axis and skips the
+  base value.
 - `test_benchmark.py`: nonblank fields, distinct labels and IDs, supported
   versions, readable JSON, and references to documents in the corpus.
 - `test_runner_cli.py`: repeated runs, document deduplication, metric aggregation,
@@ -37,7 +43,8 @@ optionally set `HF_HUB_OFFLINE=1` after the model is cached.
   CLI commands, including report contents and resolved model revision.
 
 - `test_comparison.py`: tolerance boundaries, incompatible inputs, missing metrics,
-  zero cost baselines, and CLI pass/regression/error exit codes.
+  zero cost baselines, per-question changes, the confidence-interval gate, and
+  CLI pass/regression/error exit codes.
 - `test_generation.py`: prompt payloads, usage/cost arithmetic, strict judge JSON,
   malformed/incomplete responses, timeout/error redaction, lexical metrics,
   aggregate consistency, judge identity gates, and local answer evaluation.

@@ -1,9 +1,15 @@
 FROM python:3.12-slim
 
+COPY --from=ghcr.io/astral-sh/uv:0.12.21 /uv /uvx /bin/
+
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    HF_HOME=/tmp/ragbench-models
+    UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    UV_NO_DEV=1 \
+    HF_HOME=/tmp/ragbench-models \
+    PATH="/app/.venv/bin:${PATH}" \
+    VIRTUAL_ENV=/app/.venv
 WORKDIR /app
 
 # libgomp also supports the optional FAISS/PyTorch CPU dependencies.
@@ -11,10 +17,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 \
     && rm -rf /var/lib/apt/lists/* \
     && useradd --uid 10001 --create-home ragbench \
     && mkdir /data && chown ragbench:ragbench /data
-COPY pyproject.toml README.md LICENSE ./
+COPY pyproject.toml uv.lock README.md LICENSE ./
 COPY ragbench ./ragbench
 ARG EXTRAS=api
-RUN pip install --no-cache-dir ".[${EXTRAS}]"
+RUN extras=""; \
+    for extra in $(printf '%s' "$EXTRAS" | tr ',' ' '); do extras="$extras --extra $extra"; done; \
+    uv sync --frozen --no-dev $extras \
+    && chmod -R a+rX /app/.venv
 COPY configs ./configs
 COPY datasets ./datasets
 COPY benchmarks ./benchmarks
