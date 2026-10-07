@@ -11,9 +11,9 @@ The test split is not read. The first stage is the frozen hybrid in
 import json
 from pathlib import Path
 
-from ragbench.config import HybridConfig, load_config
-from ragbench.evaluation.runner import evaluate, evaluate_candidate_depths, relativize_result
-from ragbench.evaluation.train_selection import choose_candidate_k
+from ragstat.config import HybridConfig, load_config
+from ragstat.evaluation.runner import evaluate, evaluate_candidate_depths, relativize_result
+from ragstat.evaluation.train_selection import choose_candidate_k
 
 ROOT = Path(__file__).resolve().parents[1]
 TRAIN_BENCHMARK = ROOT / ".cache/beir/scifact/benchmark.train.json"

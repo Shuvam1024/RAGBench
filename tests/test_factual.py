@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from ragbench.evaluation.factual import (
+from ragstat.evaluation.factual import (
     accuracy,
     class_f1,
     macro_f1,

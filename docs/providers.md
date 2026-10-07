@@ -11,7 +11,7 @@ python -m pip install -e '.[llm]'
 cp configs/openai.example.yaml configs/openai.local.yaml
 # Edit the model names in the copied configuration.
 # Set OPENAI_API_KEY securely in your shell environment.
-ragbench evaluate --config configs/openai.local.yaml --output results/openai.json
+ragstat evaluate --config configs/openai.local.yaml --output results/openai.json
 ```
 
 Select available model IDs compatible with the Responses API and structured

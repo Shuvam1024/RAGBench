@@ -8,14 +8,14 @@ from typing import Annotated
 import typer
 from pydantic import BaseModel
 
-from ragbench.config import RunConfig, load_config
-from ragbench.datasets.beir import DATASETS, prepare_dataset
-from ragbench.evaluation.comparison import compare as compare_reports
-from ragbench.evaluation.comparison import load_report, load_thresholds
-from ragbench.evaluation.runner import evaluate as run_evaluation
-from ragbench.evaluation.runner import relativize_result
-from ragbench.evaluation.sweep import load_sweep, run_sweep
-from ragbench.storage import RunStore
+from ragstat.config import RunConfig, load_config
+from ragstat.datasets.beir import DATASETS, prepare_dataset
+from ragstat.evaluation.comparison import compare as compare_reports
+from ragstat.evaluation.comparison import load_report, load_thresholds
+from ragstat.evaluation.runner import evaluate as run_evaluation
+from ragstat.evaluation.runner import relativize_result
+from ragstat.evaluation.sweep import load_sweep, run_sweep
+from ragstat.storage import RunStore
 
 app = typer.Typer(
     no_args_is_help=True, help="Evaluate retrieval configurations on a labeled corpus."
@@ -24,7 +24,7 @@ app = typer.Typer(
 
 @app.callback()
 def main() -> None:
-    """RAGBench: reproducible retrieval evaluation."""
+    """ragstat: reproducible retrieval evaluation."""
 
 
 def validate_output(path: Path, config_path: Path, config: RunConfig) -> None:
@@ -51,7 +51,7 @@ def save_result(result: BaseModel, path: Path) -> None:
             mode="w",
             encoding="utf-8",
             dir=path.parent,
-            prefix=".ragbench-",
+            prefix=".ragstat-",
             suffix=".tmp",
             delete=False,
         ) as handle:
@@ -107,7 +107,7 @@ def evaluate(
     except (ValueError, OSError, ImportError, RuntimeError) as exc:
         typer.echo(f"Error: {exc}", err=True)
         raise typer.Exit(code=1) from exc
-    typer.echo(f"RAGBench | {settings.retrieval.type}")
+    typer.echo(f"ragstat | {settings.retrieval.type}")
     typer.echo(
         f"Documents: {result.document_count} | Chunks: {result.chunk_count} | "
         f"Questions: {result.question_count}"
@@ -235,7 +235,7 @@ def serve_command(
     try:
         import uvicorn
 
-        from ragbench.api import create_app
+        from ragstat.api import create_app
 
         RunStore(db).list(1)
         uvicorn.run(create_app(db), host=host, port=port)

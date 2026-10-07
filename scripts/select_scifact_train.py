@@ -13,9 +13,9 @@ The test split is not read. The rule is fixed in this file:
 import json
 from pathlib import Path
 
-from ragbench.config import load_config
-from ragbench.evaluation.runner import evaluate
-from ragbench.evaluation.train_selection import selection_key
+from ragstat.config import load_config
+from ragstat.evaluation.runner import evaluate
+from ragstat.evaluation.train_selection import selection_key
 
 ROOT = Path(__file__).resolve().parents[1]
 TRAIN_BENCHMARK = ROOT / ".cache/beir/scifact/benchmark.train.json"

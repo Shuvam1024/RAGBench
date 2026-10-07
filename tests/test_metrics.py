@@ -2,7 +2,7 @@ import math
 
 import pytest
 
-from ragbench.evaluation.retrieval import (
+from ragstat.evaluation.retrieval import (
     average_precision,
     mean_reciprocal_rank,
     ndcg_at_k,

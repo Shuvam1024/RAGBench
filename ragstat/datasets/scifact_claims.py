@@ -13,8 +13,8 @@ from typing import Literal
 
 from pydantic import Field, model_validator
 
-from ragbench.config import ConfigModel, Nonblank
-from ragbench.datasets.beir import _download, file_sha256
+from ragstat.config import ConfigModel, Nonblank
+from ragstat.datasets.beir import _download, file_sha256
 
 SCIFACT_CLAIMS_URL = "https://scifact.s3-us-west-2.amazonaws.com/release/latest/data.tar.gz"
 SCIFACT_CLAIMS_SHA256 = "11c621288d41ac144d29b13b0f8503b3820b7d6e8b1f6ff24dff335c196d76be"

@@ -12,9 +12,9 @@ from typing import Self
 import yaml
 from pydantic import Field, model_validator
 
-from ragbench.config import ConfigModel, Nonblank, RunConfig, SchemaVersion, load_config
-from ragbench.evaluation.models import EvaluationResult, Record
-from ragbench.evaluation.runner import evaluate
+from ragstat.config import ConfigModel, Nonblank, RunConfig, SchemaVersion, load_config
+from ragstat.evaluation.models import EvaluationResult, Record
+from ragstat.evaluation.runner import evaluate
 
 
 class SweepAxis(ConfigModel):

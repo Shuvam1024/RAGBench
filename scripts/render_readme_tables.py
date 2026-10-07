@@ -197,6 +197,8 @@ def format_value(fmt: str, value: object) -> str:
         return f"{_number(value) * 100:.0f}"
     if fmt == "usd":
         return f"{_number(value):.6f}"
+    if fmt == "ms_to_seconds":
+        return f"{_number(value) / 1000:.1f}"
     if fmt == "prefix16":
         return str(value)[:16]
     raise ValueError(f"Unknown format {fmt}")
@@ -289,6 +291,88 @@ def interval_notes(path: str) -> str:
         sentences.append("Intervals that include zero: " + ", ".join(includes) + ".")
     sentences.extend(rounded)
     return " ".join(sentences)
+
+
+def _strictly_positive(path: str) -> bool:
+    checks = _checks(path)
+    names = {str(check["metric"]) for check in checks}
+    if names != set(RANKING_METRICS):
+        raise ValueError(f"{path} does not contain the five ranking metrics")
+    return all(_number(check["ci_low"]) > 0 for check in checks)
+
+
+def render_at_a_glance() -> str:
+    hybrid = "benchmarks/scifact/hybrid-selected.json"
+    document = "benchmarks/scifact/bm25-document.json"
+    sci_hybrid = "benchmarks/scifact/document-vs-hybrid-selected.json"
+    nf_hybrid = "benchmarks/nfcorpus/document-vs-hybrid-selected.json"
+    sci_chunk = "benchmarks/scifact/document-vs-bm25-selected.json"
+    nf_chunk = "benchmarks/nfcorpus/document-vs-bm25-selected.json"
+    rerank_cmp = "benchmarks/scifact/hybrid-vs-rerank.json"
+    rerank = "benchmarks/scifact/rerank-selected.json"
+    nli = "benchmarks/scifact/verdict-dev.json"
+    majority = "benchmarks/scifact/verdict-baseline-dev.json"
+    paired = "benchmarks/scifact/verdict-baseline-vs-nli.json"
+    recipe = "configs/paired-uncertainty.yaml"
+    if lookup(load_report(recipe), "statistics.confidence") != lookup(
+        load_report(paired), "confidence"
+    ):
+        raise ValueError(f"{recipe} confidence does not match {paired}")
+    if not _strictly_positive(nf_hybrid):
+        raise ValueError(f"{nf_hybrid} is not above zero on every ranking metric")
+    if _strictly_positive(nf_chunk):
+        raise ValueError(f"{nf_chunk} is above zero on every ranking metric")
+    accuracy_low = _number(lookup(load_report(paired), "checks[metric=accuracy].ci_low"))
+    accuracy_high = _number(lookup(load_report(paired), "checks[metric=accuracy].ci_high"))
+    if not accuracy_low < 0 < accuracy_high:
+        raise ValueError("accuracy interval does not include zero")
+    sci = "[SciFact test split](#held-out-scifact-test)"
+    nf = "[NFCorpus](#nfcorpus-confirmation)"
+    dev = "[SciFact dev](#held-out-scifact-dev)"
+    level = cite(paired, "confidence", "percent")
+    return "\n".join(
+        [
+            (
+                "- Frozen hybrid (BM25 + MiniLM, chosen on train, test scored once) versus "
+                f"document-level BM25 on the {sci}: nDCG@10 "
+                f"{cite(hybrid, 'ndcg_at_k.10', 'metric')} vs "
+                f"{cite(document, 'ndcg_at_k.10', 'metric')}, delta "
+                f"{cite(sci_hybrid, 'checks[metric=ndcg@10].mean_delta', 'signed')}, "
+                f"{level}% CI ["
+                f"{cite(sci_hybrid, 'checks[metric=ndcg@10].ci_low', 'signed')}, "
+                f"{cite(sci_hybrid, 'checks[metric=ndcg@10].ci_high', 'signed')}]."
+            ),
+            (
+                "- The same frozen settings on "
+                f"{nf}: hybrid nDCG@10 delta "
+                f"{cite(nf_hybrid, 'checks[metric=ndcg@10].mean_delta', 'signed')} "
+                "over document-level BM25, with the CI above zero on all five metrics."
+            ),
+            (
+                "- Chunked BM25 tuning is a small gain (nDCG@10 "
+                f"{cite(sci_chunk, 'checks[metric=ndcg@10].mean_delta', 'signed')} on the "
+                f"{sci}) that {nf} does not confirm."
+            ),
+            (
+                "- Cross-encoder rerank, not fine-tuned, is a negative result on the "
+                f"{sci}: nDCG@10 "
+                f"{cite(rerank_cmp, 'checks[metric=ndcg@10].mean_delta', 'signed')}, "
+                f"{cite(paired, 'confidence', 'percent')}% CI ["
+                f"{cite(rerank_cmp, 'checks[metric=ndcg@10].ci_low', 'signed')}, "
+                f"{cite(rerank_cmp, 'checks[metric=ndcg@10].ci_high', 'signed')}], "
+                f"rerank p95 {cite(rerank, 'timings.rerank_p95_ms', 'ms_to_seconds')} s."
+            ),
+            (
+                f"- {dev} claim verdicts: frozen NLI macro-F1 "
+                f"{cite(nli, 'macro_f1', 'metric')} vs "
+                f"{cite(majority, 'macro_f1', 'metric')} for the majority baseline. "
+                "Evidence-sentence F1 is "
+                f"{cite(nli, 'sentence_f1', 'metric')} vs "
+                f"{cite(majority, 'sentence_f1', 'metric')}. "
+                "The accuracy interval includes zero."
+            ),
+        ]
+    )
 
 
 def render_support_fixture() -> str:
@@ -756,6 +840,7 @@ def _comparison(path: str) -> str:
 
 
 RENDERERS: dict[str, Callable[[], str]] = {
+    "at-a-glance": render_at_a_glance,
     "support-fixture": render_support_fixture,
     "lexical-train": render_lexical_train,
     "hybrid-weights": render_hybrid_weights,

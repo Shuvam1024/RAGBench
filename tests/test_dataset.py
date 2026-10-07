@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from ragbench.datasets.beir import (
+from ragstat.datasets.beir import (
     DATASETS,
     _download,
     artifact_names,
@@ -17,7 +17,7 @@ from ragbench.datasets.beir import (
     require_sha256,
     resolve_split,
 )
-from ragbench.ingestion.loader import load_documents
+from ragstat.ingestion.loader import load_documents
 
 
 def _source(root: Path, *, grade: str = "1") -> None:
@@ -94,7 +94,7 @@ def test_materialize_writes_nonbinary_grades(tmp_path: Path) -> None:
 
 def test_checksum_and_zip_slip(tmp_path: Path) -> None:
     payload = tmp_path / "payload.bin"
-    payload.write_bytes(b"ragbench")
+    payload.write_bytes(b"ragstat")
     digest = file_sha256(payload)
     require_sha256(payload, digest)
     with pytest.raises(ValueError, match="Checksum mismatch"):
@@ -179,7 +179,7 @@ def test_unknown_dataset(tmp_path: Path) -> None:
         prepare_dataset("missing", tmp_path)
     from typer.testing import CliRunner
 
-    from ragbench.cli import app
+    from ragstat.cli import app
 
     result = CliRunner().invoke(app, ["dataset", "missing", "--cache", str(tmp_path)])
     assert result.exit_code == 1

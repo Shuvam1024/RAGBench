@@ -17,8 +17,8 @@ from typing import Literal, Protocol
 
 import numpy as np
 
-from ragbench.config import ConfigModel, Nonblank, PositiveInt
-from ragbench.retrieval.rerank import count_overlong
+from ragstat.config import ConfigModel, Nonblank, PositiveInt
+from ragstat.retrieval.rerank import count_overlong
 
 
 class NliModelConfig(ConfigModel):

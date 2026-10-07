@@ -1,4 +1,4 @@
-# BM25 baseline: run with ragbench evaluate --config configs/baseline.yaml.
+# BM25 baseline: run with ragstat evaluate --config configs/baseline.yaml.
 # Paths resolve relative to this YAML file, regardless of the shell directory.
 schema_version: 1
 

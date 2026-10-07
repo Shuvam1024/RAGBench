@@ -9,17 +9,17 @@ import math
 from pathlib import Path
 from time import perf_counter
 
-from ragbench.datasets.beir import _read_qrels, _read_queries
-from ragbench.datasets.scifact_claims import (
+from ragstat.datasets.beir import _read_qrels, _read_queries
+from ragstat.datasets.scifact_claims import (
     compare_abstracts_to_beir_bodies,
     load_beir_corpus_fields,
     prepare_scifact_release,
     require_scifact_beir_mapping,
 )
-from ragbench.evaluation.nli import CrossEncoderNli
-from ragbench.evaluation.runner import pytorch_threads
-from ragbench.evaluation.timing import percentile
-from ragbench.evaluation.verdict import (
+from ragstat.evaluation.nli import CrossEncoderNli
+from ragstat.evaluation.runner import pytorch_threads
+from ragstat.evaluation.timing import percentile
+from ragstat.evaluation.verdict import (
     VerdictPolicy,
     build_sentence_jobs,
     compare_verdicts,
@@ -31,7 +31,7 @@ from ragbench.evaluation.verdict import (
     retrieve_top_documents,
     score_sentence_jobs,
 )
-from ragbench.ingestion.loader import load_documents
+from ragstat.ingestion.loader import load_documents
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "configs" / "scifact-verdict-dev.yaml"

@@ -1,8 +1,8 @@
 """Cross-check retrieval metrics against a committed pytrec_eval fixture.
 
-Each query stores pytrec_eval's per-query scores and RAGBench's scores.
+Each query stores pytrec_eval's per-query scores and ragstat's scores.
 Binary queries must match pytrec_eval. The graded query stores both values
-because pytrec_eval's ``ndcg_cut`` uses the grade as the gain and RAGBench
+because pytrec_eval's ``ndcg_cut`` uses the grade as the gain and ragstat
 uses ``2**grade - 1``.
 """
 
@@ -12,7 +12,7 @@ from pathlib import Path
 import pytest
 import pytrec_eval
 
-from ragbench.evaluation.retrieval import (
+from ragstat.evaluation.retrieval import (
     average_precision,
     ndcg_at_k,
     precision_at_k,
@@ -57,11 +57,11 @@ def test_committed_fixture_matches_pytrec_eval_per_query() -> None:
             assert evaluated[query_id][measure] == pytest.approx(expected[measure])
 
 
-def test_committed_fixture_matches_ragbench_per_query() -> None:
+def test_committed_fixture_matches_ragstat_per_query() -> None:
     for query in _queries():
         ranking = query["ranking"]
         grades = query["grades"]
-        expected = query["ragbench"]
+        expected = query["ragstat"]
         assert isinstance(ranking, list)
         assert isinstance(grades, dict)
         assert isinstance(expected, dict)

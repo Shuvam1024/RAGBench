@@ -1,6 +1,6 @@
 import pytest
 
-from ragbench.evaluation.statistics import bootstrap_mean_ci, signflip_p_value
+from ragstat.evaluation.statistics import bootstrap_mean_ci, signflip_p_value
 
 
 def test_bootstrap_is_seeded_and_constant_intervals_collapse() -> None:

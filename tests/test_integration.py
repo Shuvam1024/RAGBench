@@ -49,7 +49,7 @@ def test_real_model_semantic_search(mode: str, tmp_path: Path) -> None:
         [
             sys.executable,
             "-m",
-            "ragbench",
+            "ragstat",
             "evaluate",
             "--config",
             str(config_path),
@@ -107,7 +107,7 @@ def test_real_cross_encoder_reports_candidate_recall_and_pipeline(tmp_path: Path
         [
             sys.executable,
             "-m",
-            "ragbench",
+            "ragstat",
             "evaluate",
             "--config",
             str(config_path),
@@ -134,7 +134,7 @@ def test_real_cross_encoder_reports_candidate_recall_and_pipeline(tmp_path: Path
 def test_real_nli_maps_entailment_and_contradiction() -> None:
     if importlib.util.find_spec("sentence_transformers") is None:
         pytest.skip("Install the dense extra for sentence_transformers")
-    from ragbench.evaluation.nli import CrossEncoderNli, NliModelConfig, classify_nli
+    from ragstat.evaluation.nli import CrossEncoderNli, NliModelConfig, classify_nli
 
     config = NliModelConfig()
     scorer = CrossEncoderNli(config)

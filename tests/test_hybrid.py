@@ -2,11 +2,11 @@ from collections.abc import Callable, Sequence
 
 import pytest
 
-from ragbench.config import BM25Config
-from ragbench.ingestion.chunker import Chunk
-from ragbench.retrieval.base import Retriever, SearchResult
-from ragbench.retrieval.bm25 import BM25Retriever
-from ragbench.retrieval.hybrid import HybridRetriever, min_max_normalize
+from ragstat.config import BM25Config
+from ragstat.ingestion.chunker import Chunk
+from ragstat.retrieval.base import Retriever, SearchResult
+from ragstat.retrieval.bm25 import BM25Retriever
+from ragstat.retrieval.hybrid import HybridRetriever, min_max_normalize
 
 
 class ScoredRetriever(Retriever):

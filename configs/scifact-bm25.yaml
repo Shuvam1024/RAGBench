@@ -4,7 +4,7 @@
 # This is a RAG-style chunked index. It is not Pyserini BEIR BM25 and is not
 # the train-selected system. CI compares this file with benchmarks/scifact/bm25.json.
 # Prepare the corpus first:
-#   ragbench dataset scifact --cache .cache/beir
+#   ragstat dataset scifact --cache .cache/beir
 schema_version: 1
 dataset:
   documents_path: ../.cache/beir/scifact

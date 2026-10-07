@@ -554,7 +554,7 @@ wheels = [
 ]
 
 [[package]]
-name = "ragbench"
+name = "ragstat"
 version = "1.1.0"
 source = { editable = "." }
 dependencies = [

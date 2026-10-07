@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from ragbench.evaluation.models import Benchmark
-from ragbench.evaluation.runner import load_benchmark
+from ragstat.evaluation.models import Benchmark
+from ragstat.evaluation.runner import load_benchmark
 
 
 def question() -> dict[str, object]:

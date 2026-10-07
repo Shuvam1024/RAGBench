@@ -1,4 +1,4 @@
-"""Checksum-verified BEIR downloads converted into RAGBench inputs.
+"""Checksum-verified BEIR downloads converted into ragstat inputs.
 
 The prepared directory contains ``documents.jsonl`` and ``benchmark.json``.
 Document text is the BEIR title and body joined by one newline when both
@@ -20,10 +20,10 @@ from typing import Self
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
-from ragbench.evaluation.models import Benchmark
-from ragbench.evaluation.timing import percentile
-from ragbench.ingestion.chunker import count_words
-from ragbench.ingestion.loader import load_documents
+from ragstat.evaluation.models import Benchmark
+from ragstat.evaluation.timing import percentile
+from ragstat.ingestion.chunker import count_words
+from ragstat.ingestion.loader import load_documents
 
 SCIFACT_SHA256 = "536e14446a0ba56ed1398ab1055f39fe852686ecad24a6306c80c490fa8e0165"
 SCIFACT_URL = "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/scifact.zip"
@@ -134,7 +134,7 @@ def _download(urls: tuple[str, ...], destination: Path, sha256: str) -> None:
     temporary = destination.with_suffix(destination.suffix + ".partial")
     for url in urls:
         try:
-            request = urllib.request.Request(url, headers={"User-Agent": "ragbench"})
+            request = urllib.request.Request(url, headers={"User-Agent": "ragstat"})
             with (
                 urllib.request.urlopen(request, timeout=120) as response,
                 temporary.open("wb") as handle,

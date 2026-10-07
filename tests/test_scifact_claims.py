@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from ragbench.datasets.beir import _read_qrels, file_sha256
-from ragbench.datasets.scifact_claims import (
+from ragstat.datasets.beir import _read_qrels, file_sha256
+from ragstat.datasets.scifact_claims import (
     AbstractDocument,
     align_split,
     collapsed_whitespace,
@@ -261,7 +261,7 @@ def test_beir_corpus_reader_rejects_a_duplicate(tmp_path: Path) -> None:
     reason="Official SciFact claims and the BEIR SciFact zip are not in the local cache",
 )
 def test_official_release_matches_beir_query_ids() -> None:
-    from ragbench.datasets.beir import _read_queries
+    from ragstat.datasets.beir import _read_queries
 
     release = prepare_scifact_release(ROOT / ".cache/scifact")
     raw = ROOT / ".cache/beir/scifact/raw/scifact"

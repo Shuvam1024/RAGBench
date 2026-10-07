@@ -6,12 +6,12 @@ from pathlib import Path
 import httpx
 import pytest
 
-from ragbench.config import JudgeConfig, OpenAIConfig, Pricing, load_config
-from ragbench.evaluation.answers import score_answer
-from ragbench.evaluation.judge import LLMJudge
-from ragbench.evaluation.runner import evaluate
-from ragbench.generation.models import Usage
-from ragbench.generation.providers import (
+from ragstat.config import JudgeConfig, OpenAIConfig, Pricing, load_config
+from ragstat.evaluation.answers import score_answer
+from ragstat.evaluation.judge import LLMJudge
+from ragstat.evaluation.runner import evaluate
+from ragstat.generation.models import Usage
+from ragstat.generation.providers import (
     ContextSource,
     ExtractiveGenerator,
     OpenAIGenerator,
@@ -161,8 +161,8 @@ def test_runner_local_answers() -> None:
 
 
 def test_runner_judge_totals_and_comparison_identity() -> None:
-    from ragbench.evaluation.comparison import Thresholds, compare
-    from ragbench.evaluation.models import EvaluationResult
+    from ragstat.evaluation.comparison import Thresholds, compare
+    from ragstat.evaluation.models import EvaluationResult
 
     config = load_config(Path(__file__).resolve().parents[1] / "configs/answers.yaml")
     prices = Pricing(input_per_million=2.0, cached_input_per_million=1.0, output_per_million=8.0)
@@ -197,7 +197,7 @@ def test_runner_judge_totals_and_comparison_identity() -> None:
 
 
 def test_timeout_and_generation_config_validation() -> None:
-    from ragbench.config import GenerationConfig, RunConfig
+    from ragstat.config import GenerationConfig, RunConfig
 
     def timeout(request: httpx.Request) -> httpx.Response:
         raise httpx.ReadTimeout("private provider details", request=request)
@@ -217,7 +217,7 @@ def test_timeout_and_generation_config_validation() -> None:
 
 
 def test_percentile_interpolation() -> None:
-    from ragbench.evaluation.timing import percentile
+    from ragstat.evaluation.timing import percentile
 
     assert percentile([10.0, 0.0], 0.95) == 9.5
     assert percentile([3.0], 0.5) == 3.0

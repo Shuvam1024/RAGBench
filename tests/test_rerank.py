@@ -9,13 +9,13 @@ import numpy as np
 import pytest
 from typer.testing import CliRunner
 
-from ragbench.cli import app
-from ragbench.config import RerankConfig, load_config
-from ragbench.evaluation.runner import evaluate, evaluate_candidate_depths
-from ragbench.evaluation.train_selection import choose_candidate_k
-from ragbench.ingestion.chunker import Chunk
-from ragbench.retrieval.base import Retriever, SearchResult
-from ragbench.retrieval.rerank import (
+from ragstat.cli import app
+from ragstat.config import RerankConfig, load_config
+from ragstat.evaluation.runner import evaluate, evaluate_candidate_depths
+from ragstat.evaluation.train_selection import choose_candidate_k
+from ragstat.ingestion.chunker import Chunk
+from ragstat.retrieval.base import Retriever, SearchResult
+from ragstat.retrieval.rerank import (
     CrossEncoderReranker,
     count_overlong,
     rank_candidates,
@@ -222,7 +222,7 @@ def test_cli_labels_the_reranked_metrics(tmp_path: Path, monkeypatch: pytest.Mon
         retriever=_OrderedRetriever(),
         reranker=_RecordingScorer({"alpha alpha": 0.0, "other document": 4.0}),
     )
-    monkeypatch.setattr("ragbench.cli.run_evaluation", lambda settings: prepared)
+    monkeypatch.setattr("ragstat.cli.run_evaluation", lambda settings: prepared)
     result = CliRunner().invoke(
         app, ["evaluate", "--config", str(config), "--output", str(tmp_path / "out.json")]
     )

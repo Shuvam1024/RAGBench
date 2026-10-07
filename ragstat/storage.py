@@ -4,7 +4,7 @@ import sqlite3
 from contextlib import closing
 from pathlib import Path
 
-from ragbench.evaluation.models import EvaluationResult
+from ragstat.evaluation.models import EvaluationResult
 
 SCHEMA = """CREATE TABLE IF NOT EXISTS runs (
     run_id TEXT PRIMARY KEY, created_at TEXT NOT NULL, retriever TEXT NOT NULL,

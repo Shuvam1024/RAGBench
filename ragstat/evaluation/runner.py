@@ -11,30 +11,30 @@ from pathlib import Path
 from statistics import fmean
 from time import perf_counter
 
-from ragbench.config import BM25Config, DenseConfig, HybridConfig, RetrieverConfig, RunConfig
-from ragbench.evaluation.answers import score_answer
-from ragbench.evaluation.judge import LLMJudge
-from ragbench.evaluation.models import (
+from ragstat.config import BM25Config, DenseConfig, HybridConfig, RetrieverConfig, RunConfig
+from ragstat.evaluation.answers import score_answer
+from ragstat.evaluation.judge import LLMJudge
+from ragstat.evaluation.models import (
     Benchmark,
     DocumentHit,
     EvaluationResult,
     QuestionResult,
     Timings,
 )
-from ragbench.evaluation.retrieval import (
+from ragstat.evaluation.retrieval import (
     average_precision,
     ndcg_at_k,
     precision_at_k,
     recall_at_k,
     reciprocal_rank,
 )
-from ragbench.evaluation.timing import percentile
-from ragbench.generation.providers import ContextSource, Generator, build_generator
-from ragbench.ingestion.chunker import Chunk, chunk_documents
-from ragbench.ingestion.loader import Document, load_documents
-from ragbench.retrieval.base import Retriever
-from ragbench.retrieval.bm25 import BM25Retriever
-from ragbench.retrieval.rerank import PairScorer, rank_candidates, select_candidates
+from ragstat.evaluation.timing import percentile
+from ragstat.generation.providers import ContextSource, Generator, build_generator
+from ragstat.ingestion.chunker import Chunk, chunk_documents
+from ragstat.ingestion.loader import Document, load_documents
+from ragstat.retrieval.base import Retriever
+from ragstat.retrieval.bm25 import BM25Retriever
+from ragstat.retrieval.rerank import PairScorer, rank_candidates, select_candidates
 
 
 def fingerprint(value: object) -> str:
@@ -60,13 +60,13 @@ def build_retriever(config: RetrieverConfig) -> Retriever:
     if isinstance(config, BM25Config):
         return BM25Retriever(config)
     try:
-        from ragbench.retrieval.dense import DenseRetriever
+        from ragstat.retrieval.dense import DenseRetriever
     except ImportError as exc:
         raise ValueError('Dense retrieval requires: python -m pip install -e ".[dense]"') from exc
     if isinstance(config, DenseConfig):
         return DenseRetriever(config)
     if isinstance(config, HybridConfig):
-        from ragbench.retrieval.hybrid import HybridRetriever
+        from ragstat.retrieval.hybrid import HybridRetriever
 
         return HybridRetriever(
             BM25Retriever(config.bm25),
@@ -80,7 +80,7 @@ def build_retriever(config: RetrieverConfig) -> Retriever:
 
 def dependency_versions(dense: bool) -> dict[str, str]:
     names = [
-        "ragbench",
+        "ragstat",
         "pydantic",
         "PyYAML",
         "rank-bm25",
@@ -345,7 +345,7 @@ def evaluate_candidate_depths(
     retriever = retriever or build_retriever(config.retrieval)
     retriever.index(chunks)
     if reranker is None:
-        from ragbench.retrieval.rerank import CrossEncoderReranker
+        from ragstat.retrieval.rerank import CrossEncoderReranker
 
         reranker = CrossEncoderReranker(rerank_config)
     index_ms = (perf_counter() - started) * 1000

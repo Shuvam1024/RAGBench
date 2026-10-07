@@ -9,14 +9,14 @@ decisions on a 27-question sample.
 from collections.abc import Sequence
 from statistics import fmean
 
-from ragbench.evaluation.comparison import (
+from ragstat.evaluation.comparison import (
     Comparison,
     StatisticsConfig,
     Thresholds,
     compare,
     decide_quality,
 )
-from ragbench.evaluation.models import EvaluationResult
+from ragstat.evaluation.models import EvaluationResult
 
 NEGATIVE_CONTROL_DROP = 0.07
 _MASS_TOLERANCE = 1e-9
@@ -177,7 +177,7 @@ def negative_control_summary(
             f"{NEGATIVE_CONTROL_DROP:.2f} on MRR, Recall@1, and Recall@3. "
             "`configs/thresholds.yaml` allows a 0.02 point drop. "
             "`gate_on_ci: false` keeps that file on the `point_drop` policy. "
-            "`ragbench compare` is expected to exit 2. This job stays green only "
+            "`ragstat compare` is expected to exit 2. This job stays green only "
             "when that rejection happens.",
             "",
             metric_table(control),

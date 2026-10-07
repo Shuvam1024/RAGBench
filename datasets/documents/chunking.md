@@ -1,7 +1,7 @@
 # Splitting documents into chunks
 
 Chunking divides a document into smaller pieces that a retriever can rank.
-RAGBench will start with fixed windows of whitespace-delimited words.
+ragstat will start with fixed windows of whitespace-delimited words.
 
 Chunk size is the maximum number of words in one chunk. Overlap is the number
 of words shared by neighboring windows. For a chunk size of five and an

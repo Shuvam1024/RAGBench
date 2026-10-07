@@ -5,11 +5,11 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from ragbench.cli import app
-from ragbench.config import load_config
-from ragbench.evaluation.runner import evaluate
-from ragbench.ingestion.chunker import Chunk
-from ragbench.retrieval.base import Retriever, SearchResult
+from ragstat.cli import app
+from ragstat.config import load_config
+from ragstat.evaluation.runner import evaluate
+from ragstat.ingestion.chunker import Chunk
+from ragstat.retrieval.base import Retriever, SearchResult
 
 
 @pytest.fixture

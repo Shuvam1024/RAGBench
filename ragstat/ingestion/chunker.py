@@ -7,8 +7,8 @@ from collections.abc import Sequence
 
 from pydantic import BaseModel, ConfigDict
 
-from ragbench.config import ChunkingConfig
-from ragbench.ingestion.loader import Document
+from ragstat.config import ChunkingConfig
+from ragstat.ingestion.loader import Document
 
 
 class Chunk(BaseModel):

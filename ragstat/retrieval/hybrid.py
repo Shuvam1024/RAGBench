@@ -3,8 +3,8 @@
 import math
 from collections.abc import Sequence
 
-from ragbench.ingestion.chunker import Chunk
-from ragbench.retrieval.base import Retriever, SearchResult
+from ragstat.ingestion.chunker import Chunk
+from ragstat.retrieval.base import Retriever, SearchResult
 
 
 def min_max_normalize(scores: Sequence[float]) -> list[float]:

@@ -13,7 +13,7 @@ import random
 from collections.abc import Sequence
 from statistics import fmean
 
-from ragbench.evaluation.timing import percentile
+from ragstat.evaluation.timing import percentile
 
 
 def bootstrap_mean_ci(

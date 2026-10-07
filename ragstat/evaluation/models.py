@@ -9,7 +9,7 @@ from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from ragbench.config import (
+from ragstat.config import (
     Nonblank,
     NonnegativeFloat,
     PositiveInt,
@@ -17,7 +17,7 @@ from ragbench.config import (
     SchemaVersion,
     UnitFloat,
 )
-from ragbench.generation.models import GeneratedAnswer, JudgeResult
+from ragstat.generation.models import GeneratedAnswer, JudgeResult
 
 PositiveGrade = PositiveInt
 

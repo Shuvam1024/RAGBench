@@ -1,11 +1,11 @@
-# Testing RAGBench
+# Testing ragstat
 
 The suite separates offline correctness checks from two explicit real-model
 integration tests. Provider tests use mocked HTTP responses and make no paid calls.
 
 ```bash
 python -m pip install -e ".[dev,api,llm,dense]"
-uv run pytest -q --cov=ragbench --cov-fail-under=85
+uv run pytest -q --cov=ragstat --cov-fail-under=85
 uv run pytest -q --run-integration
 ```
 
