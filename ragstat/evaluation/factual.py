@@ -8,6 +8,7 @@ gold rationale. They are not token overlap.
 """
 
 from collections.abc import Sequence
+from statistics import fmean
 
 VERDICTS = ("SUPPORT", "CONTRADICT", "NEI")
 Sentence = tuple[str, int]
@@ -32,6 +33,27 @@ def sentence_scores(gold: set[Sentence], predicted: set[Sentence]) -> tuple[floa
     recall = overlap / len(gold)
     f1 = 2 * precision * recall / (precision + recall) if precision + recall else 0.0
     return precision, recall, f1
+
+
+def evidence_only_sentence_f1(
+    gold: Sequence[set[Sentence]], predicted: Sequence[set[Sentence]]
+) -> float | None:
+    """Mean per-claim sentence F1 over claims whose gold evidence is nonempty.
+
+    A claim with both sets empty scores 1 in :func:`sentence_scores`. That score
+    stays in the per-claim mean. It is left out here. ``None`` means no claim
+    had gold evidence.
+    """
+    if len(gold) != len(predicted) or not gold:
+        raise ValueError("Evidence-only sentence F1 requires one prediction set per gold set")
+    scores = [
+        sentence_scores(actual, guess)[2]
+        for actual, guess in zip(gold, predicted, strict=True)
+        if actual
+    ]
+    if not scores:
+        return None
+    return fmean(scores)
 
 
 def _counts(gold: Sequence[str], predicted: Sequence[str], label: str) -> tuple[int, int, int]:

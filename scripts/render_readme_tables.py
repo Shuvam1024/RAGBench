@@ -12,7 +12,6 @@ difference of two fields). ``<!-- tables:begin name -->`` and
 
 import json
 import re
-import xml.etree.ElementTree as ET
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -21,6 +20,8 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 README = ROOT / "README.md"
+RESULTS = ROOT / "docs" / "results.md"
+DOCUMENTS = (README, RESULTS)
 REGION_PATTERN = re.compile(
     r"<!-- tables:begin (?P<name>[a-z0-9-]+) -->\n(?P<body>.*?)\n<!-- tables:end (?P=name) -->",
     re.DOTALL,
@@ -86,13 +87,6 @@ def load_report(path: str) -> dict[str, object]:
         if not isinstance(loaded, dict):
             raise ValueError(f"{path} must be a YAML mapping")
         parsed = loaded
-    elif path.endswith(".xml"):
-        suite = ET.parse(file).getroot().find("testsuite")
-        if suite is None:
-            raise ValueError(f"{path} has no testsuite element")
-        parsed: dict[str, object] = {
-            key: int(suite.attrib[key]) for key in ("tests", "failures", "errors", "skipped")
-        }
     else:
         loaded = json.loads(file.read_text(encoding="utf-8"))
         if not isinstance(loaded, dict):
@@ -182,7 +176,12 @@ def format_value(fmt: str, value: object) -> str:
     if fmt == "metric":
         return f"{_number(value):.3f}"
     if fmt == "signed":
-        return f"{_number(value):+.3f}"
+        number = _number(value)
+        if round(number, 3) == 0:
+            return "+0.000"
+        return f"{number:+.3f}"
+    if fmt == "metric4":
+        return f"{_number(value):.4f}"
     if fmt == "ms":
         return f"{round(_number(value)):,}"
     if fmt == "seconds":
@@ -310,6 +309,11 @@ def render_at_a_glance() -> str:
     nf_chunk = "benchmarks/nfcorpus/document-vs-bm25-selected.json"
     rerank_cmp = "benchmarks/scifact/hybrid-vs-rerank.json"
     rerank = "benchmarks/scifact/rerank-selected.json"
+    sci_stats = "benchmarks/scifact/corpus_stats.json"
+    nf_stats = "benchmarks/nfcorpus/corpus_stats.json"
+    train = "benchmarks/scifact/bm25-train-selection.json"
+    selected_cfg = "configs/scifact-bm25-selected.yaml"
+    document_cfg = "configs/scifact-bm25-document.yaml"
     nli = "benchmarks/scifact/verdict-dev.json"
     majority = "benchmarks/scifact/verdict-baseline-dev.json"
     paired = "benchmarks/scifact/verdict-baseline-vs-nli.json"
@@ -326,9 +330,9 @@ def render_at_a_glance() -> str:
     accuracy_high = _number(lookup(load_report(paired), "checks[metric=accuracy].ci_high"))
     if not accuracy_low < 0 < accuracy_high:
         raise ValueError("accuracy interval does not include zero")
-    sci = "[SciFact test split](#held-out-scifact-test)"
-    nf = "[NFCorpus](#nfcorpus-confirmation)"
-    dev = "[SciFact dev](#held-out-scifact-dev)"
+    sci = "[SciFact test split](docs/results.md#held-out-scifact-test)"
+    nf = "[NFCorpus](docs/results.md#nfcorpus-confirmation)"
+    dev = "[SciFact dev](docs/results.md#held-out-scifact-dev)"
     level = cite(paired, "confidence", "percent")
     return "\n".join(
         [
@@ -349,9 +353,22 @@ def render_at_a_glance() -> str:
                 "over document-level BM25, with the CI above zero on all five metrics."
             ),
             (
-                "- Chunked BM25 tuning is a small gain (nDCG@10 "
-                f"{cite(sci_chunk, 'checks[metric=ndcg@10].mean_delta', 'signed')} on the "
-                f"{sci}) that {nf} does not confirm."
+                "- The selected chunked index is nearly one chunk per document: only "
+                f"{cite(sci_stats, 'word_length.longer_than[words=480].documents', 'count')} of "
+                f"{cite(sci_stats, 'document_count', 'count')} SciFact documents ("
+                f"{cite(nf_stats, 'word_length.longer_than[words=480].documents', 'count')} of "
+                f"{cite(nf_stats, 'document_count', 'count')} on NFCorpus) exceed the "
+                f"{cite(train, 'winner.chunk_size', 'count')}-word window. Its nDCG@10 "
+                f"{cite(sci_chunk, 'checks[metric=ndcg@10].mean_delta', 'signed')} over "
+                f"document-level BM25 on the {sci} comes mostly from the BM25 parameters ("
+                f"{cite(selected_cfg, 'retrieval.k1', 'weight')}/"
+                f"{cite(selected_cfg, 'retrieval.b', 'weight')} vs "
+                f"{cite(document_cfg, 'retrieval.k1', 'weight')}/"
+                f"{cite(document_cfg, 'retrieval.b', 'weight')}), not from splitting documents. "
+                "On train the two tie at "
+                f"{cite(train, 'winner.metrics.ndcg@10', 'metric4')} vs "
+                f"{cite(train, 'document_level_reference.metrics.ndcg@10', 'metric4')}. "
+                f"{nf} does not confirm the test gap."
             ),
             (
                 "- Cross-encoder rerank, not fine-tuned, is a negative result on the "
@@ -363,12 +380,18 @@ def render_at_a_glance() -> str:
                 f"rerank p95 {cite(rerank, 'timings.rerank_p95_ms', 'ms_to_seconds')} s."
             ),
             (
-                f"- {dev} claim verdicts: frozen NLI macro-F1 "
-                f"{cite(nli, 'macro_f1', 'metric')} vs "
-                f"{cite(majority, 'macro_f1', 'metric')} for the majority baseline. "
-                "Evidence-sentence F1 is "
+                f"- {dev} claim verdicts: frozen NLI micro sentence F1 "
+                f"{cite(nli, 'micro_sentence_f1', 'metric')} vs "
+                f"{cite(majority, 'micro_sentence_f1', 'metric')} for the majority baseline. "
+                "Evidence-only sentence F1, the mean over claims with gold evidence, is "
+                f"{cite(nli, 'evidence_only_sentence_f1', 'metric')} vs "
+                f"{cite(majority, 'evidence_only_sentence_f1', 'metric')}. "
+                "The per-claim mean is "
                 f"{cite(nli, 'sentence_f1', 'metric')} vs "
-                f"{cite(majority, 'sentence_f1', 'metric')}. "
+                f"{cite(majority, 'sentence_f1', 'metric')} because a claim with no gold "
+                "evidence and no predicted evidence scores as a perfect match. Macro-F1 is "
+                f"{cite(nli, 'macro_f1', 'metric')} vs "
+                f"{cite(majority, 'macro_f1', 'metric')}. "
                 "The accuracy interval includes zero."
             ),
         ]
@@ -707,6 +730,48 @@ def render_verdict_train() -> str:
     return f"{grid}\n\n{prose}"
 
 
+def render_headline() -> str:
+    rows = [
+        ("Document-level BM25", "benchmarks/scifact/bm25-document.json"),
+        ("Selected BM25", "benchmarks/scifact/bm25-selected.json"),
+        ("Hybrid", "benchmarks/scifact/hybrid-selected.json"),
+        ("Rerank", "benchmarks/scifact/rerank-selected.json"),
+    ]
+    return table(
+        ["Setup", "nDCG@10", "Recall@10"],
+        [
+            [label, cite(path, "ndcg_at_k.10", "metric"), cite(path, "recall_at_k.10", "metric")]
+            for label, path in rows
+        ],
+    )
+
+
+def render_chunk_window() -> str:
+    sci_stats = "benchmarks/scifact/corpus_stats.json"
+    nf_stats = "benchmarks/nfcorpus/corpus_stats.json"
+    train = "benchmarks/scifact/bm25-train-selection.json"
+    selected_cfg = "configs/scifact-bm25-selected.yaml"
+    document_cfg = "configs/scifact-bm25-document.yaml"
+    sci_chunk = "benchmarks/scifact/document-vs-bm25-selected.json"
+    return (
+        "Only "
+        f"{cite(sci_stats, 'word_length.longer_than[words=480].documents', 'count')} of "
+        f"{cite(sci_stats, 'document_count', 'count')} SciFact documents and "
+        f"{cite(nf_stats, 'word_length.longer_than[words=480].documents', 'count')} of "
+        f"{cite(nf_stats, 'document_count', 'count')} NFCorpus documents are longer than "
+        f"{cite(train, 'winner.chunk_size', 'count')} words, so the selected chunked index "
+        "is nearly one chunk per document. The test nDCG@10 gap of "
+        f"{cite(sci_chunk, 'checks[metric=ndcg@10].mean_delta', 'signed')} versus "
+        "document-level BM25 comes mostly from the BM25 parameters ("
+        f"{cite(selected_cfg, 'retrieval.k1', 'weight')}/"
+        f"{cite(selected_cfg, 'retrieval.b', 'weight')} vs "
+        f"{cite(document_cfg, 'retrieval.k1', 'weight')}/"
+        f"{cite(document_cfg, 'retrieval.b', 'weight')}). On train the two tie at "
+        f"{cite(train, 'winner.metrics.ndcg@10', 'metric4')} vs "
+        f"{cite(train, 'document_level_reference.metrics.ndcg@10', 'metric4')}."
+    )
+
+
 def render_verdict_dev() -> str:
     nli = "benchmarks/scifact/verdict-dev.json"
     baseline = "benchmarks/scifact/verdict-baseline-dev.json"
@@ -714,7 +779,18 @@ def render_verdict_dev() -> str:
         f"{cite(nli, 'claim_count', 'count')} labeled claims. Gold counts are SUPPORT "
         f"{cite(nli, 'gold_counts.SUPPORT', 'count')}, CONTRADICT "
         f"{cite(nli, 'gold_counts.CONTRADICT', 'count')}, and NEI "
-        f"{cite(nli, 'gold_counts.NEI', 'count')}."
+        f"{cite(nli, 'gold_counts.NEI', 'count')}. "
+        "Micro sentence F1 is "
+        f"{cite(nli, 'micro_sentence_f1', 'metric')} for the frozen NLI and "
+        f"{cite(baseline, 'micro_sentence_f1', 'metric')} for the majority baseline. "
+        "Evidence-only sentence F1, the mean over claims with nonempty gold evidence, is "
+        f"{cite(nli, 'evidence_only_sentence_f1', 'metric')} vs "
+        f"{cite(baseline, 'evidence_only_sentence_f1', 'metric')}. "
+        "The per-claim mean in the table below is "
+        f"{cite(nli, 'sentence_f1', 'metric')} vs "
+        f"{cite(baseline, 'sentence_f1', 'metric')}. "
+        "That mean scores a both-empty evidence set as a perfect match, which is why it "
+        "sits above the micro and evidence-only figures."
     )
     grid = table(
         ["", "Accuracy", "Macro-F1", "Sentence P", "Sentence R", "Sentence F1"],
@@ -802,9 +878,51 @@ def render_paired_settings() -> str:
         f"{cite(verdict, 'bootstrap_samples', 'count')} bootstrap resamples, "
         f"{cite(verdict, 'permutation_samples', 'count')} sign-flips, and a "
         f"{cite(verdict, 'confidence', 'percent')}% percentile interval. "
-        "Retrieval comparison files do not store that recipe. "
-        "It matches `configs/paired-uncertainty.yaml` and the verdict comparison."
+        "Committed retrieval comparison files do not store that recipe. "
+        "A newly written comparison does, when its thresholds set statistics. "
+        "The recipe matches `configs/paired-uncertainty.yaml` and the verdict comparison."
     )
+
+
+def render_verdict_oracle() -> str:
+    path = "benchmarks/scifact/verdict-dev-analysis.json"
+    grid = table(
+        ["Slice", "Count"],
+        [
+            ["SUPPORT predicted NEI", cite(path, "errors.support_to_nei", "count")],
+            [
+                "of those, gold document inside top " + cite(path, "doc_k", "count"),
+                cite(path, "errors.support_to_nei_evidence_at_rank_1", "count"),
+            ],
+            [
+                "of those, gold document missed",
+                cite(path, "errors.support_to_nei_evidence_missed", "count"),
+            ],
+            [
+                "Incorrect claims with a gold document in the top " + cite(path, "doc_k", "count"),
+                cite(path, "errors.incorrect_with_gold_hit", "count"),
+            ],
+            [
+                "Incorrect claims whose gold document was missed",
+                cite(path, "errors.incorrect_with_gold_miss", "count"),
+            ],
+            [
+                "Incorrect claims with no gold document",
+                cite(path, "errors.incorrect_without_gold_evidence", "count"),
+            ],
+        ],
+    )
+    prose = (
+        "The oracle gives the frozen sentence policy every gold evidence document and does "
+        "not change sentence_k or min_confidence. It was not selected on dev. Its macro-F1 is "
+        f"{cite(path, 'oracle_retrieval.macro_f1', 'metric')} and its micro sentence F1 is "
+        f"{cite(path, 'oracle_retrieval.micro_sentence_f1', 'metric')}. Evidence-only sentence "
+        f"F1 is {cite(path, 'oracle_retrieval.evidence_only_sentence_f1', 'metric')}. "
+        "The frozen retrieved NLI system, on the same claims, has macro-F1 "
+        f"{cite(path, 'frozen_nli.macro_f1', 'metric')} and micro sentence F1 "
+        f"{cite(path, 'frozen_nli.micro_sentence_f1', 'metric')}."
+    )
+    return grid + "\n\n" + prose
 
 
 def render_judge_sample() -> str:
@@ -819,29 +937,15 @@ def render_judge_sample() -> str:
     )
 
 
-def render_coverage() -> str:
-    junit = "benchmarks/pytest-junit.xml"
-    coverage = "benchmarks/test-coverage.json"
-    return (
-        f"[benchmarks/pytest-junit.xml](benchmarks/pytest-junit.xml) records "
-        f"{cite(junit, 'tests', 'count')} tests, "
-        f"{cite(junit, 'failures', 'count')} failures, and "
-        f"{cite(junit, 'skipped', 'count')} skipped. "
-        "[benchmarks/test-coverage.json](benchmarks/test-coverage.json) records "
-        f"{cite(coverage, 'totals.num_statements', 'count')} statements, "
-        f"{cite(coverage, 'totals.covered_lines', 'count')} covered, "
-        f"{cite(coverage, 'totals.missing_lines', 'count')} missing, and "
-        f"`percent_covered` {cite(coverage, 'totals.percent_covered', 'metric')}."
-    )
-
-
 def _comparison(path: str) -> str:
     return comparison_table(path) + "\n\n" + interval_notes(path)
 
 
 RENDERERS: dict[str, Callable[[], str]] = {
     "at-a-glance": render_at_a_glance,
+    "headline": render_headline,
     "support-fixture": render_support_fixture,
+    "chunk-window": render_chunk_window,
     "lexical-train": render_lexical_train,
     "hybrid-weights": render_hybrid_weights,
     "rerank-train": render_rerank_train,
@@ -872,14 +976,14 @@ RENDERERS: dict[str, Callable[[], str]] = {
     "verdict-train": render_verdict_train,
     "verdict-dev": render_verdict_dev,
     "verdict-paired": lambda: _comparison("benchmarks/scifact/verdict-baseline-vs-nli.json"),
+    "verdict-oracle": render_verdict_oracle,
     "paired-settings": render_paired_settings,
     "judge-sample": render_judge_sample,
-    "coverage": render_coverage,
 }
 
 
-def render_readme(text: str) -> str:
-    """Replace every marked region. Missing or unknown regions raise."""
+def render_documents(texts: dict[Path, str]) -> dict[Path, str]:
+    """Replace every marked region across the documents. Each region appears once."""
     CITATIONS.clear()
     found: list[str] = []
 
@@ -887,17 +991,24 @@ def render_readme(text: str) -> str:
         global CURRENT_REGION
         name = match.group("name")
         if name not in RENDERERS:
-            raise ValueError(f"Unknown README table region {name}")
+            raise ValueError(f"Unknown table region {name}")
+        if name in found:
+            raise ValueError(f"Table region {name} appears more than once")
         found.append(name)
         CURRENT_REGION = name
         body = RENDERERS[name]().strip("\n")
         return f"<!-- tables:begin {name} -->\n{body}\n<!-- tables:end {name} -->"
 
-    updated = REGION_PATTERN.sub(replace, text)
+    updated = {path: REGION_PATTERN.sub(replace, text) for path, text in texts.items()}
     missing = [name for name in RENDERERS if name not in found]
     if missing:
-        raise ValueError("README is missing table regions: " + ", ".join(missing))
+        raise ValueError("Missing table regions: " + ", ".join(missing))
     return updated
+
+
+def render_readme(text: str) -> str:
+    """Backward-compatible helper. Prefer :func:`render_documents`."""
+    return render_documents({README: text})[README]
 
 
 def strip_table_headers(region: str) -> str:
@@ -926,13 +1037,16 @@ def uncited_digits(region: str, shown: list[str]) -> str:
 
 
 def main() -> None:
-    original = README.read_text(encoding="utf-8")
-    updated = render_readme(original)
-    if updated != original:
-        README.write_text(updated, encoding="utf-8")
-        print(f"Updated {README}")
-    else:
-        print("README regions already match the reports")
+    originals = {path: path.read_text(encoding="utf-8") for path in DOCUMENTS}
+    updated = render_documents(originals)
+    changed = False
+    for path, text in updated.items():
+        if text != originals[path]:
+            path.write_text(text, encoding="utf-8")
+            print(f"Updated {path}")
+            changed = True
+    if not changed:
+        print("Document regions already match the reports")
 
 
 if __name__ == "__main__":

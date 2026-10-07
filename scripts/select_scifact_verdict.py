@@ -10,7 +10,7 @@ import json
 from pathlib import Path
 from time import perf_counter
 
-from ragstat.datasets.beir import _read_qrels, _read_queries
+from ragstat.datasets.beir import read_qrels, read_queries
 from ragstat.datasets.scifact_claims import (
     compare_abstracts_to_beir_bodies,
     load_beir_corpus_fields,
@@ -86,9 +86,9 @@ def main() -> None:
         release.train,
         release.dev,
         release.test,
-        _read_queries(raw / "queries.jsonl"),
-        _read_qrels(raw / "qrels" / "train.tsv"),
-        _read_qrels(raw / "qrels" / "test.tsv"),
+        read_queries(raw / "queries.jsonl"),
+        read_qrels(raw / "qrels" / "train.tsv"),
+        read_qrels(raw / "qrels" / "test.tsv"),
     )
     exact, normalized = compare_abstracts_to_beir_bodies(
         release.abstracts, load_beir_corpus_fields(raw / "corpus.jsonl")

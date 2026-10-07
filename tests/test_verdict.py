@@ -16,6 +16,8 @@ from ragstat.evaluation.verdict import (
     VerdictPolicy,
     apply_policy,
     assert_train_selection,
+    breakdown_errors,
+    build_oracle_jobs,
     build_sentence_jobs,
     choose_policy,
     compare_verdicts,
@@ -421,3 +423,64 @@ def test_predictions_for_policy_abstains_without_rows() -> None:
     assert predicted["1"].verdict == "NEI"
     with pytest.raises(ValueError, match="empty"):
         premise_text(" \n ")
+
+
+def test_error_breakdown_and_oracle_jobs_keep_the_frozen_policy() -> None:
+    claims = [
+        _claim("1", "alpha", "SUPPORT", (("a", 0),)),
+        _claim("2", "beta", "SUPPORT", (("b", 0),)),
+        _claim("3", "gamma", None),
+    ]
+    report = evaluate_predictions(
+        claims,
+        {
+            "1": ClaimPrediction(verdict="NEI"),
+            "2": ClaimPrediction(verdict="NEI"),
+            "3": ClaimPrediction(verdict="SUPPORT", sentences=(("z", 0),)),
+        },
+        split="dev",
+        system="nli",
+        model_name="recording",
+        model_revision="test-revision",
+        pair_order="premise_sentence_hypothesis_claim",
+        doc_k=1,
+        sentence_k=2,
+        min_confidence=0.7,
+    )
+    errors = breakdown_errors(
+        report.claims,
+        {"1": ("a", "z"), "2": ("z",), "3": ("z",)},
+        doc_k=1,
+    )
+    assert errors.support_to_nei == 2
+    assert errors.support_to_nei_evidence_at_rank_1 == 1
+    assert errors.support_to_nei_evidence_missed == 1
+    assert errors.incorrect_with_gold_hit == 1
+    assert errors.incorrect_with_gold_miss == 1
+    assert errors.incorrect_without_gold_evidence == 1
+    abstracts = {
+        "a": AbstractDocument(id="a", title="A", sentences=("Alpha.", "Later.")),
+        "b": AbstractDocument(id="b", title="B", sentences=("Beta.",)),
+    }
+    jobs = build_oracle_jobs(claims[:2], abstracts)
+    assert jobs
+    assert {job.retrieval_rank for job in jobs} == {0}
+    assert {job.document_id for job in jobs} == {"a", "b"}
+
+
+def test_saved_verdict_reports_accept_a_missing_evidence_only_field() -> None:
+    root = Path(__file__).resolve().parents[1]
+    train = VerdictEvaluation.model_validate_json(
+        (root / "benchmarks" / "scifact" / "verdict-train.json").read_text(encoding="utf-8")
+    )
+    assert train.evidence_only_sentence_f1 is None
+    dev = VerdictEvaluation.model_validate_json(
+        (root / "benchmarks" / "scifact" / "verdict-dev.json").read_text(encoding="utf-8")
+    )
+    assert dev.evidence_only_sentence_f1 is not None
+    legacy = dev.model_dump()
+    legacy.pop("evidence_only_sentence_f1")
+    assert VerdictEvaluation.model_validate(legacy).micro_sentence_f1 == dev.micro_sentence_f1
+    legacy["evidence_only_sentence_f1"] = 0.0
+    with pytest.raises(ValueError, match="evidence_only_sentence_f1"):
+        VerdictEvaluation.model_validate(legacy)

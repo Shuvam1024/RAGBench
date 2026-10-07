@@ -1,8 +1,12 @@
-"""Exact FAISS search over unit-length float32 embeddings."""
+"""Exact inner-product search over unit-length float32 embeddings.
 
-from collections.abc import Sequence
+The production index is FAISS ``IndexFlatIP``. Tests can pass ``index_factory``
+so the ranking path runs without that optional package.
+"""
 
-import faiss
+from collections.abc import Callable, Sequence
+from typing import Protocol, cast
+
 import numpy as np
 from numpy.typing import NDArray
 
@@ -10,6 +14,24 @@ from ragstat.config import DenseConfig
 from ragstat.ingestion.chunker import Chunk
 from ragstat.retrieval.base import Retriever, SearchResult
 from ragstat.retrieval.embeddings import EmbeddingProvider, SentenceTransformerEmbedder
+
+
+class VectorIndex(Protocol):
+    d: int
+
+    def search(
+        self, query: NDArray[np.float32], k: int
+    ) -> tuple[NDArray[np.float32], NDArray[np.int64]]:
+        """Return ``(scores, positions)`` with shape ``(1, k)``."""
+        ...
+
+
+def _faiss_index(vectors: NDArray[np.float32]) -> VectorIndex:
+    import faiss
+
+    index = faiss.IndexFlatIP(vectors.shape[1])
+    index.add(vectors)
+    return cast(VectorIndex, index)
 
 
 def normalize_vectors(vectors: NDArray[np.float32], rows: int) -> NDArray[np.float32]:
@@ -27,12 +49,16 @@ def normalize_vectors(vectors: NDArray[np.float32], rows: int) -> NDArray[np.flo
 
 class DenseRetriever(Retriever):
     def __init__(
-        self, config: DenseConfig | None = None, embedder: EmbeddingProvider | None = None
+        self,
+        config: DenseConfig | None = None,
+        embedder: EmbeddingProvider | None = None,
+        index_factory: Callable[[NDArray[np.float32]], VectorIndex] | None = None,
     ) -> None:
         super().__init__()
         self.config = config or DenseConfig()
         self._embedder = embedder
-        self._index: faiss.IndexFlatIP | None = None
+        self._index_factory = index_factory or _faiss_index
+        self._index: VectorIndex | None = None
 
     def index(self, chunks: Sequence[Chunk]) -> None:
         validated = self.validate_chunks(chunks)
@@ -41,9 +67,7 @@ class DenseRetriever(Retriever):
         vectors = normalize_vectors(
             self._embedder.encode([chunk.text for chunk in validated]), len(validated)
         )
-        index = faiss.IndexFlatIP(vectors.shape[1])
-        index.add(vectors)
-        self._chunks, self._index = validated, index
+        self._chunks, self._index = validated, self._index_factory(vectors)
 
     def retrieve(self, query: str, k: int) -> list[SearchResult]:
         self.validate_query(k)

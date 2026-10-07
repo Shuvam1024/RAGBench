@@ -1,6 +1,6 @@
 # Contributing
 
-Use Python 3.12 and install `.[dev,api,llm,dense]` in a virtual environment.
+Use Python 3.12. Install with uv from `uv.lock`.
 
 Before proposing a change, run:
 

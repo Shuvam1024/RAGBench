@@ -104,6 +104,13 @@ def test_question_changes_and_ci_gate(report: EvaluationResult) -> None:
     point = compare(report, candidate, Thresholds(max_drop={"mrr": 0.0}, statistics=statistics))
     assert not point.passed
     assert point.checks[0].ci_high == pytest.approx(0.0)
+    assert point.statistics is not None
+    assert point.statistics.seed == 0
+    assert point.statistics.bootstrap_samples == 400
+    assert point.statistics.permutation_samples == 200
+    assert point.statistics.confidence == pytest.approx(0.95)
+    assert point.statistics.gate_mode == "point_drop"
+    assert compare(report, candidate, Thresholds(max_drop={"mrr": 0.0})).statistics is None
     gated = compare(
         report,
         candidate,

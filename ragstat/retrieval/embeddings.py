@@ -4,7 +4,7 @@ import hashlib
 import warnings
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Protocol
+from typing import Any, Protocol
 
 import numpy as np
 from numpy.typing import NDArray
@@ -25,24 +25,38 @@ _ENCODE_CACHE: dict[tuple[str, str, str], NDArray[np.float32]] = {}
 class SentenceTransformerEmbedder:
     """Resolve a model revision once, encode on CPU, and report truncation."""
 
-    def __init__(self, config: DenseConfig) -> None:
-        import torch
-        from huggingface_hub import hf_hub_download
-        from sentence_transformers import SentenceTransformer
-
-        # The small-corpus baseline uses one CPU thread. This also avoids the
-        # macOS OpenMP conflict between the PyTorch and FAISS binary runtimes.
-        torch.set_num_threads(1)
-        config_file = hf_hub_download(config.model_name, "config.json", revision=config.revision)
-        self._revision = Path(config_file).parent.name
-        self._config = config
-        self._model = SentenceTransformer(
-            config.model_name,
-            revision=self._revision,
-            device=config.device,
-            trust_remote_code=False,
-        )
+    def __init__(
+        self,
+        config: DenseConfig | None = None,
+        model: object | None = None,
+        revision: str = "",
+    ) -> None:
+        self._config = config or DenseConfig()
         self._truncated_texts = 0
+        self._model: Any
+        if model is None:
+            import torch
+            from huggingface_hub import hf_hub_download
+            from sentence_transformers import SentenceTransformer
+
+            # The small-corpus baseline uses one CPU thread. This also avoids the
+            # macOS OpenMP conflict between the PyTorch and FAISS binary runtimes.
+            torch.set_num_threads(1)
+            config_file = hf_hub_download(
+                self._config.model_name, "config.json", revision=self._config.revision
+            )
+            self._revision = Path(config_file).parent.name
+            self._model = SentenceTransformer(
+                self._config.model_name,
+                revision=self._revision,
+                device=self._config.device,
+                trust_remote_code=False,
+            )
+        else:
+            if not revision:
+                raise ValueError("An injected embedding model needs an explicit revision label")
+            self._model = model
+            self._revision = revision
 
     def encode(self, texts: Sequence[str]) -> NDArray[np.float32]:
         tokens = self._model.tokenizer(list(texts), truncation=False, padding=False, verbose=False)

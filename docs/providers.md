@@ -7,7 +7,7 @@ exercises the answer pipeline locally, without claiming LLM reasoning ability.
 ## Optional OpenAI adapter
 
 ```bash
-python -m pip install -e '.[llm]'
+uv sync --frozen --python 3.12 --extra llm
 cp configs/openai.example.yaml configs/openai.local.yaml
 # Edit the model names in the copied configuration.
 # Set OPENAI_API_KEY securely in your shell environment.

@@ -21,6 +21,7 @@
   "micro_sentence_precision": 0.016666666666666666,
   "micro_sentence_recall": 0.01366120218579235,
   "micro_sentence_f1": 0.015015015015015017,
+  "evidence_only_sentence_f1": 0.01836372847011145,
   "doc_k": 1,
   "sentence_k": 1,
   "min_confidence": null,

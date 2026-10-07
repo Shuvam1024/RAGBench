@@ -1,27 +1,27 @@
 {
   "schema_version": 1,
   "split": "dev",
-  "system": "nli",
+  "system": "oracle_retrieval",
   "claim_count": 300,
   "gold_counts": {
     "SUPPORT": 124,
     "CONTRADICT": 64,
     "NEI": 112
   },
-  "accuracy": 0.49333333333333335,
-  "macro_f1": 0.47673044368576284,
+  "accuracy": 0.63,
+  "macro_f1": 0.6025500298685782,
   "class_f1": {
-    "SUPPORT": 0.4025157232704402,
-    "CONTRADICT": 0.47133757961783435,
-    "NEI": 0.556338028169014
+    "SUPPORT": 0.4444444444444444,
+    "CONTRADICT": 0.640625,
+    "NEI": 0.7225806451612903
   },
-  "sentence_precision": 0.41,
-  "sentence_recall": 0.38152777777777774,
-  "sentence_f1": 0.38407407407407407,
-  "micro_sentence_precision": 0.31891891891891894,
-  "micro_sentence_recall": 0.16120218579234974,
-  "micro_sentence_f1": 0.21415607985480947,
-  "evidence_only_sentence_f1": 0.19267139479905437,
+  "sentence_precision": 0.56,
+  "sentence_recall": 0.5234166666666666,
+  "sentence_f1": 0.5278253968253969,
+  "micro_sentence_precision": 0.52,
+  "micro_sentence_recall": 0.21311475409836064,
+  "micro_sentence_f1": 0.3023255813953488,
+  "evidence_only_sentence_f1": 0.24652988855116514,
   "doc_k": 1,
   "sentence_k": 2,
   "min_confidence": 0.7,
@@ -29,32 +29,24 @@
   "model_name": "cross-encoder/nli-MiniLM2-L6-H768",
   "model_revision": "b95119ce93d3e065de6214e38cd4a97b0f2f2c6d",
   "pair_order": "premise_sentence_hypothesis_claim",
-  "retrieval_p95_ms": 25.72185529934359,
-  "nli_pairs": 2853,
+  "retrieval_p95_ms": null,
+  "nli_pairs": 2031,
   "nli_truncated_pairs": 0,
-  "nli_seconds": 110.3827891889996,
+  "nli_seconds": 84.89804734899735,
   "claims_sha256": "86f0435d08fdb65d1aa41d1472684f57e6e71930626497bdf4d7a9ec1a632217",
   "corpus_sha256": "b8d6c89624cb2ed74dee8938effc4f5d8bd2086887880af8110d64be4ceade62",
-  "environment": {
-    "platform": "Linux-6.12.94+-x86_64-with-glibc2.39",
-    "python": "3.12.3",
-    "cpu_count": "4",
-    "pytorch_threads": "1"
-  },
+  "environment": {},
   "claims": [
     {
       "id": "1",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "34386619:2",
-        "34386619:7"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "3",
@@ -111,17 +103,20 @@
     {
       "id": "42",
       "gold": "CONTRADICT",
-      "predicted": "NEI",
-      "correct": 0.0,
+      "predicted": "CONTRADICT",
+      "correct": 1.0,
       "gold_sentences": [
         "18174210:1",
         "18174210:9",
         "18174210:10"
       ],
-      "predicted_sentences": [],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [
+        "18174210:2",
+        "18174210:9"
+      ],
+      "sentence_precision": 0.5,
+      "sentence_recall": 0.3333333333333333,
+      "sentence_f1": 0.4
     },
     {
       "id": "48",
@@ -208,12 +203,12 @@
         "49556906:7"
       ],
       "predicted_sentences": [
-        "3973445:1",
-        "3973445:2"
+        "49556906:4",
+        "49556906:5"
       ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "sentence_precision": 0.5,
+      "sentence_recall": 0.3333333333333333,
+      "sentence_f1": 0.4
     },
     {
       "id": "56",
@@ -442,28 +437,24 @@
     {
       "id": "132",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "27615329:2"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "133",
       "gold": "SUPPORT",
-      "predicted": "CONTRADICT",
+      "predicted": "NEI",
       "correct": 0.0,
       "gold_sentences": [
         "16280642:3",
         "16280642:4"
       ],
-      "predicted_sentences": [
-        "19752008:3"
-      ],
+      "predicted_sentences": [],
       "sentence_precision": 0.0,
       "sentence_recall": 0.0,
       "sentence_f1": 0.0
@@ -610,11 +601,12 @@
         "27123743:4"
       ],
       "predicted_sentences": [
-        "16322674:5"
+        "16322674:5",
+        "17450673:8"
       ],
-      "sentence_precision": 1.0,
+      "sentence_precision": 0.5,
       "sentence_recall": 0.125,
-      "sentence_f1": 0.2222222222222222
+      "sentence_f1": 0.2
     },
     {
       "id": "180",
@@ -654,25 +646,23 @@
         "18340282:6"
       ],
       "predicted_sentences": [
-        "3285322:3",
-        "3285322:4"
+        "18340282:0",
+        "18340282:6"
       ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "sentence_precision": 0.5,
+      "sentence_recall": 0.5,
+      "sentence_f1": 0.5
     },
     {
       "id": "198",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "40590358:8"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "208",
@@ -693,8 +683,8 @@
     {
       "id": "212",
       "gold": "CONTRADICT",
-      "predicted": "NEI",
-      "correct": 0.0,
+      "predicted": "CONTRADICT",
+      "correct": 1.0,
       "gold_sentences": [
         "22038539:1",
         "22038539:3",
@@ -702,24 +692,24 @@
         "22038539:7",
         "22038539:8"
       ],
-      "predicted_sentences": [],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [
+        "22038539:3",
+        "22038539:8"
+      ],
+      "sentence_precision": 1.0,
+      "sentence_recall": 0.4,
+      "sentence_f1": 0.5714285714285715
     },
     {
       "id": "213",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "27054878:5",
-        "27054878:7"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "216",
@@ -867,16 +857,18 @@
     {
       "id": "239",
       "gold": "SUPPORT",
-      "predicted": "NEI",
-      "correct": 0.0,
+      "predicted": "SUPPORT",
+      "correct": 1.0,
       "gold_sentences": [
         "14079881:10",
         "14079881:11"
       ],
-      "predicted_sentences": [],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [
+        "14079881:10"
+      ],
+      "sentence_precision": 1.0,
+      "sentence_recall": 0.5,
+      "sentence_f1": 0.6666666666666666
     },
     {
       "id": "248",
@@ -898,17 +890,20 @@
     {
       "id": "249",
       "gold": "CONTRADICT",
-      "predicted": "NEI",
-      "correct": 0.0,
+      "predicted": "CONTRADICT",
+      "correct": 1.0,
       "gold_sentences": [
         "1568684:1",
         "1568684:3",
         "1568684:4"
       ],
-      "predicted_sentences": [],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [
+        "1568684:1",
+        "1568684:4"
+      ],
+      "sentence_precision": 1.0,
+      "sentence_recall": 0.6666666666666666,
+      "sentence_f1": 0.8
     },
     {
       "id": "261",
@@ -939,15 +934,13 @@
     {
       "id": "269",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "36838958:1"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "274",
@@ -996,16 +989,13 @@
     {
       "id": "294",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "10874408:1",
-        "10874408:3"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "295",
@@ -1086,16 +1076,13 @@
     {
       "id": "324",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "24612804:5",
-        "24612804:6"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "327",
@@ -1157,16 +1144,13 @@
     {
       "id": "354",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "8774475:2",
-        "8774475:4"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "362",
@@ -1285,12 +1269,15 @@
     {
       "id": "415",
       "gold": "SUPPORT",
-      "predicted": "NEI",
+      "predicted": "CONTRADICT",
       "correct": 0.0,
       "gold_sentences": [
         "6309659:12"
       ],
-      "predicted_sentences": [],
+      "predicted_sentences": [
+        "6309659:0",
+        "6309659:2"
+      ],
       "sentence_precision": 0.0,
       "sentence_recall": 0.0,
       "sentence_f1": 0.0
@@ -1309,12 +1296,14 @@
     {
       "id": "431",
       "gold": "SUPPORT",
-      "predicted": "NEI",
+      "predicted": "CONTRADICT",
       "correct": 0.0,
       "gold_sentences": [
         "28937856:5"
       ],
-      "predicted_sentences": [],
+      "predicted_sentences": [
+        "28937856:0"
+      ],
       "sentence_precision": 0.0,
       "sentence_recall": 0.0,
       "sentence_f1": 0.0
@@ -1336,41 +1325,35 @@
     {
       "id": "437",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "2359152:11"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "439",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "18575183:0"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "440",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "18575183:0"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "443",
@@ -1397,12 +1380,11 @@
         "12804937:0"
       ],
       "predicted_sentences": [
-        "11411060:6",
-        "11411060:11"
+        "464511:0"
       ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "sentence_precision": 1.0,
+      "sentence_recall": 0.5,
+      "sentence_f1": 0.6666666666666666
     },
     {
       "id": "475",
@@ -1497,7 +1479,7 @@
         "13230773:11"
       ],
       "predicted_sentences": [
-        "40867854:8"
+        "13230773:1"
       ],
       "sentence_precision": 0.0,
       "sentence_recall": 0.0,
@@ -1571,15 +1553,13 @@
     {
       "id": "527",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "1617327:1"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "528",
@@ -1711,15 +1691,13 @@
     {
       "id": "551",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "8903143:1"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "552",
@@ -1851,8 +1829,8 @@
     {
       "id": "597",
       "gold": "SUPPORT",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "SUPPORT",
+      "correct": 1.0,
       "gold_sentences": [
         "12779444:0",
         "25742130:6",
@@ -1860,25 +1838,23 @@
         "36355784:7"
       ],
       "predicted_sentences": [
+        "12779444:0",
         "36355784:11"
       ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "sentence_precision": 0.5,
+      "sentence_recall": 0.25,
+      "sentence_f1": 0.3333333333333333
     },
     {
       "id": "598",
       "gold": "CONTRADICT",
-      "predicted": "CONTRADICT",
-      "correct": 1.0,
+      "predicted": "NEI",
+      "correct": 0.0,
       "gold_sentences": [
         "25742130:6",
         "25742130:9"
       ],
-      "predicted_sentences": [
-        "36355784:8",
-        "36355784:11"
-      ],
+      "predicted_sentences": [],
       "sentence_precision": 0.0,
       "sentence_recall": 0.0,
       "sentence_f1": 0.0
@@ -1916,16 +1892,13 @@
     {
       "id": "623",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "25599283:1",
-        "25599283:8"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "628",
@@ -1941,15 +1914,12 @@
     {
       "id": "636",
       "gold": "SUPPORT",
-      "predicted": "CONTRADICT",
+      "predicted": "NEI",
       "correct": 0.0,
       "gold_sentences": [
         "24294572:4"
       ],
-      "predicted_sentences": [
-        "42708716:3",
-        "42708716:12"
-      ],
+      "predicted_sentences": [],
       "sentence_precision": 0.0,
       "sentence_recall": 0.0,
       "sentence_f1": 0.0
@@ -1986,29 +1956,24 @@
     {
       "id": "644",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "13619127:12",
-        "13619127:15"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "649",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "24159217:9"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "659",
@@ -2051,16 +2016,13 @@
     {
       "id": "684",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "4942718:6",
-        "4942718:12"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "690",
@@ -2121,30 +2083,24 @@
     {
       "id": "700",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "16557565:1",
-        "16557565:3"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "702",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "16557565:1",
-        "16557565:3"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "715",
@@ -2226,29 +2182,33 @@
     {
       "id": "728",
       "gold": "CONTRADICT",
-      "predicted": "NEI",
-      "correct": 0.0,
+      "predicted": "CONTRADICT",
+      "correct": 1.0,
       "gold_sentences": [
         "36444198:9",
         "36444198:10"
       ],
-      "predicted_sentences": [],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [
+        "36444198:9"
+      ],
+      "sentence_precision": 1.0,
+      "sentence_recall": 0.5,
+      "sentence_f1": 0.6666666666666666
     },
     {
       "id": "729",
       "gold": "SUPPORT",
-      "predicted": "NEI",
-      "correct": 0.0,
+      "predicted": "SUPPORT",
+      "correct": 1.0,
       "gold_sentences": [
         "26851674:1"
       ],
-      "predicted_sentences": [],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [
+        "26851674:1"
+      ],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "742",
@@ -2285,12 +2245,14 @@
     {
       "id": "744",
       "gold": "SUPPORT",
-      "predicted": "NEI",
+      "predicted": "CONTRADICT",
       "correct": 0.0,
       "gold_sentences": [
         "8460275:2"
       ],
-      "predicted_sentences": [],
+      "predicted_sentences": [
+        "8460275:6"
+      ],
       "sentence_precision": 0.0,
       "sentence_recall": 0.0,
       "sentence_f1": 0.0
@@ -2324,16 +2286,13 @@
     {
       "id": "768",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "1373287:0",
-        "1373287:11"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "770",
@@ -2362,16 +2321,14 @@
     {
       "id": "781",
       "gold": "CONTRADICT",
-      "predicted": "CONTRADICT",
-      "correct": 1.0,
+      "predicted": "NEI",
+      "correct": 0.0,
       "gold_sentences": [
         "24338780:2",
         "24338780:3",
         "24338780:6"
       ],
-      "predicted_sentences": [
-        "8246922:8"
-      ],
+      "predicted_sentences": [],
       "sentence_precision": 0.0,
       "sentence_recall": 0.0,
       "sentence_f1": 0.0
@@ -2403,15 +2360,13 @@
     {
       "id": "785",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "12471115:15"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "793",
@@ -2537,15 +2492,13 @@
     {
       "id": "830",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "52873726:3"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "831",
@@ -2577,16 +2530,13 @@
     {
       "id": "834",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "23122306:1",
-        "23122306:5"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "837",
@@ -2649,15 +2599,13 @@
     {
       "id": "852",
       "gold": "CONTRADICT",
-      "predicted": "CONTRADICT",
-      "correct": 1.0,
+      "predicted": "NEI",
+      "correct": 0.0,
       "gold_sentences": [
         "13843341:9",
         "13843341:10"
       ],
-      "predicted_sentences": [
-        "474325:0"
-      ],
+      "predicted_sentences": [],
       "sentence_precision": 0.0,
       "sentence_recall": 0.0,
       "sentence_f1": 0.0
@@ -2665,14 +2613,12 @@
     {
       "id": "859",
       "gold": "CONTRADICT",
-      "predicted": "CONTRADICT",
-      "correct": 1.0,
+      "predicted": "NEI",
+      "correct": 0.0,
       "gold_sentences": [
         "1982286:3"
       ],
-      "predicted_sentences": [
-        "22049489:6"
-      ],
+      "predicted_sentences": [],
       "sentence_precision": 0.0,
       "sentence_recall": 0.0,
       "sentence_f1": 0.0
@@ -2708,12 +2654,12 @@
         "29025270:5"
       ],
       "predicted_sentences": [
-        "27686445:0",
-        "27686445:12"
+        "3315558:0",
+        "29025270:5"
       ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "sentence_precision": 0.5,
+      "sentence_recall": 0.08333333333333333,
+      "sentence_f1": 0.14285714285714285
     },
     {
       "id": "879",
@@ -2830,28 +2776,24 @@
     {
       "id": "913",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "712078:4"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "914",
       "gold": "NEI",
-      "predicted": "SUPPORT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "712078:4"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "921",
@@ -3043,27 +2985,23 @@
     {
       "id": "1014",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "6277638:5"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "1019",
       "gold": "SUPPORT",
-      "predicted": "CONTRADICT",
+      "predicted": "NEI",
       "correct": 0.0,
       "gold_sentences": [
         "11603066:7"
       ],
-      "predicted_sentences": [
-        "1225513:11"
-      ],
+      "predicted_sentences": [],
       "sentence_precision": 0.0,
       "sentence_recall": 0.0,
       "sentence_f1": 0.0
@@ -3071,14 +3009,12 @@
     {
       "id": "1020",
       "gold": "SUPPORT",
-      "predicted": "CONTRADICT",
+      "predicted": "NEI",
       "correct": 0.0,
       "gold_sentences": [
         "9433958:3"
       ],
-      "predicted_sentences": [
-        "10559501:0"
-      ],
+      "predicted_sentences": [],
       "sentence_precision": 0.0,
       "sentence_recall": 0.0,
       "sentence_f1": 0.0
@@ -3128,12 +3064,14 @@
     {
       "id": "1041",
       "gold": "CONTRADICT",
-      "predicted": "NEI",
-      "correct": 0.0,
+      "predicted": "CONTRADICT",
+      "correct": 1.0,
       "gold_sentences": [
         "25254425:3"
       ],
-      "predicted_sentences": [],
+      "predicted_sentences": [
+        "25254425:0"
+      ],
       "sentence_precision": 0.0,
       "sentence_recall": 0.0,
       "sentence_f1": 0.0
@@ -3141,13 +3079,15 @@
     {
       "id": "1049",
       "gold": "CONTRADICT",
-      "predicted": "NEI",
-      "correct": 0.0,
+      "predicted": "CONTRADICT",
+      "correct": 1.0,
       "gold_sentences": [
         "12486491:5",
         "12486491:6"
       ],
-      "predicted_sentences": [],
+      "predicted_sentences": [
+        "12486491:4"
+      ],
       "sentence_precision": 0.0,
       "sentence_recall": 0.0,
       "sentence_f1": 0.0
@@ -3216,29 +3156,24 @@
     {
       "id": "1099",
       "gold": "NEI",
-      "predicted": "SUPPORT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "21557614:0"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "1100",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "21557614:0",
-        "21557614:3"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "1104",
@@ -3278,7 +3213,8 @@
         "13770184:13"
       ],
       "predicted_sentences": [
-        "756887:4"
+        "13770184:10",
+        "13770184:17"
       ],
       "sentence_precision": 0.0,
       "sentence_recall": 0.0,
@@ -3315,16 +3251,18 @@
     {
       "id": "1132",
       "gold": "SUPPORT",
-      "predicted": "NEI",
+      "predicted": "CONTRADICT",
       "correct": 0.0,
       "gold_sentences": [
         "33499189:3",
         "33499189:4"
       ],
-      "predicted_sentences": [],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [
+        "33499189:3"
+      ],
+      "sentence_precision": 1.0,
+      "sentence_recall": 0.5,
+      "sentence_f1": 0.6666666666666666
     },
     {
       "id": "1137",
@@ -3422,41 +3360,39 @@
     {
       "id": "1175",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "15419873:2"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "1179",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "10627801:1"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "1180",
       "gold": "SUPPORT",
-      "predicted": "NEI",
-      "correct": 0.0,
+      "predicted": "SUPPORT",
+      "correct": 1.0,
       "gold_sentences": [
         "31272411:0"
       ],
-      "predicted_sentences": [],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [
+        "31272411:0"
+      ],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "1185",
@@ -3616,12 +3552,14 @@
     {
       "id": "1221",
       "gold": "CONTRADICT",
-      "predicted": "NEI",
-      "correct": 0.0,
+      "predicted": "CONTRADICT",
+      "correct": 1.0,
       "gold_sentences": [
         "19736671:2"
       ],
-      "predicted_sentences": [],
+      "predicted_sentences": [
+        "19736671:0"
+      ],
       "sentence_precision": 0.0,
       "sentence_recall": 0.0,
       "sentence_f1": 0.0
@@ -3697,17 +3635,14 @@
     {
       "id": "1259",
       "gold": "SUPPORT",
-      "predicted": "CONTRADICT",
+      "predicted": "NEI",
       "correct": 0.0,
       "gold_sentences": [
         "24341590:11",
         "24341590:12",
         "24341590:13"
       ],
-      "predicted_sentences": [
-        "13069283:0",
-        "13069283:2"
-      ],
+      "predicted_sentences": [],
       "sentence_precision": 0.0,
       "sentence_recall": 0.0,
       "sentence_f1": 0.0
@@ -3770,16 +3705,13 @@
     {
       "id": "1272",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "24760136:0",
-        "24760136:3"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "1273",
@@ -3888,16 +3820,13 @@
     {
       "id": "1292",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "56893404:2",
-        "56893404:3"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     },
     {
       "id": "1298",
@@ -3923,12 +3852,12 @@
         "12631697:2"
       ],
       "predicted_sentences": [
-        "40631095:0",
-        "40631095:11"
+        "12631697:2",
+        "12631697:4"
       ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "sentence_precision": 0.5,
+      "sentence_recall": 0.5,
+      "sentence_f1": 0.5
     },
     {
       "id": "1316",
@@ -3950,7 +3879,8 @@
         "16284655:2"
       ],
       "predicted_sentences": [
-        "14192687:4"
+        "16284655:1",
+        "16284655:4"
       ],
       "sentence_precision": 0.0,
       "sentence_recall": 0.0,
@@ -3965,12 +3895,12 @@
         "16284655:4"
       ],
       "predicted_sentences": [
-        "14192687:1",
-        "14192687:6"
+        "16284655:4",
+        "16284655:6"
       ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "sentence_precision": 0.5,
+      "sentence_recall": 1.0,
+      "sentence_f1": 0.6666666666666666
     },
     {
       "id": "1332",
@@ -4002,15 +3932,18 @@
     {
       "id": "1336",
       "gold": "CONTRADICT",
-      "predicted": "NEI",
+      "predicted": "SUPPORT",
       "correct": 0.0,
       "gold_sentences": [
         "27910499:4"
       ],
-      "predicted_sentences": [],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [
+        "27910499:0",
+        "27910499:4"
+      ],
+      "sentence_precision": 0.5,
+      "sentence_recall": 1.0,
+      "sentence_f1": 0.6666666666666666
     },
     {
       "id": "1337",
@@ -4130,8 +4063,8 @@
         "2425364:12"
       ],
       "predicted_sentences": [
-        "17450673:2",
-        "17450673:9"
+        "2425364:0",
+        "2425364:3"
       ],
       "sentence_precision": 0.0,
       "sentence_recall": 0.0,
@@ -4158,16 +4091,19 @@
     {
       "id": "1382",
       "gold": "CONTRADICT",
-      "predicted": "NEI",
-      "correct": 0.0,
+      "predicted": "CONTRADICT",
+      "correct": 1.0,
       "gold_sentences": [
         "17755060:3",
         "17755060:5"
       ],
-      "predicted_sentences": [],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [
+        "17755060:2",
+        "17755060:5"
+      ],
+      "sentence_precision": 0.5,
+      "sentence_recall": 0.5,
+      "sentence_f1": 0.5
     },
     {
       "id": "1385",
@@ -4199,15 +4135,13 @@
     {
       "id": "1395",
       "gold": "NEI",
-      "predicted": "CONTRADICT",
-      "correct": 0.0,
+      "predicted": "NEI",
+      "correct": 1.0,
       "gold_sentences": [],
-      "predicted_sentences": [
-        "5492542:0"
-      ],
-      "sentence_precision": 0.0,
-      "sentence_recall": 0.0,
-      "sentence_f1": 0.0
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
     }
   ]
 }

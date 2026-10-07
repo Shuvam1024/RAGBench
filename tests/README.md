@@ -4,8 +4,11 @@ The suite separates offline correctness checks from two explicit real-model
 integration tests. Provider tests use mocked HTTP responses and make no paid calls.
 
 ```bash
-python -m pip install -e ".[dev,api,llm,dense]"
+uv sync --frozen --python 3.12 --extra dev --extra api
 uv run pytest -q --cov=ragstat --cov-fail-under=85
+uv sync --frozen --python 3.12 --extra dev --extra agreement
+uv run pytest -q tests/test_trec_agreement.py
+uv sync --frozen --python 3.12 --extra dev --extra dense
 uv run pytest -q --run-integration
 ```
 
@@ -25,7 +28,8 @@ optionally set `HF_HUB_OFFLINE=1` after the model is cached.
   negative scores, invalid K, empty input, duplicate IDs, index replacement,
   and the stem tokenizer's stopword removal.
 - `test_trec_agreement.py`: Recall, Precision, nDCG, MAP, and MRR on a fixed
-  fixture against `pytrec_eval`.
+  fixture against `pytrec_eval`. That package is the `agreement` extra and
+  needs a C++ compiler. The test skips when the extra is not installed.
 - `test_metrics.py`: hand-calculated Recall@K, MRR, Precision@K, average
   precision, and nDCG, duplicate hits, multiple relevant documents, no matches,
   and invalid metric arguments.
@@ -38,8 +42,9 @@ optionally set `HF_HUB_OFFLINE=1` after the model is cached.
 - `test_rerank.py`: best-chunk text selection, candidate Recall@100 kept apart
   from the reranked order, prefix depths from one scoring pass, truncation
   counting, and the CLI latency labels.
-- `test_readme_figures.py`: README metric tables match the committed reports
-  at four decimals.
+- `test_readme_figures.py`: generated regions in the README and
+  `docs/results.md` match the committed reports. Coverage is the CI badge
+  and the 85% gate, not a committed coverage file.
 - `test_sweep.py`: a one-factor sweep changes only the named axis and skips the
   base value.
 - `test_benchmark.py`: nonblank fields, distinct labels and IDs, supported

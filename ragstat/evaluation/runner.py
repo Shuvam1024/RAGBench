@@ -318,7 +318,8 @@ def evaluate_candidate_depths(
     Min-max hybrid has to do that before it can name a top-K set. ``rerank_ms``
     is only the cross-encoder. ``pipeline_ms`` adds those two. It is the
     end-to-end cost of the reranked top-K list, and the first-stage part of
-    that sum is still the full ranking.
+    that sum is still the full ranking. ``index_ms`` is the first-stage index
+    build. It does not include cross-encoder weight loading.
     """
     rerank_config = config.rerank
     ordered_depths = _validate_depths(config, depths)
@@ -344,11 +345,11 @@ def evaluate_candidate_depths(
     started = perf_counter()
     retriever = retriever or build_retriever(config.retrieval)
     retriever.index(chunks)
+    index_ms = (perf_counter() - started) * 1000
     if reranker is None:
         from ragstat.retrieval.rerank import CrossEncoderReranker
 
         reranker = CrossEncoderReranker(rerank_config)
-    index_ms = (perf_counter() - started) * 1000
     by_depth: dict[int, list[QuestionResult]] = {depth: [] for depth in ordered_depths}
     truncated_totals = dict.fromkeys(ordered_depths, 0)
     for index, question in enumerate(benchmark.questions, start=1):
@@ -608,59 +609,21 @@ def evaluate(
                 judge=judged,
             )
         )
-    responses = [q.answer for q in results if q.answer is not None] + [
-        q.judge.response for q in results if q.judge is not None
-    ]
-    usage = [response.usage for response in responses if response.usage is not None]
-    costs = [response.estimated_cost_usd for response in responses]
     chunk_counts: dict[str, int] = {}
     for chunk in chunks:
         chunk_counts[chunk.document_id] = chunk_counts.get(chunk.document_id, 0) + 1
-    return EvaluationResult(
+    return _assemble(
         config=config,
-        corpus_sha256=fingerprint([(doc.id, doc.content_sha256) for doc in corpus.documents]),
-        benchmark_sha256=fingerprint(benchmark.model_dump(mode="json", exclude_none=True)),
-        document_count=len(corpus.documents),
-        chunk_count=len(chunks),
+        corpus_documents=corpus.documents,
+        benchmark=benchmark,
+        chunks=chunks,
         multi_chunk_documents=sum(count > 1 for count in chunk_counts.values()),
-        question_count=len(results),
         skipped_empty_files=corpus.skipped_empty_files,
         retriever=retriever.metadata,
-        versions=dependency_versions(not isinstance(config.retrieval, BM25Config)),
-        recall_at_k={
-            k: fmean(result.recall_at_k[k] for result in results)
-            for k in config.evaluation.recall_at_k
-        },
-        ndcg_at_k=_mean_cutoffs([result.ndcg_at_k for result in results], "nDCG"),
-        precision_at_k=_mean_cutoffs([result.precision_at_k for result in results], "precision"),
-        mean_average_precision=fmean(
-            result.average_precision for result in results if result.average_precision is not None
-        ),
-        mrr=fmean(result.reciprocal_rank for result in results),
-        questions=tuple(results),
-        timings=Timings(
-            ingestion_ms=ingestion_ms,
-            index_ms=index_ms,
-            retrieval_p50_ms=percentile([q.retrieval_ms for q in results], 0.5),
-            retrieval_p95_ms=percentile([q.retrieval_ms for q in results], 0.95),
-            generation_p95_ms=percentile(
-                [q.generation_ms for q in results if q.generation_ms is not None], 0.95
-            )
-            if config.generation
-            else None,
-            judge_p95_ms=percentile([q.judge_ms for q in results if q.judge_ms is not None], 0.95)
-            if config.judge
-            else None,
-        ),
-        environment={
-            "platform": platform.platform(),
-            "python": platform.python_version(),
-            "cpu_count": str(os.cpu_count()),
-            "pytorch_threads": pytorch_threads(),
-        },
-        answer_metrics=_answer_metrics(results) if config.generation else None,
-        judge_metrics=_judge_metrics(results) if config.judge else None,
-        input_tokens=sum(item.input_tokens for item in usage) if usage else None,
-        output_tokens=sum(item.output_tokens for item in usage) if usage else None,
-        estimated_cost_usd=_total_cost(costs),
+        results=results,
+        ingestion_ms=ingestion_ms,
+        index_ms=index_ms,
+        rerank_times=None,
+        pipeline_times=None,
+        uses_model=not isinstance(config.retrieval, BM25Config),
     )

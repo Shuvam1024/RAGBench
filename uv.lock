@@ -566,6 +566,9 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
+agreement = [
+    { name = "pytrec-eval" },
+]
 api = [
     { name = "fastapi" },
     { name = "uvicorn" },
@@ -583,7 +586,6 @@ dev = [
     { name = "numpy" },
     { name = "pytest" },
     { name = "pytest-cov" },
-    { name = "pytrec-eval" },
     { name = "ruff" },
 ]
 llm = [
@@ -602,7 +604,7 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2,<3" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8,<10" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6,<8" },
-    { name = "pytrec-eval", marker = "extra == 'dev'", specifier = ">=0.5,<0.6" },
+    { name = "pytrec-eval", marker = "extra == 'agreement'", specifier = ">=0.5,<0.6" },
     { name = "pyyaml", specifier = ">=6,<7" },
     { name = "rank-bm25", specifier = ">=0.2.2,<0.3" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.12,<1" },
@@ -613,7 +615,7 @@ requires-dist = [
     { name = "typer", specifier = ">=0.12,<1" },
     { name = "uvicorn", marker = "extra == 'api'", specifier = ">=0.30,<1" },
 ]
-provides-extras = ["dev", "llm", "api", "dense"]
+provides-extras = ["dev", "agreement", "llm", "api", "dense"]
 
 [[package]]
 name = "rank-bm25"
