@@ -8,6 +8,7 @@ import pytest
 from ragstat.evaluation.factual import (
     accuracy,
     class_f1,
+    evidence_only_sentence_f1,
     macro_f1,
     micro_sentence_scores,
     sentence_scores,
@@ -82,15 +83,24 @@ def test_fixture_matches_the_hand_arithmetic_and_the_scorer() -> None:
     assert micro[0] == pytest.approx(HAND["micro_sentence_precision"])
     assert micro[1] == pytest.approx(HAND["micro_sentence_recall"])
     assert micro[2] == pytest.approx(HAND["micro_sentence_f1"])
+    evidence_only = evidence_only_sentence_f1(
+        [_sentence_set(claim["gold_sentences"]) for claim in FIXTURE["claims"]],
+        [_sentence_set(claim["predicted_sentences"]) for claim in FIXTURE["claims"]],
+    )
+    # Claims a, b, and e have gold evidence. c and d do not.
+    assert evidence_only == pytest.approx((1 / 2 + 0 + 2 / 3) / 3)
 
 
 def test_docs_say_lexical_metrics_are_not_factual_support() -> None:
     readme = Path("README.md").read_text(encoding="utf-8")
+    results = Path("docs/results.md").read_text(encoding="utf-8")
     providers = Path("docs/providers.md").read_text(encoding="utf-8")
     assert "does not establish factual support" in readme
+    assert "does not establish factual support" in results
     assert "does not establish factual support" in providers
     assert "BEIR qrels" in readme
-    assert "claims_test.jsonl" in readme
+    assert "BEIR qrels" in results
+    assert "claims_test.jsonl" in results
 
 
 def test_empty_sets_and_rejected_labels() -> None:
@@ -110,3 +120,7 @@ def test_empty_sets_and_rejected_labels() -> None:
         accuracy(["SUPPORT"], ["MAYBE"])
     with pytest.raises(ValueError, match="one prediction"):
         micro_sentence_scores([set()], [])
+    assert evidence_only_sentence_f1([set(), {("d", 0)}], [set(), set()]) == pytest.approx(0.0)
+    assert evidence_only_sentence_f1([set(), set()], [set(), set()]) is None
+    with pytest.raises(ValueError, match="one prediction"):
+        evidence_only_sentence_f1([set()], [])

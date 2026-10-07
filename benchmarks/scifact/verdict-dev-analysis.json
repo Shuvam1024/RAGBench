@@ -1,0 +1,38 @@
+{
+  "split": "dev",
+  "selected_on_this_split": false,
+  "doc_k": 1,
+  "frozen_nli": {
+    "accuracy": 0.49333333333333335,
+    "macro_f1": 0.47673044368576284,
+    "micro_sentence_f1": 0.21415607985480947,
+    "evidence_only_sentence_f1": 0.19267139479905437,
+    "sentence_f1": 0.38407407407407407
+  },
+  "majority_baseline": {
+    "accuracy": 0.41333333333333333,
+    "macro_f1": 0.19496855345911948,
+    "micro_sentence_f1": 0.015015015015015017,
+    "evidence_only_sentence_f1": 0.01836372847011145,
+    "sentence_f1": 0.011507936507936509
+  },
+  "oracle_retrieval": {
+    "accuracy": 0.63,
+    "macro_f1": 0.6025500298685782,
+    "micro_sentence_f1": 0.3023255813953488,
+    "evidence_only_sentence_f1": 0.24652988855116514,
+    "sentence_f1": 0.5278253968253969
+  },
+  "errors": {
+    "claim_count": 300,
+    "correct": 148,
+    "incorrect": 152,
+    "support_to_nei": 67,
+    "support_to_nei_evidence_at_rank_1": 47,
+    "support_to_nei_evidence_missed": 20,
+    "incorrect_with_gold_hit": 78,
+    "incorrect_with_gold_miss": 41,
+    "incorrect_without_gold_evidence": 33
+  },
+  "note": "Dev is held out. The oracle is not a selected system. It gives the frozen sentence policy every gold evidence document and leaves sentence_k and min_confidence unchanged. NEI claims have no gold document, so the oracle predicts NEI for them."
+}

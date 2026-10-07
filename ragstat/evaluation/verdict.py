@@ -32,6 +32,7 @@ from ragstat.evaluation.factual import (
     VERDICTS,
     accuracy,
     class_f1,
+    evidence_only_sentence_f1,
     macro_f1,
     micro_sentence_scores,
     sentence_scores,
@@ -154,7 +155,7 @@ class ClaimScore(ConfigModel):
 class VerdictEvaluation(ConfigModel):
     schema_version: Literal[1] = 1
     split: Literal["train", "dev"]
-    system: Literal["nli", "majority_baseline"]
+    system: Literal["nli", "majority_baseline", "oracle_retrieval"]
     claim_count: int
     gold_counts: dict[str, int]
     accuracy: float
@@ -166,6 +167,7 @@ class VerdictEvaluation(ConfigModel):
     micro_sentence_precision: float
     micro_sentence_recall: float
     micro_sentence_f1: float
+    evidence_only_sentence_f1: float | None = None
     doc_k: int | None = None
     sentence_k: int | None = None
     min_confidence: float | None = None
@@ -236,6 +238,14 @@ class VerdictEvaluation(ConfigModel):
             )
         ):
             raise ValueError("micro sentence scores do not match the claim rows")
+        evidence_only = evidence_only_sentence_f1(
+            [_parse_sentences(claim.gold_sentences) for claim in self.claims],
+            [_parse_sentences(claim.predicted_sentences) for claim in self.claims],
+        )
+        if self.evidence_only_sentence_f1 is not None and (
+            evidence_only is None or not _close(self.evidence_only_sentence_f1, evidence_only)
+        ):
+            raise ValueError("evidence_only_sentence_f1 does not match the claim rows")
         return self
 
 
@@ -285,7 +295,7 @@ def evaluate_predictions(
     predictions: Mapping[str, ClaimPrediction],
     *,
     split: Literal["train", "dev"],
-    system: Literal["nli", "majority_baseline"],
+    system: Literal["nli", "majority_baseline", "oracle_retrieval"],
     model_name: str,
     model_revision: str,
     pair_order: str,
@@ -324,10 +334,9 @@ def evaluate_predictions(
         )
     gold: list[str] = [row.gold for row in rows]
     predicted: list[str] = [row.predicted for row in rows]
-    micro = micro_sentence_scores(
-        [_parse_sentences(row.gold_sentences) for row in rows],
-        [_parse_sentences(row.predicted_sentences) for row in rows],
-    )
+    gold_sets = [_parse_sentences(row.gold_sentences) for row in rows]
+    predicted_sets = [_parse_sentences(row.predicted_sentences) for row in rows]
+    micro = micro_sentence_scores(gold_sets, predicted_sets)
     return VerdictEvaluation(
         split=split,
         system=system,
@@ -342,6 +351,7 @@ def evaluate_predictions(
         micro_sentence_precision=micro[0],
         micro_sentence_recall=micro[1],
         micro_sentence_f1=micro[2],
+        evidence_only_sentence_f1=evidence_only_sentence_f1(gold_sets, predicted_sets),
         doc_k=doc_k,
         sentence_k=sentence_k,
         min_confidence=min_confidence,
@@ -414,6 +424,39 @@ def build_sentence_jobs(
                     )
                 )
     return jobs
+
+
+def oracle_document_lists(claims: Sequence[SciFactClaim]) -> dict[str, tuple[str, ...]]:
+    """Gold evidence documents, sorted by id. NEI claims map to an empty tuple."""
+    return {
+        claim.id: tuple(sorted(claim.evidence_document_ids(), key=_claim_order)) for claim in claims
+    }
+
+
+def build_oracle_jobs(
+    claims: Sequence[SciFactClaim],
+    abstracts: Mapping[str, AbstractDocument],
+) -> list[SentenceJob]:
+    """Every gold evidence sentence, with retrieval rank 0.
+
+    The frozen policy still applies ``sentence_k`` and ``min_confidence``. Rank 0
+    keeps every gold document inside ``doc_k``. A claim with no gold evidence
+    contributes no jobs, so the policy predicts NEI.
+    """
+    retrieved = oracle_document_lists(claims)
+    widest = max((len(documents) for documents in retrieved.values()), default=1)
+    jobs = build_sentence_jobs(claims, abstracts, retrieved, max(widest, 1))
+    return [
+        SentenceJob(
+            claim_id=job.claim_id,
+            document_id=job.document_id,
+            sentence=job.sentence,
+            retrieval_rank=0,
+            premise=job.premise,
+            hypothesis=job.hypothesis,
+        )
+        for job in jobs
+    ]
 
 
 def score_sentence_jobs(
@@ -543,6 +586,122 @@ def retrieve_top_documents(
         elapsed.append((perf_counter() - started) * 1000)
         found[claim_id] = tuple(hit.chunk.document_id for hit in hits)
     return found, elapsed
+
+
+class VerdictErrorBreakdown(ConfigModel):
+    """Where frozen-policy mistakes come from. This is a dev measurement, not a selection."""
+
+    claim_count: int
+    correct: int
+    incorrect: int
+    support_to_nei: int
+    support_to_nei_evidence_at_rank_1: int
+    support_to_nei_evidence_missed: int
+    incorrect_with_gold_hit: int
+    incorrect_with_gold_miss: int
+    incorrect_without_gold_evidence: int
+
+    @model_validator(mode="after")
+    def counts_partition_the_claims(self) -> "VerdictErrorBreakdown":
+        if self.correct + self.incorrect != self.claim_count:
+            raise ValueError("correct and incorrect must add up to claim_count")
+        if (
+            self.incorrect_with_gold_hit
+            + self.incorrect_with_gold_miss
+            + self.incorrect_without_gold_evidence
+            != self.incorrect
+        ):
+            raise ValueError("incorrect rows must partition into hit, miss, and no gold evidence")
+        if (
+            self.support_to_nei_evidence_at_rank_1 + self.support_to_nei_evidence_missed
+            != self.support_to_nei
+        ):
+            raise ValueError("SUPPORT to NEI rows must partition into rank-1 hits and misses")
+        return self
+
+
+def _gold_document_ids(sentences: Sequence[str]) -> set[str]:
+    return {value.rsplit(":", 1)[0] for value in sentences}
+
+
+def breakdown_errors(
+    claims: Sequence[ClaimScore],
+    rankings: Mapping[str, Sequence[str]],
+    *,
+    doc_k: int,
+) -> VerdictErrorBreakdown:
+    """Split mistakes by whether a gold evidence document is inside the top ``doc_k``.
+
+    Rank 1 is the first retrieved document. Claims with no gold evidence, which
+    are the NEI labels, are not retrieval misses.
+    """
+    if isinstance(doc_k, bool) or not isinstance(doc_k, int) or doc_k <= 0:
+        raise ValueError("doc_k must be a positive integer")
+    if {claim.id for claim in claims} != set(rankings):
+        raise ValueError("Rankings must cover each claim once")
+    correct = 0
+    support_hit = support_miss = 0
+    incorrect_hit = incorrect_miss = incorrect_empty = 0
+    for claim in claims:
+        gold_documents = _gold_document_ids(claim.gold_sentences)
+        hit = any(document_id in gold_documents for document_id in rankings[claim.id][:doc_k])
+        if claim.gold == claim.predicted:
+            correct += 1
+            continue
+        if not gold_documents:
+            incorrect_empty += 1
+        elif hit:
+            incorrect_hit += 1
+        else:
+            incorrect_miss += 1
+        if claim.gold == "SUPPORT" and claim.predicted == "NEI":
+            if hit:
+                support_hit += 1
+            else:
+                support_miss += 1
+    incorrect = len(claims) - correct
+    return VerdictErrorBreakdown(
+        claim_count=len(claims),
+        correct=correct,
+        incorrect=incorrect,
+        support_to_nei=support_hit + support_miss,
+        support_to_nei_evidence_at_rank_1=support_hit,
+        support_to_nei_evidence_missed=support_miss,
+        incorrect_with_gold_hit=incorrect_hit,
+        incorrect_with_gold_miss=incorrect_miss,
+        incorrect_without_gold_evidence=incorrect_empty,
+    )
+
+
+class MetricSnapshot(ConfigModel):
+    accuracy: float
+    macro_f1: float
+    micro_sentence_f1: float
+    evidence_only_sentence_f1: float | None
+    sentence_f1: float
+
+
+def metric_snapshot(report: VerdictEvaluation) -> MetricSnapshot:
+    return MetricSnapshot(
+        accuracy=report.accuracy,
+        macro_f1=report.macro_f1,
+        micro_sentence_f1=report.micro_sentence_f1,
+        evidence_only_sentence_f1=report.evidence_only_sentence_f1,
+        sentence_f1=report.sentence_f1,
+    )
+
+
+class VerdictDevAnalysis(ConfigModel):
+    """Held-out dev measurement. No knob in this file was chosen on dev."""
+
+    split: Literal["dev"] = "dev"
+    selected_on_this_split: Literal[False] = False
+    doc_k: PositiveInt
+    frozen_nli: MetricSnapshot
+    majority_baseline: MetricSnapshot
+    oracle_retrieval: MetricSnapshot
+    errors: VerdictErrorBreakdown
+    note: Nonblank
 
 
 class VerdictMetricCheck(ConfigModel):
