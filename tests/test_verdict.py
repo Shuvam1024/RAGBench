@@ -285,20 +285,39 @@ def test_paired_comparison_uses_the_shared_bootstrap() -> None:
         compare_verdicts(baseline, candidate.model_copy(update={"split": "train"}))
 
 
-def test_injected_cross_encoder_warns_once_and_checks_shape() -> None:
+def test_injected_cross_encoder_warns_once_and_checks_shape(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import builtins
+
+    real_import = builtins.__import__
+
+    def refuse_torch(name: str, *args: object, **kwargs: object) -> object:
+        if name == "torch" or name.startswith("torch."):
+            raise ModuleNotFoundError("No module named 'torch'")
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", refuse_torch)
     config = NliModelConfig(max_length=4, revision="injected-revision")
-    model = _FakeNli([[0.1, 0.8, 0.1], [0.7, 0.2, 0.1]])
+    # Logits. Softmax recovers the probabilities; the scorer must not ask torch to do it.
+    model = _FakeNli(np.log([[0.1, 0.8, 0.1], [1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0]]).tolist())
     scorer = CrossEncoderNli(config, model=model, revision="injected-revision")
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
         scores = scorer.score([("sentence", "claim"), ("other", "claim")])
         scorer.score([("sentence", "claim"), ("other", "claim")])
     assert len(caught) == 1
+    assert scores[0].contradiction == pytest.approx(0.1)
     assert scores[0].entailment == pytest.approx(0.8)
+    assert scores[0].neutral == pytest.approx(0.1)
+    assert scores[1].contradiction == pytest.approx(1.0 / 3.0)
+    assert scores[1].entailment == pytest.approx(1.0 / 3.0)
+    assert scores[1].neutral == pytest.approx(1.0 / 3.0)
     assert scorer.truncated_pairs == 2
     assert scorer.metadata["nli_revision"] == "injected-revision"
     assert scorer.metadata["nli_pair_order"] == "premise_sentence_hypothesis_claim"
-    assert model.kwargs["apply_softmax"] is True
+    assert "apply_softmax" not in model.kwargs
+    assert "activation_fn" not in model.kwargs
     model.rows = [[0.1, 0.8]]
     with pytest.raises(ValueError, match="three-class"):
         scorer.score([("sentence", "claim")])

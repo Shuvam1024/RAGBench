@@ -53,6 +53,22 @@ class NliScorer(Protocol):
     def truncated_pairs(self) -> int: ...
 
 
+def _row_softmax(array: np.ndarray) -> np.ndarray:
+    """Softmax each row. Injected models return logits and do not import torch."""
+    if array.ndim != 2 or array.shape[1] == 0:
+        return array
+    shifted = array - np.max(array, axis=1, keepdims=True)
+    exp = np.exp(shifted)
+    return np.asarray(exp / np.sum(exp, axis=1, keepdims=True), dtype=np.float64)
+
+
+def _identity_activation() -> object:
+    """Identity activation for the loaded cross-encoder. This imports torch."""
+    import torch
+
+    return torch.nn.Identity()
+
+
 def classify_nli(scores: NliScores) -> tuple[str, float]:
     """Return the verdict and its probability.
 
@@ -120,6 +136,7 @@ class CrossEncoderNli:
         self._config = config
         self._truncated_pairs = 0
         self._warned = False
+        self._loaded_backend = model is None
         if model is None:
             model, revision = load_nli_cross_encoder(config)
         if not revision:
@@ -130,8 +147,6 @@ class CrossEncoderNli:
     def score(self, pairs: Sequence[tuple[str, str]]) -> list[NliScores]:
         if not pairs:
             return []
-        import torch
-
         tokenizer = getattr(self._model, "tokenizer", None)
         predict = getattr(self._model, "predict", None)
         if tokenizer is None or predict is None:
@@ -154,15 +169,20 @@ class CrossEncoderNli:
                 UserWarning,
                 stacklevel=2,
             )
-        raw = predict(
-            list(pairs),
-            batch_size=self._config.batch_size,
-            show_progress_bar=False,
-            convert_to_numpy=True,
-            apply_softmax=True,
-            activation_fn=torch.nn.Identity(),
-        )
+        predict_kwargs: dict[str, object] = {
+            "batch_size": self._config.batch_size,
+            "show_progress_bar": False,
+            "convert_to_numpy": True,
+        }
+        if self._loaded_backend:
+            # The loaded model softmaxes in torch. Passing Identity keeps that
+            # path the same as the run that produced the committed scores.
+            predict_kwargs["activation_fn"] = _identity_activation()
+            predict_kwargs["apply_softmax"] = True
+        raw = predict(list(pairs), **predict_kwargs)
         array = np.asarray(raw, dtype=np.float64)
+        if not self._loaded_backend:
+            array = _row_softmax(array)
         if array.shape != (len(pairs), 3):
             raise ValueError("Expected one three-class NLI distribution per pair")
         return [NliScores(float(row[0]), float(row[1]), float(row[2])) for row in array]
