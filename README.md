@@ -126,8 +126,27 @@ does not stop early. `rerank_p95_ms` is the cross-encoder alone.
 
 `scripts/select_scifact_rerank.py` scores candidate depths 20, 50, and 100 on
 the SciFact train split only. The highest train nDCG@10 wins. A tie prefers
-the smaller depth. The test split is scored once after that choice is
+the smaller depth. The frozen hybrid's train nDCG@10 is 0.7331. The reranked
+depths score lower on that metric. Depth 20 is the highest of the three, so
+it is the frozen depth. The test split is scored once after that choice is
 committed.
+[rerank-train-selection.json](benchmarks/scifact/rerank-train-selection.json):
+
+| candidate_k | Train nDCG@10 | Recall@10 | Recall@100 | Candidate Recall@100 | MAP | MRR |
+| --- | --- | --- | --- | --- | --- | --- |
+| 20 | 0.7211 | 0.8505 | 0.8938 | 0.9551 | 0.6787 | 0.6876 |
+| 50 | 0.7166 | 0.8430 | 0.9402 | 0.9551 | 0.6771 | 0.6868 |
+| 100 | 0.7116 | 0.8311 | 0.9551 | 0.9551 | 0.6747 | 0.6846 |
+
+Recall@100 on a reranked list is the recall of the returned documents.
+Candidate Recall@100 is the first stage, before the reorder. At depth 100
+those two recalls match, because reranking only permutes the same 100
+documents. At depth 20 the reranked list cannot retrieve a document that the
+first stage placed at rank 21–100, so its Recall@100 is lower. The train
+report for depth 20 truncated 1,966 of 16,180 query/document pairs. Full-ranking
+retrieval p95 was 298.3 ms, rerank p95 was 2,081.4 ms, and the top-K pipeline
+p95 was 2,301.7 ms. The pipeline is the full-ranking first stage plus the
+cross-encoder. One PyTorch thread.
 
 ### Held-out SciFact test
 

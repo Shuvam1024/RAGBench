@@ -1,0 +1,48 @@
+# Train-frozen cross-encoder for the SciFact test split. Do not retune this file.
+# First stage: the frozen hybrid (stem, 480-word windows, overlap 20, k1 1.5,
+# b 0.75, min-max, dense_weight 0.5). Not retuned.
+# candidate_k 20 won the train grid in
+# benchmarks/scifact/rerank-train-selection.json (highest train nDCG@10; a tie
+# would prefer the smaller depth). Depths 50 and 100 scored lower on train.
+# The cross-encoder sees the highest-scoring first-stage chunk. Pairs longer
+# than 512 tokens, including special tokens, are truncated. The score is the
+# raw logit. Model revision is pinned below. One CPU thread.
+schema_version: 1
+dataset:
+  documents_path: ../.cache/beir/scifact
+  benchmark_path: ../.cache/beir/scifact/benchmark.json
+chunking:
+  unit: words
+  chunk_size: 480
+  overlap: 20
+retrieval:
+  type: hybrid
+  fusion: minmax
+  dense_weight: 0.5
+  rrf_k: 60
+  bm25:
+    type: bm25
+    k1: 1.5
+    b: 0.75
+    tokenizer: stem
+  dense:
+    type: dense
+    model_name: sentence-transformers/all-MiniLM-L6-v2
+    revision: 1110a243fdf4706b3f48f1d95db1a4f5529b4d41
+    device: cpu
+    batch_size: 32
+rerank:
+  model_name: cross-encoder/ms-marco-MiniLM-L-6-v2
+  revision: 233902d25c440f23af6f7d6e94d2946bac0bee0a
+  candidate_k: 20
+  max_length: 512
+  batch_size: 32
+  device: cpu
+  text: best_first_stage_chunk
+evaluation:
+  recall_at_k: [10, 100]
+  ndcg_at_k: [10]
+  precision_at_k: [10]
+  stored_hits: 10
+output:
+  json_path: null
