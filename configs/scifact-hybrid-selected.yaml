@@ -1,0 +1,40 @@
+# Train-frozen hybrid for the SciFact test split. Do not retune this file.
+# Lexical side: stem, 480-word windows, overlap 20, k1 1.5, b 0.75
+# (benchmarks/scifact/bm25-train-selection.json).
+# dense_weight 0.5 won the train sweep in
+# benchmarks/scifact/hybrid-weight-train.json (max train nDCG@10, then the
+# smaller weight). Fusion is min-max. A document's score is its best chunk.
+# Dense model: sentence-transformers/all-MiniLM-L6-v2 at the revision below,
+# CPU, batch 32. Inputs over 256 tokens are truncated.
+# Indexed field: prepared title and body joined by one newline.
+schema_version: 1
+dataset:
+  documents_path: ../.cache/beir/scifact
+  benchmark_path: ../.cache/beir/scifact/benchmark.json
+chunking:
+  unit: words
+  chunk_size: 480
+  overlap: 20
+retrieval:
+  type: hybrid
+  fusion: minmax
+  dense_weight: 0.5
+  rrf_k: 60
+  bm25:
+    type: bm25
+    k1: 1.5
+    b: 0.75
+    tokenizer: stem
+  dense:
+    type: dense
+    model_name: sentence-transformers/all-MiniLM-L6-v2
+    revision: 1110a243fdf4706b3f48f1d95db1a4f5529b4d41
+    device: cpu
+    batch_size: 32
+evaluation:
+  recall_at_k: [10, 100]
+  ndcg_at_k: [10]
+  precision_at_k: [10]
+  stored_hits: 10
+output:
+  json_path: null

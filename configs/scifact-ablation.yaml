@@ -1,7 +1,8 @@
-# Optional BM25 sensitivity on the train split. The reported test configuration
-# stays at chunk size 120, overlap 20, k1 1.5, and b 0.75.
+# Exploratory one-factor sweep on the SciFact test split. The committed
+# result is benchmarks/scifact/ablation-bm25.json. It does not choose the
+# frozen settings. Train selection is scripts/select_scifact_train.py.
 schema_version: 1
-base: scifact-bm25-train.yaml
+base: scifact-bm25.yaml
 axes:
   - name: chunk_size
     field: chunking.chunk_size

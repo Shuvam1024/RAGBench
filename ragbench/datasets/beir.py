@@ -27,6 +27,10 @@ from ragbench.ingestion.loader import load_documents
 
 SCIFACT_SHA256 = "536e14446a0ba56ed1398ab1055f39fe852686ecad24a6306c80c490fa8e0165"
 SCIFACT_URL = "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/scifact.zip"
+# SHA-256 of the zip from the UKP BEIR mirror above. NFCorpus is the confirmation
+# corpus: its qrels are not used to choose SciFact settings.
+NFCORPUS_SHA256 = "efe5be03f8c5b86a5870102d0599d227c8c6e2484328e68c6522560385671b0b"
+NFCORPUS_URL = "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/nfcorpus.zip"
 TEXT_POLICY = "title and body joined by a newline when both are non-empty; words are \\S+ spans"
 LENGTH_THRESHOLDS = (64, 120, 200, 256, 480)
 
@@ -87,7 +91,13 @@ DATASETS: dict[str, BeirSource] = {
         urls=(SCIFACT_URL,),
         sha256=SCIFACT_SHA256,
         splits=("train", "test"),
-    )
+    ),
+    "nfcorpus": BeirSource(
+        name="nfcorpus",
+        urls=(NFCORPUS_URL,),
+        sha256=NFCORPUS_SHA256,
+        splits=("train", "dev", "test"),
+    ),
 }
 
 
@@ -356,7 +366,7 @@ def prepare_dataset(
     """Download, verify, and materialize a known BEIR dataset into ``cache/name``.
 
     ``split`` selects the qrels file. Omitting it keeps the dataset's default
-    split, which for SciFact is ``test`` and still writes ``benchmark.json``.
+    split, which is ``test``, and still writes ``benchmark.json``.
     """
     try:
         source = DATASETS[name]

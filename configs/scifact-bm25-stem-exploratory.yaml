@@ -1,0 +1,23 @@
+# Exploratory SciFact test run. Stem tokenizer, 120-word windows, overlap 20,
+# k1 1.5, b 0.75. This file records the run in
+# benchmarks/scifact/bm25-stem-chunk120-exploratory.json. The test split was
+# scored before train selection finished. Do not use it to choose settings.
+schema_version: 1
+dataset:
+  documents_path: ../.cache/beir/scifact
+  benchmark_path: ../.cache/beir/scifact/benchmark.json
+chunking:
+  chunk_size: 120
+  overlap: 20
+retrieval:
+  type: bm25
+  k1: 1.5
+  b: 0.75
+  tokenizer: stem
+evaluation:
+  recall_at_k: [10, 100]
+  ndcg_at_k: [10]
+  precision_at_k: [10]
+  stored_hits: 10
+output:
+  json_path: null

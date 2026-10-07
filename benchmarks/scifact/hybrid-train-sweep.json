@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "base_config": "scifact-hybrid-train.yaml",
+  "corpus_sha256": "0ae06d7ccabbb805d0018de482423ddd32dcc8aa60df71fe46cd74727888a70f",
+  "benchmark_sha256": "c96ff8d26e4bb5777a36b50ec0f189ae0104adfb22224ce21969112530361141",
+  "rows": [
+    {
+      "name": "base",
+      "axis": "base",
+      "field": "",
+      "value": "base",
+      "document_count": 5183,
+      "chunk_count": 5236,
+      "multi_chunk_documents": 46,
+      "question_count": 809,
+      "metrics": {
+        "mrr": 0.70643651523376,
+        "map": 0.6962140874643399,
+        "recall@10": 0.850247218788628,
+        "recall@100": 0.9550885867325917,
+        "ndcg@10": 0.7330767504671214,
+        "precision@10": 0.09517923362175525
+      },
+      "index_ms": 214644.77709599986,
+      "retrieval_p50_ms": 51.245122000182164,
+      "retriever": "hybrid",
+      "fusion": "minmax"
+    },
+    {
+      "name": "dense_weight=0",
+      "axis": "dense_weight",
+      "field": "retrieval.dense_weight",
+      "value": "0",
+      "document_count": 5183,
+      "chunk_count": 5236,
+      "multi_chunk_documents": 46,
+      "question_count": 809,
+      "metrics": {
+        "mrr": 0.6695303758872599,
+        "map": 0.6591360468166909,
+        "recall@10": 0.8196126905644829,
+        "recall@100": 0.9315615986814998,
+        "ndcg@10": 0.6971974365161454,
+        "precision@10": 0.09122373300370828
+      },
+      "index_ms": 14658.651103999546,
+      "retrieval_p50_ms": 54.034820000197215,
+      "retriever": "hybrid",
+      "fusion": "minmax"
+    },
+    {
+      "name": "dense_weight=0.25",
+      "axis": "dense_weight",
+      "field": "retrieval.dense_weight",
+      "value": "0.25",
+      "document_count": 5183,
+      "chunk_count": 5236,
+      "multi_chunk_documents": 46,
+      "question_count": 809,
+      "metrics": {
+        "mrr": 0.6835534988111883,
+        "map": 0.674209183940336,
+        "recall@10": 0.8418623815409971,
+        "recall@100": 0.9486608982282654,
+        "ndcg@10": 0.7144629045737987,
+        "precision@10": 0.09406674907292956
+      },
+      "index_ms": 14425.99194000013,
+      "retrieval_p50_ms": 54.5043740003166,
+      "retriever": "hybrid",
+      "fusion": "minmax"
+    },
+    {
+      "name": "dense_weight=0.75",
+      "axis": "dense_weight",
+      "field": "retrieval.dense_weight",
+      "value": "0.75",
+      "document_count": 5183,
+      "chunk_count": 5236,
+      "multi_chunk_documents": 46,
+      "question_count": 809,
+      "metrics": {
+        "mrr": 0.7026234166355243,
+        "map": 0.6939575958489869,
+        "recall@10": 0.8535434693036671,
+        "recall@100": 0.9602389781623404,
+        "ndcg@10": 0.7324570902148952,
+        "precision@10": 0.09653893695920891
+      },
+      "index_ms": 14456.65388299949,
+      "retrieval_p50_ms": 56.09962499966059,
+      "retriever": "hybrid",
+      "fusion": "minmax"
+    },
+    {
+      "name": "dense_weight=1",
+      "axis": "dense_weight",
+      "field": "retrieval.dense_weight",
+      "value": "1",
+      "document_count": 5183,
+      "chunk_count": 5236,
+      "multi_chunk_documents": 46,
+      "question_count": 809,
+      "metrics": {
+        "mrr": 0.6331904407317029,
+        "map": 0.6219388872090617,
+        "recall@10": 0.7917387721466831,
+        "recall@100": 0.9330449114132675,
+        "ndcg@10": 0.6627613015019506,
+        "precision@10": 0.08986402966625463
+      },
+      "index_ms": 14539.191032999952,
+      "retrieval_p50_ms": 53.13883800045005,
+      "retriever": "hybrid",
+      "fusion": "minmax"
+    }
+  ]
+}

@@ -39,6 +39,23 @@ run never emits a second chunk.
 
 ## SciFact
 
+The 300-query test split already informed the tables in this section, so those
+tables stay as exploratory results. They are not a train-selected system, and
+the chunked whitespace BM25 run is not Pyserini BEIR BM25. Chunk size, the
+stemming tokenizer, and the hybrid weight were chosen again on the 809-query
+train split only. The frozen chunked BM25 system is stem, 480-word windows,
+overlap 20, `k1` 1.5, `b` 0.75
+([bm25-train-selection.json](benchmarks/scifact/bm25-train-selection.json)).
+The frozen hybrid weight is `dense_weight` 0.5
+([hybrid-weight-train.json](benchmarks/scifact/hybrid-weight-train.json)).
+The comparison baseline is document-level BM25: one prepared field, stem,
+`k1` 0.9, `b` 0.4. Those configs are committed before the test split is
+scored again. An earlier exploratory test run used the stem tokenizer with
+120-word windows before that train grid finished
+([bm25-stem-chunk120-exploratory.json](benchmarks/scifact/bm25-stem-chunk120-exploratory.json),
+nDCG@10 0.6828). It is not the frozen setting and is not a headline. NFCorpus
+is scored only after the freeze, as a corpus that did not choose any setting.
+
 `ragbench dataset scifact` downloads the BEIR SciFact zip and rejects it unless
 its SHA-256 is `536e14446a0ba56ed1398ab1055f39fe852686ecad24a6306c80c490fa8e0165`.
 The committed length manifest is [benchmarks/scifact/corpus_stats.json](benchmarks/scifact/corpus_stats.json):
@@ -283,15 +300,17 @@ document production index.
 
 The committed BM25 baseline on the 12-document fixture has Recall@3 and
 Recall@5 of 1.0, and its document count equals its chunk count, so that
-configuration never splits a document. SciFact is the public measurement. It is one BEIR
-dataset, not the BEIR suite. FiQA and NFCorpus are not run here; a much larger
-passage corpus would multiply CPU embedding time without changing the method.
-Reported SciFact scores use whitespace word windows and then collapse chunk
-hits to documents. They are not a reproduction of the official BEIR leaderboard,
-which scores the dataset's own passages.
+configuration never splits a document. SciFact is one BEIR dataset. NFCorpus
+is a second corpus used only to repeat frozen settings. FiQA is not run.
+Reported scores collapse chunk hits to documents. They are not a reproduction
+of the official BEIR leaderboard or of Pyserini's Lucene BM25.
 
 SciFact test qrels in this export are all grade 1, so nDCG is binary on that
-run even though the metric accepts grades. Precision@K uses K as the denominator,
+run even though the metric accepts grades. NFCorpus test qrels include grades
+1 and 2. nDCG gain is `2^grade - 1`. `pytrec_eval`'s `ndcg_cut` uses the grade
+itself, so the two nDCG numbers match on binary labels and differ when a grade
+is greater than 1. MAP, recall, precision, and MRR treat any positive grade as
+relevant. Precision@K uses K as the denominator,
 so Precision@10 stays near 0.1 when a question has a single relevant document.
 MAP and MRR use the full document ranking. The JSON report stores only
 `stored_hits` documents per question.

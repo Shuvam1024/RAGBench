@@ -148,6 +148,12 @@ with no searchable tokens; allow empty token lists for individual chunks if
 the corpus contains searchable text elsewhere. A query that is only stopwords
 returns no hits under the stem tokenizer.
 
+`chunking.unit: words` is the overlapping word-window index. `chunking.unit:
+document` indexes each prepared document as one string. A document-level run
+is a different experiment from the chunked run. Neither setup is Lucene or the
+Pyserini BEIR flat index, even when `k1` and `b` are set to Pyserini's `--bm25`
+defaults of 0.9 and 0.4.
+
 Keep library score values, including zero and negative values. A nonblank query
 whose terms do not appear in the corpus produces tied scores and therefore a
 deterministic ranking; a query with no lexical tokens returns no hits. Tests

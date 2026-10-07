@@ -1,14 +1,14 @@
-# Train-split hybrid sweep base. Lexical settings are the train-grid winner:
-# stem, 480-word windows, overlap 20, k1 1.5, b 0.75. The sweep selected
-# dense_weight 0.5 (highest train nDCG@10; a tie would prefer the smaller
-# weight). See benchmarks/scifact/hybrid-weight-train.json. The test split
-# is not used here. MiniLM revision is pinned. Chunk texts longer than 256
-# tokens are truncated.
+# NFCorpus test split with the SciFact train-frozen hybrid settings.
+# Copied from configs/scifact-hybrid-selected.yaml. NFCorpus did not choose
+# chunk size, tokenizer, or dense_weight. Grades include 1 and 2; nDCG uses
+# exponential gain. A document's score is its best chunk. MiniLM revision is
+# pinned and inputs over 256 tokens are truncated.
 schema_version: 1
 dataset:
-  documents_path: ../.cache/beir/scifact
-  benchmark_path: ../.cache/beir/scifact/benchmark.train.json
+  documents_path: ../.cache/beir/nfcorpus
+  benchmark_path: ../.cache/beir/nfcorpus/benchmark.json
 chunking:
+  unit: words
   chunk_size: 480
   overlap: 20
 retrieval:

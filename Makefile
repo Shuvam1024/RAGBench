@@ -16,6 +16,7 @@ dataset-scifact:
 	$(UV) run ragbench dataset scifact --cache .cache/beir --manifest benchmarks/scifact/corpus_stats.json
 	$(UV) run ragbench dataset scifact --split train --cache .cache/beir --manifest benchmarks/scifact/corpus_stats_train.json
 
+# Original whitespace chunked reports. This does not run the frozen configs.
 eval-scifact: dataset-scifact
 	$(UV) run ragbench evaluate --config configs/scifact-bm25.yaml --output benchmarks/scifact/bm25.json --portable
 	$(UV) run ragbench evaluate --config configs/scifact-hybrid.yaml --output benchmarks/scifact/hybrid.json --portable

@@ -78,6 +78,9 @@ Discounted cumulative gain at K is the sum of `(2^grade - 1) / log2(rank + 1)`
 over the top K unique documents. Unlisted documents have grade 0. nDCG divides
 that sum by the ideal DCG of the highest grades, also truncated at K. Binary
 relevance is grade 1. Graded qrels are accepted when `relevance_grades` is set.
+`pytrec_eval`'s `ndcg_cut` uses the grade itself as the gain. The formulas
+match on binary labels and differ when a grade is greater than 1. Both values
+are stored per query in `tests/fixtures/pytrec_agreement.json`.
 
 ## Reciprocal rank and MRR
 

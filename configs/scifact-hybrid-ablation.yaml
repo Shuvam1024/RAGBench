@@ -1,8 +1,10 @@
-# Train-split sensitivity for dense_weight and fusion. The weight used in the
-# held-out test report is chosen by configs/scifact-hybrid-train-sweep.yaml.
-# dense_weight is ignored when fusion is rrf.
+# Exploratory dense_weight and fusion sweep on the SciFact test split.
+# The committed result is benchmarks/scifact/ablation-hybrid.json, including
+# dense_weight 0.75. That weight was chosen while looking at the test split
+# and is not the frozen setting. Train selection of the weight is
+# configs/scifact-hybrid-train-sweep.yaml. dense_weight is ignored for RRF.
 schema_version: 1
-base: scifact-hybrid-train.yaml
+base: scifact-hybrid.yaml
 axes:
   - name: dense_weight
     field: retrieval.dense_weight

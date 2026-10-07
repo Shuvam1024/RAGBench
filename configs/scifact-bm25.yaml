@@ -1,4 +1,9 @@
-# SciFact test split. Prepare it first:
+# Original chunked BM25 on the SciFact test split. Tokenizer is the default
+# whitespace \w+ split. Windows are 120 words with overlap 20. k1=1.5, b=0.75.
+# Indexed field: prepared title and body joined by one newline.
+# This is a RAG-style chunked index. It is not Pyserini BEIR BM25 and is not
+# the train-selected system. CI compares this file with benchmarks/scifact/bm25.json.
+# Prepare the corpus first:
 #   ragbench dataset scifact --cache .cache/beir
 schema_version: 1
 dataset:
@@ -11,9 +16,6 @@ retrieval:
   type: bm25
   k1: 1.5
   b: 0.75
-  # Snowball English stemmer after the vendored English stopword list.
-  # The default ``whitespace`` tokenizer is the older ``\w+`` baseline.
-  tokenizer: stem
 evaluation:
   recall_at_k: [10, 100]
   ndcg_at_k: [10]

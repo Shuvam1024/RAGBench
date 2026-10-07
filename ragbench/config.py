@@ -25,12 +25,16 @@ class DatasetConfig(ConfigModel):
 
 
 class ChunkingConfig(ConfigModel):
+    # ``words`` is the historical overlapping word-window chunker. ``document``
+    # indexes each document as one string. The default keeps existing configs
+    # on word windows.
+    unit: Literal["words", "document"] = "words"
     chunk_size: PositiveInt = 120
     overlap: NonnegativeInt = 20
 
     @model_validator(mode="after")
     def validate_overlap(self) -> Self:
-        if self.overlap >= self.chunk_size:
+        if self.unit == "words" and self.overlap >= self.chunk_size:
             raise ValueError("overlap must be smaller than chunk_size")
         return self
 

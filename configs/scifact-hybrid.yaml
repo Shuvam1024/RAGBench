@@ -1,3 +1,5 @@
+# Exploratory test-split hybrid: whitespace BM25, 120-word windows,
+# dense_weight 0.5, min-max fusion. Not the train-frozen system.
 schema_version: 1
 dataset:
   documents_path: ../.cache/beir/scifact
@@ -14,7 +16,6 @@ retrieval:
     type: bm25
     k1: 1.5
     b: 0.75
-    tokenizer: stem
   dense:
     type: dense
     model_name: sentence-transformers/all-MiniLM-L6-v2

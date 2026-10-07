@@ -1,0 +1,21 @@
+# Same document-level BM25 as configs/scifact-bm25-document.yaml, scored on
+# the SciFact train split only as a reference. Its parameters are not chosen
+# here. Train qrels: https://ir-datasets.com/beir.html#beir/scifact/train
+schema_version: 1
+dataset:
+  documents_path: ../.cache/beir/scifact
+  benchmark_path: ../.cache/beir/scifact/benchmark.train.json
+chunking:
+  unit: document
+retrieval:
+  type: bm25
+  k1: 0.9
+  b: 0.4
+  tokenizer: stem
+evaluation:
+  recall_at_k: [10, 100]
+  ndcg_at_k: [10]
+  precision_at_k: [10]
+  stored_hits: 10
+output:
+  json_path: null

@@ -1,0 +1,16 @@
+# Paired uncertainty recipe. max_drop is 1.0 so a lower candidate still
+# produces the bootstrap interval. This is not the CI quality gate
+# (configs/scifact-thresholds.yaml, gate_on_ci false, point-drop 0).
+max_drop:
+  mrr: 1.0
+  map: 1.0
+  recall@10: 1.0
+  recall@100: 1.0
+  ndcg@10: 1.0
+max_increase_ratio: {}
+statistics:
+  seed: 0
+  bootstrap_samples: 10000
+  permutation_samples: 10000
+  confidence: 0.95
+  gate_on_ci: false

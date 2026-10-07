@@ -1,6 +1,7 @@
-# SciFact train split, used only to choose settings. Report held-out numbers
-# from configs/scifact-bm25.yaml. Prepare the split first:
-#   ragbench dataset scifact --split train --cache .cache/beir
+# Historical chunked BM25 on the SciFact train split (whitespace tokenizer,
+# 120-word windows). scripts/select_scifact_train.py varies tokenizer and
+# chunk size from this file. It does not read the test split.
+# Train qrels: https://ir-datasets.com/beir.html#beir/scifact/train
 schema_version: 1
 dataset:
   documents_path: ../.cache/beir/scifact
@@ -12,7 +13,6 @@ retrieval:
   type: bm25
   k1: 1.5
   b: 0.75
-  tokenizer: stem
 evaluation:
   recall_at_k: [10, 100]
   ndcg_at_k: [10]

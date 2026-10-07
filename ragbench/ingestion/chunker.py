@@ -25,30 +25,47 @@ def count_words(text: str) -> int:
     return len(re.findall(r"\S+", text))
 
 
+def _chunk_id(identity: list[object]) -> str:
+    digest = hashlib.sha256(
+        json.dumps(identity, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    return f"chunk-v1-{digest}"
+
+
 def chunk_document(document: Document, config: ChunkingConfig) -> list[Chunk]:
-    """Advance by size minus overlap; stop once a window reaches the final word."""
+    """Advance by size minus overlap; stop once a window reaches the final word.
+
+    ``unit: document`` emits the whole document as one chunk. Word-window IDs
+    stay on the historical identity so existing chunk fingerprints do not move.
+    """
     words = list(re.finditer(r"\S+", document.text))
+    if config.unit == "document":
+        if not words:
+            return []
+        return [
+            Chunk(
+                id=_chunk_id([document.id, document.content_sha256, "document"]),
+                document_id=document.id,
+                text=document.text,
+                start_word=0,
+                end_word=len(words),
+            )
+        ]
     chunks: list[Chunk] = []
     for start in range(0, len(words), config.chunk_size - config.overlap):
         end = min(start + config.chunk_size, len(words))
-        identity = [
-            document.id,
-            document.content_sha256,
-            config.chunk_size,
-            config.overlap,
-            start,
-            end,
-        ]
-        digest = hashlib.sha256(
-            json.dumps(
-                identity,
-                ensure_ascii=False,
-                separators=(",", ":"),
-            ).encode("utf-8")
-        ).hexdigest()
         chunks.append(
             Chunk(
-                id=f"chunk-v1-{digest}",
+                id=_chunk_id(
+                    [
+                        document.id,
+                        document.content_sha256,
+                        config.chunk_size,
+                        config.overlap,
+                        start,
+                        end,
+                    ]
+                ),
                 document_id=document.id,
                 text=document.text[words[start].start() : words[end - 1].end()],
                 start_word=start,

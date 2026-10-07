@@ -1,5 +1,6 @@
-# Choose dense_weight on the SciFact train split. Do not use the test split
-# to pick the weight. The base value is skipped, so 0.5 is the "base" row.
+# Choose dense_weight on the SciFact train split after the BM25 grid.
+# Winner: maximum train nDCG@10. Ties prefer the smaller dense_weight.
+# The base value is skipped, so 0.5 is the "base" row. Do not read the test split.
 schema_version: 1
 base: scifact-hybrid-train.yaml
 axes:

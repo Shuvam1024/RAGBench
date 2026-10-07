@@ -108,12 +108,26 @@ uv run ragbench sweep --config configs/scifact-ablation.yaml --output results/ab
 
 The dataset command downloads the BEIR SciFact zip and rejects it unless the
 SHA-256 matches. `--split` defaults to `test` and still writes `benchmark.json`.
-`--split train` writes `benchmark.train.json` beside it (about 809 queries) and
-does not replace the test benchmark. Dense and hybrid configs need the `dense`
-extra and a Hugging Face cache. Reports under `benchmarks/scifact/` are the
-committed measurements. SciFact BM25 configs that set `tokenizer: stem` use
-Snowball stemming and a fixed English stopword list; omitting `tokenizer`
-keeps the original `\\w+` tokenizer.
+`--split train` writes `benchmark.train.json` beside it (809 queries; see
+[ir-datasets](https://ir-datasets.com/beir.html#beir/scifact/train)) and does
+not replace the test benchmark. `scripts/select_scifact_train.py` chooses
+chunk size and the BM25 tokenizer on that train split.
+`scripts/lock_dense_weight.py` then locks `dense_weight` from the train hybrid
+sweep. Commit those frozen configs before evaluating the test split again.
+Earlier test-split runs, including the whitespace ablation and the stem
+120-word report, are exploratory and do not choose the frozen settings.
+
+`chunking.unit: document` indexes each prepared document once. That
+document-level config is the pre-specified comparison baseline. It is not the
+chunked RAG setup and is not a Pyserini reproduction
+([Pyserini BEIR 2CR](https://castorini.github.io/pyserini/2cr/beir.html)).
+Omitting `tokenizer` keeps the original `\w+` tokenizer. Dense and hybrid
+configs need the `dense` extra and a Hugging Face cache.
+
+`ragbench dataset nfcorpus` prepares a second BEIR corpus
+([BEIR NFCorpus](https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/nfcorpus.zip)).
+Its test qrels are used only to repeat the frozen SciFact settings. Do not
+select chunk size, tokenizer, or fusion weight on NFCorpus.
 
 ## Tests
 

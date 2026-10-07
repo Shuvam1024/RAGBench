@@ -167,6 +167,11 @@ def test_train_split_is_written_beside_the_default_benchmark(tmp_path: Path) -> 
     assert resolve_split(DATASETS["scifact"], "train") == "train"
     with pytest.raises(ValueError, match="not available"):
         resolve_split(DATASETS["scifact"], "dev")
+    nfcorpus = DATASETS["nfcorpus"]
+    assert nfcorpus.sha256 == "efe5be03f8c5b86a5870102d0599d227c8c6e2484328e68c6522560385671b0b"
+    assert nfcorpus.splits == ("train", "dev", "test")
+    assert resolve_split(nfcorpus, None) == "test"
+    assert resolve_split(nfcorpus, "dev") == "dev"
 
 
 def test_unknown_dataset(tmp_path: Path) -> None:

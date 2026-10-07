@@ -30,8 +30,11 @@ optionally set `HF_HUB_OFFLINE=1` after the model is cached.
   precision, and nDCG, duplicate hits, multiple relevant documents, no matches,
   and invalid metric arguments.
 - `test_statistics.py`: seeded bootstrap intervals and sign-flip p-values.
-- `test_dataset.py`: SciFact zip checksum, path safety, JSONL ordering, grade
-  handling on a synthetic archive, and train/test benchmark filenames.
+- `test_dataset.py`: SciFact and NFCorpus zip checksums, path safety, JSONL
+  ordering, grade handling on a synthetic archive, and train/test benchmark
+  filenames. NFCorpus is a confirmation corpus, not a tuning split.
+- `test_train_selection.py`: train-split tie breaks for chunk size, tokenizer,
+  and hybrid dense weight.
 - `test_sweep.py`: a one-factor sweep changes only the named axis and skips the
   base value.
 - `test_benchmark.py`: nonblank fields, distinct labels and IDs, supported
