@@ -16,6 +16,7 @@ chosen on the train split only. Nothing on this page was selected on test or dev
 - [Train selection](#train-selection)
 - [Cross-encoder second stage](#cross-encoder-second-stage)
 - [Held-out SciFact test](#held-out-scifact-test)
+- [Post-hoc parameter ablation](#post-hoc-parameter-ablation)
 - [NFCorpus confirmation](#nfcorpus-confirmation)
 - [Exploratory test-split runs](#exploratory-test-split-runs)
 - [SciFact claim verdicts](#scifact-claim-verdicts)
@@ -51,6 +52,7 @@ every chunk. It is a different measurement from a top-K pipeline latency.
 | Original chunked | Exploratory test run, not a CI gate | whitespace `\w+` | 120-word windows, overlap 20 | k1 1.5, b 0.75 | `configs/scifact-bm25.yaml` |
 | Selected chunked | Chosen on train, scored once on test, CI gate | stem | 480-word windows, overlap 20 | k1 1.5, b 0.75 | `configs/scifact-bm25-selected.yaml` |
 | Document-level | Pre-specified baseline and CI gate | stem | one string per document | k1 0.9, b 0.4 | `configs/scifact-bm25-document.yaml` |
+| Document-level, selected parameters | Post-hoc ablation after the test report, not a selection | stem | one string per document | k1 1.5, b 0.75 | `configs/scifact-bm25-document-k1.5-b0.75.yaml` |
 | Selected hybrid | Weight chosen on train after the lexical freeze | stem, same windows as selected chunked | 480-word windows, overlap 20 | k1 1.5, b 0.75 | min-max, dense_weight 0.5 |
 
 `chunking.unit: document` does not apply the chunk-size default stored beside
@@ -133,7 +135,7 @@ committed.
 | 100 | 0.712 | 0.831 | 0.955 | 0.955 | 0.675 | 0.685 |
 
 The frozen hybrid's train nDCG@10 is 0.733.
-The train report for depth 20 truncated 1,966 of 16,180 query/document pairs. Full-ranking retrieval p95 was 298 ms, rerank p95 was 2,081 ms, and the top-K pipeline p95 was 2,302 ms.
+The train report for depth 20 truncated 1,966 of 16,180 query/document pairs. Full-ranking retrieval p95 was 245 ms, rerank p95 was 1,993 ms, and the top-K pipeline p95 was 2,171 ms.
 <!-- tables:end rerank-train -->
 
 Recall@100 on a reranked list is the recall of the returned documents.
@@ -173,7 +175,7 @@ the frozen selected BM25 config with a zero point-drop in
 `configs/scifact-thresholds.yaml`. The original chunk-120 report is exploratory.
 
 <!-- tables:begin chunk-window -->
-Only 46 of 5,183 SciFact documents and 26 of 3,633 NFCorpus documents are longer than 480 words, so the selected chunked index is nearly one chunk per document. The test nDCG@10 gap of +0.017 versus document-level BM25 comes mostly from the BM25 parameters (1.50/0.75 vs 0.90/0.40). On train the two tie at 0.6972 vs 0.6957.
+Only 46 of 5,183 SciFact documents and 26 of 3,633 NFCorpus documents are longer than 480 words, so the selected chunked index is nearly one chunk per document. A post-hoc ablation, scored after the test numbers were reported and not used to select a setting, uses that document-level index with parameters 1.50/0.75. Its test nDCG@10 is 0.6910. Document-level BM25 at 0.90/0.40 is 0.674, and the parameter change is +0.017. The selected chunked index scores 0.6907. Those two differ on 5 of 300 queries, so chunking adds about nothing on SciFact once the parameters match. On train the frozen pair tie at 0.6972 vs 0.6957.
 <!-- tables:end chunk-window -->
 
 Selected chunked BM25 minus the document-level baseline
@@ -190,6 +192,54 @@ Selected chunked BM25 minus the document-level baseline
 
 Above zero: nDCG@10, Recall@10. Intervals that include zero: Recall@100, MAP, MRR.
 <!-- tables:end scifact-doc-vs-selected -->
+
+### Post-hoc parameter ablation
+
+This comparison was scored after the test numbers above were already reported.
+It is not a train selection, and it does not change the frozen document-level
+baseline or the selected chunked index. The new index is document-level BM25
+with the selected parameters (1.50 and 0.75) and the same stem tokenizer
+(`configs/scifact-bm25-document-k1.5-b0.75.yaml`).
+
+Document-level BM25 at those parameters minus the frozen document-level baseline
+([document-vs-bm25-k15.json](benchmarks/scifact/document-vs-bm25-k15.json)):
+
+<!-- tables:begin scifact-doc-vs-k15 -->
+| Metric | Mean delta | 95% CI | Sign-flip p |
+| --- | --- | --- | --- |
+| nDCG@10 | +0.017 | [+0.005, +0.028] | 0.0045 |
+| Recall@10 | +0.037 | [+0.016, +0.061] | 0.0006 |
+| Recall@100 | -0.003 | [-0.010, +0.000] | 1.0000 |
+| MAP | +0.008 | [-0.003, +0.020] | 0.1765 |
+| MRR | +0.010 | [-0.003, +0.023] | 0.1522 |
+
+Above zero: nDCG@10, Recall@10. Intervals that include zero: Recall@100, MAP, MRR.
+
+Per-query nDCG@10 differs on 51 of 300 queries.
+<!-- tables:end scifact-doc-vs-k15 -->
+
+Selected chunked BM25 minus that ablation
+([bm25-k15-vs-selected.json](benchmarks/scifact/bm25-k15-vs-selected.json)).
+Positive delta would mean chunking scored higher:
+
+<!-- tables:begin scifact-k15-vs-selected -->
+| Metric | Mean delta | 95% CI | Sign-flip p |
+| --- | --- | --- | --- |
+| nDCG@10 | +0.000 | [-0.001, +0.000] | 0.0621 |
+| Recall@10 | +0.000 | [+0.000, +0.000] | 1.0000 |
+| Recall@100 | +0.000 | [+0.000, +0.000] | 1.0000 |
+| MAP | +0.000 | [-0.001, +0.000] | 0.0222 |
+| MRR | +0.000 | [-0.001, +0.000] | 0.0166 |
+
+Below zero: nDCG@10, MAP, MRR. Intervals that include zero: Recall@10, Recall@100. nDCG@10 is below zero, but its upper bound rounds to +0.000. MAP is below zero, but its upper bound rounds to +0.000. MRR is below zero, but its upper bound rounds to +0.000.
+
+Per-query nDCG@10 differs on 5 of 300 queries.
+<!-- tables:end scifact-k15-vs-selected -->
+
+The nDCG@10 interval is just below zero, and its sign-flip p-value does not
+fall under 0.05. MAP and MRR are slightly lower. At the displayed precision
+the chunking deltas are 0.000, so the gap versus the frozen document-level
+baseline is the parameter change, not the 480-word windows.
 
 Selected hybrid minus the same document-level baseline
 ([document-vs-hybrid-selected.json](benchmarks/scifact/document-vs-hybrid-selected.json)):
@@ -230,7 +280,7 @@ on the reranked list is lower because the returned list stops at `candidate_k`.
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Reranked top 20 | 0.840 | 0.890 | 0.702 | 0.094 | 0.657 | 0.670 | 0.952 |
 
-The run truncated 767 of 6,000 query/document pairs. Full-ranking retrieval p95 was 248 ms, rerank p95 was 1,995 ms, and the top-K pipeline p95 was 2,168 ms.
+The run truncated 767 of 6,000 query/document pairs. Full-ranking retrieval p95 was 243 ms, rerank p95 was 1,961 ms, and the top-K pipeline p95 was 2,114 ms.
 <!-- tables:end scifact-rerank -->
 
 Reranked candidates minus the selected hybrid
@@ -289,6 +339,49 @@ Above zero: nDCG@10. Intervals that include zero: Recall@10, Recall@100, MAP, MR
 
 That does not confirm a general advantage for the 480-word stem index over
 document-level BM25.
+
+The same post-hoc ablation, document-level BM25 with parameters 1.50 and 0.75,
+was scored on this corpus after the frozen numbers were reported. It was not
+used to choose a setting
+(`configs/nfcorpus-bm25-document-k1.5-b0.75.yaml`).
+
+That ablation minus the frozen document-level baseline
+([document-vs-bm25-k15.json](benchmarks/nfcorpus/document-vs-bm25-k15.json)):
+
+<!-- tables:begin nfcorpus-doc-vs-k15 -->
+| Metric | Mean delta | 95% CI | Sign-flip p |
+| --- | --- | --- | --- |
+| nDCG@10 | +0.004 | [-0.001, +0.008] | 0.0975 |
+| Recall@10 | +0.000 | [-0.004, +0.004] | 0.8648 |
+| Recall@100 | +0.001 | [-0.001, +0.004] | 0.4209 |
+| MAP | +0.000 | [-0.004, +0.002] | 0.8198 |
+| MRR | +0.010 | [-0.005, +0.024] | 0.1819 |
+
+Intervals that include zero: nDCG@10, Recall@10, Recall@100, MAP, MRR.
+
+Per-query nDCG@10 differs on 114 of 323 queries.
+<!-- tables:end nfcorpus-doc-vs-k15 -->
+
+Selected chunked BM25 minus that ablation
+([bm25-k15-vs-selected.json](benchmarks/nfcorpus/bm25-k15-vs-selected.json)):
+
+<!-- tables:begin nfcorpus-k15-vs-selected -->
+| Metric | Mean delta | 95% CI | Sign-flip p |
+| --- | --- | --- | --- |
+| nDCG@10 | +0.001 | [+0.000, +0.003] | 0.0789 |
+| Recall@10 | +0.003 | [+0.000, +0.007] | 0.0273 |
+| Recall@100 | -0.002 | [-0.010, +0.005] | 0.7118 |
+| MAP | +0.000 | [+0.000, +0.001] | 0.6297 |
+| MRR | +0.002 | [+0.000, +0.004] | 0.0462 |
+
+Above zero: Recall@10, MRR. Intervals that include zero: nDCG@10, Recall@100, MAP. Recall@10 is above zero, but its lower bound rounds to +0.000. MRR is above zero, but its lower bound rounds to +0.000.
+
+Per-query nDCG@10 differs on 12 of 323 queries.
+<!-- tables:end nfcorpus-k15-vs-selected -->
+
+On this corpus the parameter change does not clear zero, and neither does the
+nDCG difference between the chunked index and the matched document-level
+parameters. Recall@10 is slightly higher for the chunked index.
 
 Selected hybrid minus document-level BM25
 ([document-vs-hybrid-selected.json](benchmarks/nfcorpus/document-vs-hybrid-selected.json)):

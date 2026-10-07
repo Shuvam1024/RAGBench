@@ -67,6 +67,7 @@ def test_held_out_scifact_reports_share_the_test_fingerprint() -> None:
     baseline = _load("benchmarks/scifact/bm25.json")
     for path in (
         "benchmarks/scifact/bm25-document.json",
+        "benchmarks/scifact/bm25-document-k1.5-b0.75.json",
         "benchmarks/scifact/bm25-selected.json",
         "benchmarks/scifact/hybrid-selected.json",
         "benchmarks/scifact/rerank-selected.json",
