@@ -350,5 +350,7 @@ multiply CPU embedding time without changing the method.
 sentences. `datasets/scifact_claims.py` reads the AllenAI claim files and checks
 them against BEIR query IDs. BEIR qrels stay retrieval grades. `evaluation/nli.py`
 loads a pinned NLI model, and tests can inject a scorer. `evaluation/verdict.py`
-selects the decision rule on the train claims. The public SciFact test labels
-are withheld, so the held-out labeled split is the dev claims.
+selects the decision rule on the train claims. The frozen rule is `doc_k` 1,
+`sentence_k` 2, and `min_confidence` 0.7. The public SciFact test labels
+are withheld, so the held-out labeled split is the dev claims. Dev is scored
+once after that choice.

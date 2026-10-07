@@ -426,8 +426,49 @@ higher. `doc_k` 3 is lower on train macro-F1. The majority-SUPPORT baseline on
 the same train claims has accuracy 0.4104, macro-F1 0.1940, and mean sentence
 F1 0.0142. The grid scored 23,066 sentence/claim pairs in 840.2 s. The winning
 depth, scored on its own, was 7,656 pairs in 279.8 s. None were truncated.
-Document-level retrieval p95 was 17.9 ms. One PyTorch thread. Dev is not scored
-in the commit that freezes this table.
+Document-level retrieval p95 was 17.9 ms. One PyTorch thread.
+
+### Held-out SciFact dev
+
+300 labeled claims, scored once after the train freeze. These are the same
+claim IDs the retrieval reports call the SciFact test split. The public SciFact
+test file is still unscored. Gold counts are SUPPORT 124, CONTRADICT 64, and
+NEI 112.
+
+| | Accuracy | Macro-F1 | Sentence P | Sentence R | Sentence F1 |
+| --- | --- | --- | --- | --- | --- |
+| Majority SUPPORT | 0.4133 | 0.1950 | 0.0167 | 0.0100 | 0.0115 |
+| Frozen NLI | 0.4933 | 0.4767 | 0.4100 | 0.3815 | 0.3841 |
+
+Class F1 for the frozen NLI is SUPPORT 0.4025, CONTRADICT 0.4713, and NEI
+0.5563. The majority baseline's class F1 is SUPPORT 0.5849, CONTRADICT 0.0000,
+and NEI 0.0000. It always predicts SUPPORT, so that class F1 is higher and the
+other two are zero. Macro-F1 is the unweighted mean of the three.
+
+Frozen NLI minus the majority baseline
+([verdict-baseline-vs-nli.json](benchmarks/scifact/verdict-baseline-vs-nli.json)),
+seed 0, 10,000 bootstrap resamples, 10,000 sign-flips, 95% interval:
+
+| Metric | Mean delta | 95% CI | Sign-flip p |
+| --- | --- | --- | --- |
+| Accuracy | +0.0800 | [-0.0133, +0.1700] | 0.1125 |
+| Macro-F1 | +0.2818 | [+0.2163, +0.3465] | none |
+| Sentence precision | +0.3933 | [+0.3383, +0.4483] | 0.0001 |
+| Sentence recall | +0.3715 | [+0.3190, +0.4247] | 0.0001 |
+| Sentence F1 | +0.3726 | [+0.3203, +0.4247] | 0.0001 |
+
+The accuracy interval includes zero. Macro-F1 was the train selection metric.
+It is recomputed on each resampled claim list, so that row has no sign-flip
+p-value. Sentence precision, recall, and F1 are means of the per-claim evidence
+scores against the gold rationale sentences.
+
+Micro scores pool sentence counts. Both-empty claims add nothing. The frozen
+NLI micro precision, recall, and F1 are 0.3189, 0.1612, and 0.2142. The
+baseline's are 0.0167, 0.0137, and 0.0150.
+
+On the dev run, document-level retrieval p95 was 25.7 ms. The NLI pass scored
+2,853 pairs in 110.4 s. None were truncated. One PyTorch thread. This
+comparison file has no `passed` field. It is a measurement, not a quality gate.
 
 ## Judge sample
 
