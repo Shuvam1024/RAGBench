@@ -215,6 +215,30 @@ Selected hybrid minus selected chunked BM25, same windows
 
 The Recall@10 interval for that fusion comparison includes zero.
 
+The frozen cross-encoder reorders the top 20 hybrid documents
+([rerank-selected.json](benchmarks/scifact/rerank-selected.json)). Candidate
+Recall@100 is 0.9517, the same value as the selected hybrid's Recall@100.
+Reranked Recall@10 is 0.8396, Recall@100 is 0.8897, nDCG@10 is 0.7015, P@10
+is 0.0940, MAP is 0.6565, and MRR is 0.6696. Recall@100 here is lower because
+the returned list has 20 documents. The run truncated 767 of 6,000
+query/document pairs. Full-ranking retrieval p95 was 247.6 ms, rerank p95 was
+1,995.1 ms, and the top-K pipeline p95 was 2,167.9 ms.
+
+Reranked top 20 minus the selected hybrid
+([hybrid-vs-rerank.json](benchmarks/scifact/hybrid-vs-rerank.json)):
+
+| Metric | Mean delta | 95% CI | Sign-flip p |
+| --- | --- | --- | --- |
+| nDCG@10 | -0.0279 | [-0.0543, -0.0010] | 0.0424 |
+| Recall@10 | -0.0143 | [-0.0411, +0.0130] | 0.3180 |
+| Recall@100 | -0.0620 | [-0.0897, -0.0367] | 0.0001 |
+| MAP | -0.0329 | [-0.0642, -0.0028] | 0.0317 |
+| MRR | -0.0306 | [-0.0624, +0.0014] | 0.0619 |
+
+nDCG@10 and MAP are lower. The Recall@100 drop is the 20-document cutoff.
+The Recall@10 and MRR intervals include zero. This checkpoint was not
+fine-tuned on SciFact.
+
 ### NFCorpus confirmation
 
 `ragbench dataset nfcorpus` checks SHA-256

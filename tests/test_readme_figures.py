@@ -11,6 +11,7 @@ REPORTS = (
     "benchmarks/scifact/bm25-document.json",
     "benchmarks/scifact/bm25-selected.json",
     "benchmarks/scifact/hybrid-selected.json",
+    "benchmarks/scifact/rerank-selected.json",
     "benchmarks/scifact/bm25-stem-chunk120-exploratory.json",
     "benchmarks/nfcorpus/bm25-whitespace.json",
     "benchmarks/nfcorpus/bm25-document.json",
@@ -22,6 +23,7 @@ COMPARISONS = (
     "benchmarks/scifact/document-vs-bm25-selected.json",
     "benchmarks/scifact/document-vs-hybrid-selected.json",
     "benchmarks/scifact/bm25-selected-vs-hybrid.json",
+    "benchmarks/scifact/hybrid-vs-rerank.json",
     "benchmarks/nfcorpus/document-vs-bm25-selected.json",
     "benchmarks/nfcorpus/document-vs-hybrid-selected.json",
 )
@@ -64,6 +66,7 @@ def test_held_out_scifact_reports_share_the_test_fingerprint() -> None:
         "benchmarks/scifact/bm25-document.json",
         "benchmarks/scifact/bm25-selected.json",
         "benchmarks/scifact/hybrid-selected.json",
+        "benchmarks/scifact/rerank-selected.json",
     ):
         report = _load(path)
         assert report["benchmark_sha256"] == baseline["benchmark_sha256"]
