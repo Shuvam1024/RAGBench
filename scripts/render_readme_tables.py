@@ -925,6 +925,66 @@ def render_verdict_counts() -> str:
     )
 
 
+_SMALL_COUNTS = (
+    "zero",
+    "one",
+    "two",
+    "three",
+    "four",
+    "five",
+    "six",
+    "seven",
+    "eight",
+    "nine",
+    "ten",
+    "eleven",
+    "twelve",
+)
+# Committed JSON files that name a baseline run. Storage is checked, not assumed.
+RETRIEVAL_COMPARISONS = (
+    "benchmarks/scifact/document-vs-bm25-k15.json",
+    "benchmarks/scifact/bm25-k15-vs-selected.json",
+    "benchmarks/nfcorpus/document-vs-bm25-k15.json",
+    "benchmarks/nfcorpus/bm25-k15-vs-selected.json",
+    "benchmarks/scifact/hybrid-vs-rerank.json",
+    "benchmarks/scifact/document-vs-bm25-selected.json",
+    "benchmarks/scifact/document-vs-hybrid-selected.json",
+    "benchmarks/scifact/bm25-selected-vs-hybrid.json",
+    "benchmarks/scifact/bm25-vs-hybrid-w075.json",
+    "benchmarks/nfcorpus/document-vs-bm25-selected.json",
+    "benchmarks/nfcorpus/document-vs-hybrid-selected.json",
+    "benchmarks/nfcorpus/bm25-selected-vs-hybrid.json",
+)
+
+
+def _count_word(count: int) -> str:
+    if count < 0 or count >= len(_SMALL_COUNTS):
+        raise ValueError(f"Cannot spell count {count}")
+    return _SMALL_COUNTS[count]
+
+
+def _english_list(items: list[str]) -> str:
+    if len(items) == 1:
+        return items[0]
+    return ", ".join(items[:-1]) + ", and " + items[-1]
+
+
+def _recipe_coverage(stored: list[str], missing: list[str]) -> str:
+    total = _count_word(len(stored) + len(missing))
+    if not stored:
+        return f"None of the {total} committed retrieval comparison files store that recipe."
+    listed = _english_list([f"`{path}`" for path in stored])
+    sentence = (
+        f"{_count_word(len(stored)).capitalize()} of the {total} committed retrieval "
+        f"comparison files store that recipe: {listed}."
+    )
+    if len(missing) == 1:
+        return sentence + " The other one does not."
+    if missing:
+        return sentence + f" The other {_count_word(len(missing))} do not."
+    return sentence
+
+
 def render_paired_settings() -> str:
     recipe = "configs/paired-uncertainty.yaml"
     verdict = "benchmarks/scifact/verdict-baseline-vs-nli.json"
@@ -937,13 +997,39 @@ def render_paired_settings() -> str:
     for recipe_field, verdict_field in pairs:
         if lookup(load_report(recipe), recipe_field) != lookup(load_report(verdict), verdict_field):
             raise ValueError(f"{recipe} {recipe_field} does not match {verdict} {verdict_field}")
+    if lookup(load_report(recipe), "statistics.gate_on_ci") is not False:
+        raise ValueError(f"{recipe} does not resolve to point_drop")
+    expected = {
+        "seed": lookup(load_report(verdict), "seed"),
+        "bootstrap_samples": lookup(load_report(verdict), "bootstrap_samples"),
+        "permutation_samples": lookup(load_report(verdict), "permutation_samples"),
+        "confidence": lookup(load_report(verdict), "confidence"),
+        "gate_mode": "point_drop",
+    }
+    found = sorted(
+        str(path.relative_to(ROOT))
+        for path in (ROOT / "benchmarks").rglob("*.json")
+        if "baseline_run_id" in load_report(str(path.relative_to(ROOT)))
+    )
+    if found != sorted(RETRIEVAL_COMPARISONS):
+        raise ValueError("Committed retrieval comparisons do not match RETRIEVAL_COMPARISONS")
+    stored: list[str] = []
+    missing: list[str] = []
+    for path in RETRIEVAL_COMPARISONS:
+        stats = load_report(path).get("statistics")
+        if stats is None:
+            missing.append(path)
+            continue
+        if stats != expected:
+            raise ValueError(f"{path} statistics do not match the paired recipe")
+        stored.append(path)
     return (
         "Paired deltas use seed "
         f"{cite(verdict, 'seed', 'count')}, "
         f"{cite(verdict, 'bootstrap_samples', 'count')} bootstrap resamples, "
         f"{cite(verdict, 'permutation_samples', 'count')} sign-flips, and a "
         f"{cite(verdict, 'confidence', 'percent')}% percentile interval. "
-        "Committed retrieval comparison files do not store that recipe. "
+        f"{_recipe_coverage(stored, missing)} "
         "A newly written comparison does, when its thresholds set statistics. "
         "The recipe matches `configs/paired-uncertainty.yaml` and the verdict comparison."
     )
@@ -1156,6 +1242,8 @@ def strip_table_headers(region: str) -> str:
 def uncited_digits(region: str, shown: list[str]) -> str:
     """Digits left after cited displays and metric labels are removed."""
     text = strip_table_headers(region)
+    # Inline code names files. Digits there are part of the path, not a measurement.
+    text = re.sub(r"`[^`]*`", "", text)
     for fragment in sorted(LABEL_FRAGMENTS, key=len, reverse=True):
         text = text.replace(fragment, "")
     for token in sorted(set(shown), key=len, reverse=True):

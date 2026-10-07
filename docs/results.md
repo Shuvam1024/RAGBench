@@ -166,7 +166,7 @@ Sources: [bm25.json](../benchmarks/scifact/bm25.json),
 [hybrid-selected.json](../benchmarks/scifact/hybrid-selected.json).
 
 <!-- tables:begin paired-settings -->
-Paired deltas use seed 0, 10,000 bootstrap resamples, 10,000 sign-flips, and a 95% percentile interval. Committed retrieval comparison files do not store that recipe. A newly written comparison does, when its thresholds set statistics. The recipe matches `configs/paired-uncertainty.yaml` and the verdict comparison.
+Paired deltas use seed 0, 10,000 bootstrap resamples, 10,000 sign-flips, and a 95% percentile interval. Five of the twelve committed retrieval comparison files store that recipe: `benchmarks/scifact/document-vs-bm25-k15.json`, `benchmarks/scifact/bm25-k15-vs-selected.json`, `benchmarks/nfcorpus/document-vs-bm25-k15.json`, `benchmarks/nfcorpus/bm25-k15-vs-selected.json`, and `benchmarks/scifact/hybrid-vs-rerank.json`. The other seven do not. A newly written comparison does, when its thresholds set statistics. The recipe matches `configs/paired-uncertainty.yaml` and the verdict comparison.
 <!-- tables:end paired-settings -->
 Positive delta means the candidate is higher. That file sets `max_drop` to 1.0
 so the comparison records the interval. `passed` in those files is a measurement
