@@ -1,7 +1,7 @@
 # Benchmark format and metric examples
 
 This is the implemented version 1 contract. Pydantic validates the input before
-the runner builds an index. Models live in `ragbench/evaluation/models.py`.
+the runner builds an index. Models live in `ragstat/evaluation/models.py`.
 
 ## JSON structure
 

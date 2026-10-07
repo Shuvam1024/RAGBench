@@ -335,7 +335,7 @@ approximate search would require separate scale-driven tradeoffs.
 
 ## 13. Public BEIR materialization
 
-`ragbench dataset scifact` downloads the SciFact zip, checks its SHA-256, and
+`ragstat dataset scifact` downloads the SciFact zip, checks its SHA-256, and
 writes `documents.jsonl` plus `benchmark.json` under the cache directory. Title
 and body are joined with a newline when both are non-empty. Query identifiers
 are sorted numerically when every ID is digits. Relevance grades are written

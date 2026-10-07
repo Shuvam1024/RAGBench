@@ -1,6 +1,6 @@
 """Show the support-fixture gate reject a 0.07 quality drop.
 
-The process exits 0 when that rejection happens. ``ragbench compare`` on the
+The process exits 0 when that rejection happens. ``ragstat compare`` on the
 written candidate exits 2. Set ``GITHUB_STEP_SUMMARY`` to append the metric
 table to a GitHub Actions job summary.
 """
@@ -8,9 +8,9 @@ table to a GitHub Actions job summary.
 import os
 from pathlib import Path
 
-from ragbench.cli import save_result
-from ragbench.evaluation.comparison import load_report, load_thresholds
-from ragbench.evaluation.gate_demo import degrade_support_metrics, negative_control_summary
+from ragstat.cli import save_result
+from ragstat.evaluation.comparison import load_report, load_thresholds
+from ragstat.evaluation.gate_demo import degrade_support_metrics, negative_control_summary
 
 ROOT = Path(__file__).resolve().parents[1]
 BASELINE = ROOT / "benchmarks" / "baseline.json"
@@ -45,7 +45,7 @@ def main(write_candidate: Path | None = None) -> int:
         return 1
     print(
         "Negative control rejected the 0.07 drop, as required. "
-        "ragbench compare on this candidate exits 2."
+        "ragstat compare on this candidate exits 2."
     )
     return 0
 

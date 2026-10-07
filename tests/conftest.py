@@ -4,7 +4,7 @@ from collections.abc import Callable
 
 import pytest
 
-from ragbench.ingestion.chunker import Chunk
+from ragstat.ingestion.chunker import Chunk
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:

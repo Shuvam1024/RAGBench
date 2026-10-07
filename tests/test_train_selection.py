@@ -1,6 +1,6 @@
 import pytest
 
-from ragbench.evaluation.train_selection import (
+from ragstat.evaluation.train_selection import (
     choose_candidate_k,
     choose_dense_weight,
     selection_key,

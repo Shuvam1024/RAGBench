@@ -25,16 +25,16 @@ jobs:
       - run: uv run ruff check .
       - run: uv run ruff format --check .
       - run: uv run mypy
-      - run: uv run pytest -q --cov=ragbench --cov-report=term-missing --cov-fail-under=85
+      - run: uv run pytest -q --cov=ragstat --cov-report=term-missing --cov-fail-under=85
       - name: Evaluate candidate
-        run: uv run ragbench evaluate --config configs/baseline.yaml --output results/candidate.json
+        run: uv run ragstat evaluate --config configs/baseline.yaml --output results/candidate.json
       - name: Enforce quality thresholds
-        run: uv run ragbench compare --baseline benchmarks/baseline.json --candidate results/candidate.json --thresholds configs/thresholds.yaml --output results/comparison.json
+        run: uv run ragstat compare --baseline benchmarks/baseline.json --candidate results/candidate.json --thresholds configs/thresholds.yaml --output results/comparison.json
       - name: Prepare SciFact and enforce the BM25 gate
         run: |
-          uv run ragbench dataset scifact --cache .cache/beir
-          uv run ragbench evaluate --config configs/scifact-bm25.yaml --output results/scifact-bm25.json
-          uv run ragbench compare --baseline benchmarks/scifact/bm25.json --candidate results/scifact-bm25.json --thresholds configs/scifact-thresholds.yaml --output results/scifact-comparison.json
+          uv run ragstat dataset scifact --cache .cache/beir
+          uv run ragstat evaluate --config configs/scifact-bm25.yaml --output results/scifact-bm25.json
+          uv run ragstat compare --baseline benchmarks/scifact/bm25.json --candidate results/scifact-bm25.json --thresholds configs/scifact-thresholds.yaml --output results/scifact-comparison.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -79,5 +79,5 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - run: docker build -t ragbench-test .
-      - run: docker run --rm ragbench-test
+      - run: docker build -t ragstat-test .
+      - run: docker run --rm ragstat-test

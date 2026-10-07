@@ -6,7 +6,7 @@ from collections.abc import Sequence
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from ragbench.ingestion.chunker import Chunk
+from ragstat.ingestion.chunker import Chunk
 
 
 class SearchResult(BaseModel):

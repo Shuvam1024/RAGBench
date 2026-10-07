@@ -8,9 +8,9 @@ from typing import Literal, Self
 import yaml
 from pydantic import Field, model_validator
 
-from ragbench.config import ConfigModel, NonnegativeFloat, PositiveInt, UnitFloat
-from ragbench.evaluation.models import EvaluationResult, QuestionResult, Record
-from ragbench.evaluation.statistics import bootstrap_mean_ci, signflip_p_value
+from ragstat.config import ConfigModel, NonnegativeFloat, PositiveInt, UnitFloat
+from ragstat.evaluation.models import EvaluationResult, QuestionResult, Record
+from ragstat.evaluation.statistics import bootstrap_mean_ci, signflip_p_value
 
 QUALITY = {
     "mrr",

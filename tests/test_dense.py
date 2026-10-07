@@ -6,8 +6,8 @@ from numpy.typing import NDArray
 
 pytest.importorskip("faiss")
 
-from ragbench.ingestion.chunker import Chunk
-from ragbench.retrieval.dense import DenseRetriever, normalize_vectors
+from ragstat.ingestion.chunker import Chunk
+from ragstat.retrieval.dense import DenseRetriever, normalize_vectors
 
 
 class FixedEmbeddings:

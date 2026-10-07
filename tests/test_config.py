@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from ragbench.config import (
+from ragstat.config import (
     BM25Config,
     ChunkingConfig,
     DenseConfig,

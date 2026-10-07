@@ -14,8 +14,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
 
-from ragbench.config import RerankConfig
-from ragbench.retrieval.base import SearchResult
+from ragstat.config import RerankConfig
+from ragstat.retrieval.base import SearchResult
 
 
 @dataclass(frozen=True)

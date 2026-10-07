@@ -9,7 +9,7 @@ from typing import Protocol
 import numpy as np
 from numpy.typing import NDArray
 
-from ragbench.config import DenseConfig
+from ragstat.config import DenseConfig
 
 
 class EmbeddingProvider(Protocol):

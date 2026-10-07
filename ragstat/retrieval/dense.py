@@ -6,10 +6,10 @@ import faiss
 import numpy as np
 from numpy.typing import NDArray
 
-from ragbench.config import DenseConfig
-from ragbench.ingestion.chunker import Chunk
-from ragbench.retrieval.base import Retriever, SearchResult
-from ragbench.retrieval.embeddings import EmbeddingProvider, SentenceTransformerEmbedder
+from ragstat.config import DenseConfig
+from ragstat.ingestion.chunker import Chunk
+from ragstat.retrieval.base import Retriever, SearchResult
+from ragstat.retrieval.embeddings import EmbeddingProvider, SentenceTransformerEmbedder
 
 
 def normalize_vectors(vectors: NDArray[np.float32], rows: int) -> NDArray[np.float32]:

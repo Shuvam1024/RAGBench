@@ -9,9 +9,9 @@ uv sync --frozen --python 3.12 --extra dev --extra api
 uv run ruff check .
 uv run ruff format --check .
 uv run mypy
-uv run pytest -q --cov=ragbench --cov-report=term-missing --cov-fail-under=85
-uv run ragbench evaluate --config configs/baseline.yaml --output results/candidate.json
-uv run ragbench compare --baseline benchmarks/baseline.json \
+uv run pytest -q --cov=ragstat --cov-report=term-missing --cov-fail-under=85
+uv run ragstat evaluate --config configs/baseline.yaml --output results/candidate.json
+uv run ragstat compare --baseline benchmarks/baseline.json \
   --candidate results/candidate.json --thresholds configs/thresholds.yaml
 ```
 

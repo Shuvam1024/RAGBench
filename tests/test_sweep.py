@@ -3,8 +3,8 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-from ragbench.cli import app
-from ragbench.evaluation.sweep import load_sweep, run_sweep
+from ragstat.cli import app
+from ragstat.evaluation.sweep import load_sweep, run_sweep
 
 
 def test_one_factor_sweep_changes_only_the_named_axis(tmp_path: Path) -> None:

@@ -7,10 +7,10 @@ import numpy as np
 import pytest
 import yaml
 
-from ragbench.datasets.scifact_claims import AbstractDocument, EvidenceSentence, SciFactClaim
-from ragbench.evaluation.nli import CrossEncoderNli, NliModelConfig, NliScores, classify_nli
-from ragbench.evaluation.statistics import bootstrap_mean_ci
-from ragbench.evaluation.verdict import (
+from ragstat.datasets.scifact_claims import AbstractDocument, EvidenceSentence, SciFactClaim
+from ragstat.evaluation.nli import CrossEncoderNli, NliModelConfig, NliScores, classify_nli
+from ragstat.evaluation.statistics import bootstrap_mean_ci
+from ragstat.evaluation.verdict import (
     ClaimPrediction,
     VerdictEvaluation,
     VerdictPolicy,
@@ -29,7 +29,7 @@ from ragbench.evaluation.verdict import (
     retrieve_top_documents,
     score_sentence_jobs,
 )
-from ragbench.ingestion.loader import Document
+from ragstat.ingestion.loader import Document
 
 
 class _FakeNli:

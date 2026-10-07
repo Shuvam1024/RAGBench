@@ -4,22 +4,43 @@ from statistics import fmean
 import pytest
 from typer.testing import CliRunner
 
-from ragbench.cli import app, save_result
-from ragbench.config import load_config
-from ragbench.evaluation.comparison import (
+from ragstat.cli import app, save_result
+from ragstat.config import load_config
+from ragstat.evaluation.comparison import (
     StatisticsConfig,
     Thresholds,
     compare,
     load_report,
     load_thresholds,
 )
-from ragbench.evaluation.models import EvaluationResult
-from ragbench.evaluation.runner import evaluate
+from ragstat.evaluation.models import EvaluationResult
+from ragstat.evaluation.runner import evaluate
 
 
 @pytest.fixture
 def report() -> EvaluationResult:
     return evaluate(load_config(Path(__file__).resolve().parents[1] / "configs/baseline.yaml"))
+
+
+def test_saved_reports_still_load_and_compare(report: EvaluationResult) -> None:
+    root = Path(__file__).resolve().parents[1]
+    saved = load_report(root / "benchmarks" / "baseline.json")
+    judged = load_report(root / "benchmarks" / "support" / "judge-sample.json")
+    assert saved.versions["ragbench"] == "1.0.0"
+    assert "ragstat" not in saved.versions
+    assert judged.versions["ragbench"] == "1.1.0"
+    assert any(
+        question.judge is not None and question.judge.rubric_version == "ragbench-judge-v1"
+        for question in judged.questions
+    )
+    limits = load_thresholds(root / "configs" / "thresholds.yaml")
+    assert compare(saved, saved, limits).passed
+    assert "ragstat" in report.versions
+    assert report.versions["ragstat"] != "not-installed"
+    assert "ragbench" not in report.versions
+    assert saved.mrr == report.mrr
+    assert saved.recall_at_k == report.recall_at_k
+    assert compare(saved, report, limits).passed
 
 
 def test_identical_and_boundary(report: EvaluationResult) -> None:

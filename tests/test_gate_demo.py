@@ -4,9 +4,9 @@ from statistics import fmean
 import pytest
 from typer.testing import CliRunner
 
-from ragbench.cli import app, save_result
-from ragbench.evaluation.comparison import load_report, load_thresholds
-from ragbench.evaluation.gate_demo import (
+from ragstat.cli import app, save_result
+from ragstat.evaluation.comparison import load_report, load_thresholds
+from ragstat.evaluation.gate_demo import (
     NEGATIVE_CONTROL_DROP,
     degrade_support_metrics,
     negative_control_summary,

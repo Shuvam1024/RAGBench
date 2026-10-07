@@ -17,7 +17,7 @@ from typing import Literal
 import yaml
 from pydantic import Field, model_validator
 
-from ragbench.config import (
+from ragstat.config import (
     BM25Config,
     ChunkingConfig,
     ConfigModel,
@@ -26,9 +26,9 @@ from ragbench.config import (
     SchemaVersion,
     UnitFloat,
 )
-from ragbench.datasets.scifact_claims import AbstractDocument, SciFactClaim
-from ragbench.evaluation.comparison import QuestionChange
-from ragbench.evaluation.factual import (
+from ragstat.datasets.scifact_claims import AbstractDocument, SciFactClaim
+from ragstat.evaluation.comparison import QuestionChange
+from ragstat.evaluation.factual import (
     VERDICTS,
     accuracy,
     class_f1,
@@ -36,12 +36,12 @@ from ragbench.evaluation.factual import (
     micro_sentence_scores,
     sentence_scores,
 )
-from ragbench.evaluation.nli import NliModelConfig, NliScorer, NliScores, classify_nli
-from ragbench.evaluation.statistics import bootstrap_mean_ci, signflip_p_value
-from ragbench.evaluation.timing import percentile
-from ragbench.ingestion.chunker import chunk_documents
-from ragbench.ingestion.loader import Document
-from ragbench.retrieval.bm25 import BM25Retriever
+from ragstat.evaluation.nli import NliModelConfig, NliScorer, NliScores, classify_nli
+from ragstat.evaluation.statistics import bootstrap_mean_ci, signflip_p_value
+from ragstat.evaluation.timing import percentile
+from ragstat.ingestion.chunker import chunk_documents
+from ragstat.ingestion.loader import Document
+from ragstat.retrieval.bm25 import BM25Retriever
 
 TIE_BREAK = (
     "higher mean sentence F1",

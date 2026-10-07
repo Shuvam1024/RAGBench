@@ -2,9 +2,9 @@ from collections.abc import Callable
 
 import pytest
 
-from ragbench.config import BM25Config
-from ragbench.ingestion.chunker import Chunk
-from ragbench.retrieval.bm25 import BM25Retriever, tokenize
+from ragstat.config import BM25Config
+from ragstat.ingestion.chunker import Chunk
+from ragstat.retrieval.bm25 import BM25Retriever, tokenize
 
 
 def test_keyword_ranking_and_case(make_chunk: Callable[..., Chunk]) -> None:

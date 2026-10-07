@@ -11,8 +11,8 @@ from typing import TYPE_CHECKING, Protocol
 
 from pydantic import BaseModel, ConfigDict
 
-from ragbench.config import GenerationConfig, OpenAIConfig, Pricing
-from ragbench.generation.models import GeneratedAnswer, Usage
+from ragstat.config import GenerationConfig, OpenAIConfig, Pricing
+from ragstat.generation.models import GeneratedAnswer, Usage
 
 if TYPE_CHECKING:
     import httpx

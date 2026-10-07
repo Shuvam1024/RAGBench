@@ -7,10 +7,10 @@ config. The winner maximizes train nDCG@10, then prefers the smaller weight.
 import json
 from pathlib import Path
 
-from ragbench.config import HybridConfig, load_config
-from ragbench.evaluation.models import Benchmark
-from ragbench.evaluation.runner import fingerprint
-from ragbench.evaluation.train_selection import choose_dense_weight
+from ragstat.config import HybridConfig, load_config
+from ragstat.evaluation.models import Benchmark
+from ragstat.evaluation.runner import fingerprint
+from ragstat.evaluation.train_selection import choose_dense_weight
 
 ROOT = Path(__file__).resolve().parents[1]
 TRAIN_BENCHMARK = ROOT / ".cache/beir/scifact/benchmark.train.json"

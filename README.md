@@ -1,11 +1,21 @@
-# RAGBench
+# ragstat
 
-[![CI](https://github.com/Shuvam1024/RAGBench/actions/workflows/ci.yml/badge.svg)](https://github.com/Shuvam1024/RAGBench/actions/workflows/ci.yml)
+[![CI](https://github.com/Shuvam1024/ragstat/actions/workflows/ci.yml/badge.svg)](https://github.com/Shuvam1024/ragstat/actions/workflows/ci.yml)
 
 **Benchmark RAG configurations and catch quality regressions before shipping.**
-RAGBench evaluates retrieval and optional generated answers, compares a candidate
+ragstat evaluates retrieval and optional generated answers, compares a candidate
 against a saved baseline, and returns a failing exit code when configured quality
 thresholds are exceeded.
+
+## Results at a glance
+
+<!-- tables:begin at-a-glance -->
+- Frozen hybrid (BM25 + MiniLM, chosen on train, test scored once) versus document-level BM25 on the [SciFact test split](#held-out-scifact-test): nDCG@10 0.729 vs 0.674, delta +0.055, 95% CI [+0.037, +0.075].
+- The same frozen settings on [NFCorpus](#nfcorpus-confirmation): hybrid nDCG@10 delta +0.032 over document-level BM25, with the CI above zero on all five metrics.
+- Chunked BM25 tuning is a small gain (nDCG@10 +0.017 on the [SciFact test split](#held-out-scifact-test)) that [NFCorpus](#nfcorpus-confirmation) does not confirm.
+- Cross-encoder rerank, not fine-tuned, is a negative result on the [SciFact test split](#held-out-scifact-test): nDCG@10 -0.028, 95% CI [-0.054, -0.001], rerank p95 2.0 s.
+- [SciFact dev](#held-out-scifact-dev) claim verdicts: frozen NLI macro-F1 0.477 vs 0.195 for the majority baseline. Evidence-sentence F1 is 0.384 vs 0.012. The accuracy interval includes zero.
+<!-- tables:end at-a-glance -->
 
 Built directly with Python 3.12, Pydantic, Typer, sentence-transformers, FAISS,
 rank-bm25, SQLite, and FastAPI. No LangChain or LlamaIndex.
@@ -13,11 +23,11 @@ rank-bm25, SQLite, and FastAPI. No LangChain or LlamaIndex.
 ## Quick start
 
 ```bash
-git clone https://github.com/Shuvam1024/RAGBench.git
-cd RAGBench
+git clone https://github.com/Shuvam1024/ragstat.git
+cd ragstat
 uv sync --frozen --python 3.12 --extra dev --extra api
-uv run ragbench evaluate --config configs/baseline.yaml --output results/candidate.json
-uv run ragbench compare --baseline benchmarks/baseline.json \
+uv run ragstat evaluate --config configs/baseline.yaml --output results/candidate.json
+uv run ragstat compare --baseline benchmarks/baseline.json \
   --candidate results/candidate.json --thresholds configs/thresholds.yaml
 ```
 
@@ -265,7 +275,7 @@ fine-tuned on SciFact.
 
 ### NFCorpus confirmation
 
-`ragbench dataset nfcorpus` checks SHA-256
+`ragstat dataset nfcorpus` checks SHA-256
 `efe5be03f8c5b86a5870102d0599d227c8c6e2484328e68c6522560385671b0b`.
 nDCG uses gain `2^grade - 1`, so these nDCG numbers differ from `pytrec_eval`
 `ndcg_cut` and from published BEIR nDCG. The configs copy the frozen SciFact
@@ -564,16 +574,16 @@ There are no human labels and no agreement statistic.
 # Real embeddings; first run downloads the pinned MiniLM model.
 python -m pip install -e '.[dev,dense]'
 export HF_HOME="$PWD/.cache/huggingface"
-ragbench evaluate --config configs/dense.yaml --output results/dense.json
-ragbench evaluate --config configs/hybrid.yaml --output results/hybrid.json
+ragstat evaluate --config configs/dense.yaml --output results/dense.json
+ragstat evaluate --config configs/hybrid.yaml --output results/hybrid.json
 
 # Exercise answer evaluation locally with deterministic sentence extraction.
-ragbench evaluate --config configs/answers.yaml --db results/runs.sqlite
-ragbench history --db results/runs.sqlite
+ragstat evaluate --config configs/answers.yaml --db results/runs.sqlite
+ragstat history --db results/runs.sqlite
 
 # Local read-only API; interactive API documentation at /docs.
 python -m pip install -e '.[api]'
-ragbench serve --db results/runs.sqlite
+ragstat serve --db results/runs.sqlite
 ```
 
 For opt-in paid generation and judging, see [providers and scoring](docs/providers.md).
@@ -583,13 +593,13 @@ On macOS, run dense benchmarks as fresh CLI processes; see the
 ## Docker
 
 ```bash
-docker build -t ragbench .
-docker run --rm ragbench
+docker build -t ragstat .
+docker run --rm ragstat
 # Persist reports and history in a named volume.
-docker volume create ragbench-data
-docker run --rm -v ragbench-data:/data ragbench evaluate \
+docker volume create ragstat-data
+docker run --rm -v ragstat-data:/data ragstat evaluate \
   --config configs/answers.yaml --output /data/answers.json --db /data/runs.sqlite
-docker run --rm -p 127.0.0.1:8000:8000 -v ragbench-data:/data ragbench \
+docker run --rm -p 127.0.0.1:8000:8000 -v ragstat-data:/data ragstat \
   serve --db /data/runs.sqlite --host 0.0.0.0
 ```
 
@@ -603,7 +613,7 @@ uv sync --frozen --python 3.12 --extra dev --extra api --extra dense --extra llm
 uv run ruff check .
 uv run ruff format --check .
 uv run mypy
-uv run pytest -q --cov=ragbench --cov-report=term-missing --cov-fail-under=85
+uv run pytest -q --cov=ragstat --cov-report=term-missing --cov-fail-under=85
 uv run pytest -q --run-integration
 ```
 
@@ -640,21 +650,21 @@ independently testable; provider, storage, and HTTP layers are optional.
 
 ## How this compares
 
-RAGBench is a small, typed retrieval-evaluation library. Neighboring tools
+ragstat is a small, typed retrieval-evaluation library. Neighboring tools
 optimize different contracts:
 
 - **Ragas** scores generation and retrieval with LLM-judged metrics on each
-  sample. RAGBench's primary metrics are deterministic functions of a labeled
+  sample. ragstat's primary metrics are deterministic functions of a labeled
   ranking. The optional judge is a separate stage with a versioned rubric,
   strict JSON validation, and caller-supplied token prices.
 - **DeepEval** packages LLM metrics as pytest-style checks and can report to a
-  hosted product. RAGBench keeps the gate local: fingerprints, thresholds, and
+  hosted product. ragstat keeps the gate local: fingerprints, thresholds, and
   a failing process exit, with a read-only API that cannot start a paid run.
 - **promptfoo** is a prompt and assertion matrix, including red-team cases.
-  RAGBench does not vary prompts. It varies retrievers, chunking, and fusion,
+  ragstat does not vary prompts. It varies retrievers, chunking, and fusion,
   and it refuses to compare reports whose corpus or question fingerprints differ.
 - **ARES** trains or prompts a judge to predict human preference and puts
-  intervals around that prediction. RAGBench's intervals resample a fixed labeled
+  intervals around that prediction. ragstat's intervals resample a fixed labeled
   query set. They are not a substitute for human agreement, and this repository
   does not synthesize relevance labels.
 

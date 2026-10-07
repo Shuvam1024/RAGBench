@@ -2,9 +2,9 @@ from pathlib import Path
 
 import pytest
 
-from ragbench.config import ChunkingConfig
-from ragbench.ingestion.chunker import chunk_document
-from ragbench.ingestion.loader import Document, load_documents, text_fingerprint
+from ragstat.config import ChunkingConfig
+from ragstat.ingestion.chunker import chunk_document
+from ragstat.ingestion.loader import Document, load_documents, text_fingerprint
 
 
 def document(text: str, identifier: str = "source.md") -> Document:

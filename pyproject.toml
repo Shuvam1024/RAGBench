@@ -3,7 +3,7 @@ requires = ["setuptools>=77.0.3"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "ragbench"
+name = "ragstat"
 version = "1.1.0"
 authors = [{ name = "Shuvam Mukherjee" }]
 description = "Evaluation and regression testing for RAG systems."
@@ -39,10 +39,10 @@ dense = [
 ]
 
 [project.scripts]
-ragbench = "ragbench.cli:app"
+ragstat = "ragstat.cli:app"
 
 [project.urls]
-Repository = "https://github.com/Shuvam1024/RAGBench"
+Repository = "https://github.com/Shuvam1024/ragstat"
 
 [[tool.uv.index]]
 name = "pytorch-cpu"
@@ -54,7 +54,7 @@ torch = [{ index = "pytorch-cpu", marker = "sys_platform != 'darwin'" }]
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["ragbench", "ragbench.*"]
+include = ["ragstat", "ragstat.*"]
 namespaces = false
 
 [tool.pytest.ini_options]
@@ -65,7 +65,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["ragbench"]
+source = ["ragstat"]
 
 [tool.coverage.report]
 show_missing = true
@@ -81,7 +81,7 @@ ignore = ["B008", "E501", "SIM102", "SIM108", "SIM117", "RUF043"]
 
 [tool.mypy]
 python_version = "3.12"
-packages = ["ragbench"]
+packages = ["ragstat"]
 disallow_untyped_defs = true
 warn_unused_ignores = true
 warn_redundant_casts = true

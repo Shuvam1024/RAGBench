@@ -4,11 +4,11 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from ragbench.cli import app
-from ragbench.config import load_config
-from ragbench.evaluation.models import EvaluationResult
-from ragbench.evaluation.runner import evaluate
-from ragbench.storage import RunStore
+from ragstat.cli import app
+from ragstat.config import load_config
+from ragstat.evaluation.models import EvaluationResult
+from ragstat.evaluation.runner import evaluate
+from ragstat.storage import RunStore
 
 
 @pytest.fixture
@@ -40,11 +40,11 @@ def test_read_only_api(tmp_path: Path, report: EvaluationResult) -> None:
     pytest.importorskip("fastapi")
     from fastapi.testclient import TestClient
 
-    from ragbench.api import create_app
+    from ragstat.api import create_app
 
     path = tmp_path / "runs.sqlite"
     client = TestClient(create_app(path))
-    assert client.app.version == importlib.metadata.version("ragbench")
+    assert client.app.version == importlib.metadata.version("ragstat")
     assert client.get("/health").status_code == 503
     assert not path.exists()
     RunStore(path).save(report)

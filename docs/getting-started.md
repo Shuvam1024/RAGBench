@@ -1,6 +1,6 @@
-# Run and inspect RAGBench
+# Run and inspect ragstat
 
-RAGBench evaluates retrieval and optional answers, checks quality regressions,
+ragstat evaluates retrieval and optional answers, checks quality regressions,
 and records results as JSON or SQLite. Install from `uv.lock` when you want the
 same versions CI uses.
 
@@ -13,7 +13,7 @@ python3.12 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e ".[dev,api]"
 python -m pip check
-ragbench evaluate --config configs/baseline.yaml
+ragstat evaluate --config configs/baseline.yaml
 ```
 
 If the environment already exists, start with `source .venv/bin/activate`.
@@ -34,9 +34,9 @@ explains editable installs and dependency groups.
 ```bash
 python -m pip install -e ".[dev,dense]"
 export HF_HOME="$PWD/.cache/huggingface"
-ragbench evaluate --config configs/baseline.yaml --output results/baseline.json
-ragbench evaluate --config configs/dense.yaml --output results/dense.json
-ragbench evaluate --config configs/hybrid.yaml --output results/hybrid.json
+ragstat evaluate --config configs/baseline.yaml --output results/baseline.json
+ragstat evaluate --config configs/dense.yaml --output results/dense.json
+ragstat evaluate --config configs/hybrid.yaml --output results/hybrid.json
 ```
 
 The dense extra adds sentence-transformers, FAISS, and their numerical
@@ -56,7 +56,7 @@ on macOS 15.6 arm64. CI and Docker install from `uv.lock` instead:
 
 ```bash
 uv sync --frozen --python 3.12 --extra dev --extra api
-uv run ragbench evaluate --config configs/baseline.yaml
+uv run ragstat evaluate --config configs/baseline.yaml
 ```
 
 The lock resolves CPU torch on non-macOS through the PyTorch CPU index. Dense
@@ -100,10 +100,10 @@ optional judging. See [providers and scoring](providers.md).
 ## SciFact
 
 ```bash
-uv run ragbench dataset scifact --cache .cache/beir --manifest benchmarks/scifact/corpus_stats.json
-uv run ragbench dataset scifact --split train --cache .cache/beir
-uv run ragbench evaluate --config configs/scifact-bm25.yaml --output results/scifact-bm25.json --portable
-uv run ragbench sweep --config configs/scifact-ablation.yaml --output results/ablation-bm25.json
+uv run ragstat dataset scifact --cache .cache/beir --manifest benchmarks/scifact/corpus_stats.json
+uv run ragstat dataset scifact --split train --cache .cache/beir
+uv run ragstat evaluate --config configs/scifact-bm25.yaml --output results/scifact-bm25.json --portable
+uv run ragstat sweep --config configs/scifact-ablation.yaml --output results/ablation-bm25.json
 ```
 
 The dataset command downloads the BEIR SciFact zip and rejects it unless the
@@ -124,7 +124,7 @@ chunked RAG setup and is not a Pyserini reproduction
 Omitting `tokenizer` keeps the original `\w+` tokenizer. Dense and hybrid
 configs need the `dense` extra and a Hugging Face cache.
 
-`ragbench dataset nfcorpus` prepares a second BEIR corpus. Its test qrels
+`ragstat dataset nfcorpus` prepares a second BEIR corpus. Its test qrels
 repeat the frozen SciFact settings. Chunk size, tokenizer, and fusion weight
 stay on the values committed from the SciFact train split. The held-out
 reports are `benchmarks/scifact/bm25-selected.json`,
@@ -165,18 +165,18 @@ record the thread setting; the current report includes it in retriever metadata.
 ## Regression checks and run history
 
 ```bash
-ragbench evaluate --config configs/baseline.yaml --output results/candidate.json
-ragbench compare --baseline benchmarks/baseline.json \
+ragstat evaluate --config configs/baseline.yaml --output results/candidate.json
+ragstat compare --baseline benchmarks/baseline.json \
   --candidate results/candidate.json --thresholds configs/thresholds.yaml
 
 # Deliberate 0.07 drop. The script exits 0 after the gate rejects it.
 # The compare command exits 2.
 uv run python scripts/demonstrate_gate_failure.py results/degraded-baseline.json
-ragbench compare --baseline benchmarks/baseline.json \
+ragstat compare --baseline benchmarks/baseline.json \
   --candidate results/degraded-baseline.json --thresholds configs/thresholds.yaml
-ragbench evaluate --config configs/answers.yaml --db results/runs.sqlite
-ragbench history --db results/runs.sqlite
-ragbench serve --db results/runs.sqlite
+ragstat evaluate --config configs/answers.yaml --db results/runs.sqlite
+ragstat history --db results/runs.sqlite
+ragstat serve --db results/runs.sqlite
 ```
 
 Open `http://127.0.0.1:8000/docs` for the local API explorer. Use `--limit` with

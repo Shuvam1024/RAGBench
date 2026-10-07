@@ -9,7 +9,7 @@ import re
 from collections import Counter
 from collections.abc import Sequence
 
-from ragbench.generation.providers import ContextSource
+from ragstat.generation.providers import ContextSource
 
 
 def tokens(text: str) -> list[str]:

@@ -2,14 +2,14 @@ Retrieval methods
 
 BM25 is a lexical retrieval method that scores text using matching query terms,
 term frequency, inverse document frequency, and document length normalization.
-In RAGBench the units indexed by BM25 will be text chunks.
+In ragstat the units indexed by BM25 will be text chunks.
 
 Dense retrieval represents a query and each chunk as numerical embedding
 vectors. A sentence-transformers model will create these vectors. FAISS will
 search them using inner products after both query and chunk embeddings have
 been normalized to unit length, giving cosine-similarity scores.
 
-Hybrid retrieval combines lexical and dense signals. RAGBench will normalize
+Hybrid retrieval combines lexical and dense signals. ragstat will normalize
 each method's scores for a query and combine them with a configurable weight.
 Changing this weight will let us study how exact word matching and semantic
 similarity affect retrieval results on the same benchmark questions.

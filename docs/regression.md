@@ -4,8 +4,8 @@ A comparison answers whether a candidate's measured behavior stays within the
 allowed change from a baseline. It never silently changes that baseline.
 
 ```bash
-ragbench evaluate --config configs/baseline.yaml --output results/candidate.json
-ragbench compare --baseline benchmarks/baseline.json \
+ragstat evaluate --config configs/baseline.yaml --output results/candidate.json
+ragstat compare --baseline benchmarks/baseline.json \
   --candidate results/candidate.json --thresholds configs/thresholds.yaml \
   --output results/comparison.json
 ```
@@ -51,6 +51,8 @@ delta `(candidate - baseline)`, a percentile bootstrap interval for that mean,
 and a two-sided sign-flip permutation p-value. Seeds are the strings
 `ragbench-stats-v1:{seed}:bootstrap:{metric}` and
 `ragbench-stats-v1:{seed}:permutation:{metric}`, drawn with `random.Random`.
+The seed prefix `ragbench-stats-v1`, the rubric id `ragbench-judge-v1`, and the
+judge tool name `ragbench_judge` keep the original name so saved reports stay valid.
 The interval is uncertainty from resampling this fixed question list. It is not
 a model of retrieval noise or hardware. The permutation p-value is
 `(extreme + 1) / (samples + 1)` and cannot be zero.
@@ -81,14 +83,14 @@ interval. The two interval policies answer different questions; CI stays on
 
 ```bash
 uv run python scripts/demonstrate_gate_failure.py results/degraded-baseline.json
-uv run ragbench compare --baseline benchmarks/baseline.json \
+uv run ragstat compare --baseline benchmarks/baseline.json \
   --candidate results/degraded-baseline.json \
   --thresholds configs/thresholds.yaml
 ```
 
 The first command lowers MRR, Recall@1, and Recall@3 by 0.07, prints both
 metric tables, and exits 0 because the gate rejected the candidate. The second
-command is `ragbench compare` itself and exits 2. In GitHub Actions the job
+command is `ragstat compare` itself and exits 2. In GitHub Actions the job
 `gate-negative-control` runs the first command and appends the tables to the
 job summary. That job is green when the rejection happens. It is a labeled
 negative control, separate from the happy-path support-fixture and SciFact

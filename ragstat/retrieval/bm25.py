@@ -11,10 +11,10 @@ from collections.abc import Sequence
 import snowballstemmer
 from rank_bm25 import BM25Okapi
 
-from ragbench.config import BM25Config
-from ragbench.ingestion.chunker import Chunk
-from ragbench.retrieval.base import Retriever, SearchResult
-from ragbench.retrieval.stopwords import ENGLISH_STOPWORDS
+from ragstat.config import BM25Config
+from ragstat.ingestion.chunker import Chunk
+from ragstat.retrieval.base import Retriever, SearchResult
+from ragstat.retrieval.stopwords import ENGLISH_STOPWORDS
 
 _STEMMER = snowballstemmer.stemmer("english")
 

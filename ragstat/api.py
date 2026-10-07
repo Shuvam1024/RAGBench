@@ -6,20 +6,20 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import JSONResponse
 
-from ragbench.evaluation.models import EvaluationResult
-from ragbench.storage import RunStore
+from ragstat.evaluation.models import EvaluationResult
+from ragstat.storage import RunStore
 
 
 def package_version() -> str:
     try:
-        return importlib.metadata.version("ragbench")
+        return importlib.metadata.version("ragstat")
     except importlib.metadata.PackageNotFoundError:
         return "0+unknown"
 
 
 def create_app(database: Path) -> FastAPI:
     app = FastAPI(
-        title="RAGBench",
+        title="ragstat",
         version=package_version(),
         description="Read-only evaluation run history",
     )
