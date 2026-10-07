@@ -23,16 +23,40 @@ QUALITY = {
 }
 RESOURCES = {"retrieval_p95_ms", "generation_p95_ms", "estimated_cost_usd"}
 CUTOFF_METRIC = re.compile(r"(recall|ndcg|precision)@[1-9][0-9]*")
+GateMode = Literal["point_drop", "proven_regression", "non_inferior"]
 
 
 class StatisticsConfig(ConfigModel):
-    """Paired uncertainty over the benchmark's questions. Off unless configured."""
+    """Paired uncertainty over the benchmark's questions. Off unless configured.
+
+    ``gate_mode`` names the quality decision. ``point_drop`` uses the point
+    estimate. ``proven_regression`` fails only when the upper confidence bound
+    of ``(candidate - baseline)`` is below ``-tolerance``. ``non_inferior``
+    fails unless the lower bound is at least ``-tolerance``. ``gate_on_ci``
+    remains the older switch: true means ``proven_regression`` when
+    ``gate_mode`` is omitted.
+    """
 
     seed: int = Field(default=0, ge=0)
     bootstrap_samples: PositiveInt = 10_000
     permutation_samples: PositiveInt = 10_000
     confidence: float = Field(gt=0, lt=1, default=0.95)
     gate_on_ci: bool = False
+    gate_mode: GateMode | None = None
+
+    @model_validator(mode="after")
+    def legacy_flag_matches_named_mode(self) -> Self:
+        if self.gate_on_ci and self.gate_mode not in (None, "proven_regression"):
+            raise ValueError(
+                "gate_on_ci true selects proven_regression and conflicts with "
+                f"gate_mode {self.gate_mode!r}"
+            )
+        return self
+
+    def resolved_gate_mode(self) -> GateMode:
+        if self.gate_mode is not None:
+            return self.gate_mode
+        return "proven_regression" if self.gate_on_ci else "point_drop"
 
 
 class Thresholds(ConfigModel):
@@ -191,6 +215,38 @@ def _statistics_fields(
     return mean_delta, low, high, p_value
 
 
+def decide_quality(
+    mode: GateMode,
+    *,
+    point_passed: bool,
+    tolerance: float,
+    ci_low: float | None,
+    ci_high: float | None,
+) -> tuple[bool, str]:
+    """Apply one named quality policy. ``tolerance`` is the allowed negative margin."""
+    if mode == "proven_regression":
+        if ci_high is None:
+            raise ValueError("proven_regression requires a confidence interval")
+        passed = ci_high > -tolerance or math.isclose(ci_high, -tolerance, abs_tol=1e-12)
+        rule = (
+            "proven_regression: upper confidence bound of (candidate - baseline) "
+            "is at least -tolerance"
+        )
+    elif mode == "non_inferior":
+        if ci_low is None:
+            raise ValueError("non_inferior requires a confidence interval")
+        passed = ci_low > -tolerance or math.isclose(ci_low, -tolerance, abs_tol=1e-12)
+        rule = (
+            "non_inferior: lower confidence bound of (candidate - baseline) is at least -tolerance"
+        )
+    elif mode == "point_drop":
+        passed = point_passed
+        rule = "point_drop: maximum absolute drop"
+    else:
+        raise ValueError(f"Unknown gate mode: {mode}")
+    return passed, rule
+
+
 def compare(
     baseline: EvaluationResult, candidate: EvaluationResult, limits: Thresholds
 ) -> Comparison:
@@ -223,17 +279,19 @@ def compare(
         drop = old - new
         point_passed = drop <= tolerance or math.isclose(drop, tolerance, rel_tol=0, abs_tol=1e-12)
         mean_delta = ci_low = ci_high = p_value = None
+        mode: GateMode = "point_drop"
         if limits.statistics is not None:
             mean_delta, ci_low, ci_high, p_value = _statistics_fields(
                 name, baseline, candidate, limits.statistics
             )
-        if limits.statistics is not None and limits.statistics.gate_on_ci:
-            assert ci_high is not None
-            passed = ci_high > -tolerance or math.isclose(ci_high, -tolerance, abs_tol=1e-12)
-            rule = "CI upper bound of (candidate - baseline) is at least -tolerance"
-        else:
-            passed = point_passed
-            rule = "maximum absolute drop"
+            mode = limits.statistics.resolved_gate_mode()
+        passed, rule = decide_quality(
+            mode,
+            point_passed=point_passed,
+            tolerance=tolerance,
+            ci_low=ci_low,
+            ci_high=ci_high,
+        )
         checks.append(
             MetricCheck(
                 metric=name,
