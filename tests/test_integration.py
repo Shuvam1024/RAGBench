@@ -128,3 +128,24 @@ def test_real_cross_encoder_reports_candidate_recall_and_pipeline(tmp_path: Path
     assert report["timings"]["pipeline_p95_ms"] >= report["timings"]["retrieval_p95_ms"]
     assert "Candidate Recall@100" in process.stdout
     assert "Top-K pipeline p95" in process.stdout
+
+
+@pytest.mark.integration
+def test_real_nli_maps_entailment_and_contradiction() -> None:
+    if importlib.util.find_spec("sentence_transformers") is None:
+        pytest.skip("Install the dense extra for sentence_transformers")
+    from ragbench.evaluation.nli import CrossEncoderNli, NliModelConfig, classify_nli
+
+    config = NliModelConfig()
+    scorer = CrossEncoderNli(config)
+    scores = scorer.score(
+        [
+            ("A dog is a mammal.", "A dog is an animal."),
+            ("A dog is a mammal.", "A dog is a reptile."),
+        ]
+    )
+    assert classify_nli(scores[0])[0] == "SUPPORT"
+    assert classify_nli(scores[1])[0] == "CONTRADICT"
+    assert scorer.metadata["nli_revision"] == config.revision
+    total = scores[0].contradiction + scores[0].entailment + scores[0].neutral
+    assert total == pytest.approx(1.0, abs=1e-5)

@@ -34,12 +34,17 @@ documents, bounded by `max_context_chars` across all chunks. The final chunk may
 truncated. Reference answers never enter the generator prompt. Reports retain the
 selected chunk IDs; corpus fingerprints and configuration identify source inputs.
 
+- `answer_exact_match`, `answer_token_f1`, and `context_token_precision` are
+  lexical overlap. They compare token sequences. They do not establish factual
+  support, and they are not faithfulness.
 - `answer_exact_match`: case-folded Unicode word sequences match exactly and the
   answer is nonempty. Punctuation differences are ignored.
 - `answer_token_f1`: multiset token precision/recall harmonic mean against the
   reference; repeated tokens count. Empty answers score zero.
-- `context_token_precision`: fraction of answer tokens present in retrieved
-  context. This is a lexical overlap proxy, not proof of faithfulness.
+- `context_token_precision`: fraction of answer tokens that also occur in the
+  retrieved context. A copied sentence scores high even when it does not support
+  the question. An answer can be factually supported and still score low when it
+  uses different words. This number does not establish factual support.
 
 The extractive baseline naturally has high context overlap because it copies a
 sentence. Its low reference match is expected; do not present that overlap as

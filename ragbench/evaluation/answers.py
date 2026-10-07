@@ -1,4 +1,9 @@
-"""Transparent lexical metrics; context overlap does not prove faithfulness."""
+"""Lexical overlap between an answer, a reference, and retrieved context.
+
+``answer_exact_match``, ``answer_token_f1``, and ``context_token_precision``
+compare tokens. ``context_token_precision`` does not establish factual support.
+It is not a faithfulness score.
+"""
 
 import re
 from collections import Counter

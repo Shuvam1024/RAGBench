@@ -30,8 +30,10 @@ unknown names are rejected.
 
 Supported quality names: `mrr`, `map`, `recall@K`, `ndcg@K`, and `precision@K`
 for measured positive K, `answer_exact_match`, `answer_token_f1`,
-`context_token_precision`, `judge_correctness`, `judge_faithfulness`. Resource
-names: `retrieval_p95_ms`, `generation_p95_ms`, `estimated_cost_usd`.
+`context_token_precision`, `judge_correctness`, `judge_faithfulness`. The three
+answer names are lexical overlap. `context_token_precision` does not establish
+factual support. Resource names: `retrieval_p95_ms`, `generation_p95_ms`,
+`estimated_cost_usd`.
 
 ## Paired statistics
 

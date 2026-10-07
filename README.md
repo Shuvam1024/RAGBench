@@ -316,6 +316,96 @@ remain in [ablation-bm25.json](benchmarks/scifact/ablation-bm25.json). The
 paired comparison of the exploratory 0.75 hybrid with whitespace BM25 remains
 in [bm25-vs-hybrid-w075.json](benchmarks/scifact/bm25-vs-hybrid-w075.json).
 
+## SciFact claim verdicts
+
+`answer_exact_match`, `answer_token_f1`, and `context_token_precision` are
+lexical overlap. `context_token_precision` is the fraction of answer tokens
+that also appear in the retrieved context. That overlap does not establish factual support.
+It is not a faithfulness score. The optional judge
+rubric's faithfulness field is a separate 0–4 model score. It is not a SciFact
+SUPPORT or CONTRADICT label.
+
+Verdicts and evidence sentence IDs are read from the AllenAI SciFact claim
+files, SHA-256
+`11c621288d41ac144d29b13b0f8503b3820b7d6e8b1f6ff24dff335c196d76be`
+([data.tar.gz](https://scifact.s3-us-west-2.amazonaws.com/release/latest/data.tar.gz),
+schema in [doc/data.md](https://github.com/allenai/scifact/blob/master/doc/data.md)).
+They are not read from BEIR qrels. A qrel row is `query-id`, `corpus-id`, and
+an integer `score`. On this export every score is 1. For the train claims and
+for the dev claims, that document set equals `cited_doc_ids`. It does not equal
+the evidence-document set. Train has 809 claims: the qrel set matches the
+evidence documents for 480 of them and differs for the other 329. Dev has 300
+claims: 175 match and 125 differ. A claim with no annotated evidence is still
+cited, and some claims cite a document that has no rationale. Claim 263
+contradicts from documents 11328820 and 30041340 and also cites 14853989,
+which has no evidence annotation and is still a grade-1 qrel.
+
+Sentence IDs index the `corpus.jsonl` abstract list. They do not index the
+title, and they are not recovered by splitting the BEIR body. After whitespace
+is collapsed, the BEIR body matches the abstract sentences joined by spaces.
+1,055 of 5,183 abstracts differ from a single-space join before that collapse.
+
+The public `claims_test.jsonl` has no evidence field. Those 300 labels are
+withheld, so this repository does not score that file and does not treat the
+missing field as NEI. Empty evidence on train or dev does mean NEI. No train
+or dev claim mixes SUPPORT and CONTRADICT. The gold verdict is that unique
+label, or NEI when the evidence object is empty. Gold sentences are the set of
+`(document id, abstract sentence index)` pairs.
+
+BEIR query IDs are the SciFact train and dev claim IDs, and the text matches.
+BEIR has no separate dev qrels file. The dev claim IDs are the BEIR test query
+IDs. The official SciFact test IDs are not in the BEIR zip. The labeled split
+scored here is SciFact dev, because it has labels and the public test file
+does not. Those dev claims are the same 300 queries the retrieval reports call
+the SciFact test split. Verdict knobs are not selected on them.
+
+Retrieval is the frozen document-level BM25 index: stem, k1 0.9, b 0.4, one
+string per document. It is not retuned. The indexed string is still the
+prepared BEIR title and body.
+
+Predicted sentences are a set. Precision, recall, and F1 are:
+
+- both sets empty: 1, 1, 1, a correct abstention
+- predicted empty and gold nonempty: 0, 0, 0
+- gold empty and predicted nonempty: 0, 0, 0
+- otherwise the overlap divided by the prediction count, the gold count, and
+  their harmonic mean
+
+The reported sentence precision, recall, and F1 are means of those per-claim
+scores. Micro scores pool the sentence counts across claims. Verdict accuracy
+is the fraction of exact label matches. Macro-F1 is the unweighted mean of the
+SUPPORT, CONTRADICT, and NEI F1 scores. A class with no gold and no predictions
+scores 0.
+
+The baseline predicts the majority train verdict. Train counts are SUPPORT 332,
+CONTRADICT 173, and NEI 304, so the majority is SUPPORT. A tie would prefer
+NEI, then SUPPORT, then CONTRADICT. The baseline's evidence sentence is
+sentence 0 of the top retrieved document. It predicts no sentence when the
+verdict is NEI. It does not use the NLI model.
+
+The NLI model is `cross-encoder/nli-MiniLM2-L6-H768` at revision
+`b95119ce93d3e065de6214e38cd4a97b0f2f2c6d`, on CPU, with one PyTorch thread and
+batch size 32. `max_length` is 512. The checkpoint's positional limit is 514.
+Pairs longer than 512 tokens, including special tokens, are truncated. The
+model was trained on SNLI and MultiNLI. It was not fine-tuned on SciFact. The
+premise is the abstract sentence and the hypothesis is the claim. Softmax over
+the three logits maps entailment to SUPPORT, contradiction to CONTRADICT, and
+neutral to NEI. Equal probabilities break toward contradiction, then
+entailment, then neutral. A sentence is kept when that label is not NEI and
+its probability is at least `min_confidence`. Kept sentences are ordered by
+descending probability, then document ID, then sentence index. The top
+`sentence_k` are the prediction. The verdict is the label of the first kept
+sentence, which is the highest-ranked label when the kept sentences disagree.
+No kept sentence means NEI and an empty evidence set.
+
+`scripts/select_scifact_verdict.py` scores `doc_k` 1 and 3, `sentence_k` 1 and
+2, and `min_confidence` 0.5 and 0.7 on the train claims only. The forward pass
+covers the top 3 documents once. Smaller document depths reuse those
+probabilities. The winner maximizes train macro-F1. Ties prefer a higher mean
+sentence F1, then a smaller `doc_k`, then a smaller `sentence_k`, then a
+higher `min_confidence`. Dev is scored once after that choice is committed.
+Tests inject an NLI scorer. The pinned model is not required for those tests.
+
 ## Judge sample
 
 [benchmarks/support/judge-sample.json](benchmarks/support/judge-sample.json)
@@ -335,9 +425,12 @@ There are no human labels and no agreement statistic.
 - **Retrieval:** BM25, exact dense cosine search, min-max weighted hybrid, and
   reciprocal rank fusion; deterministic chunks, IDs, and ranking ties.
 - **Evaluation:** document Recall@K, nDCG@K, Precision@K, MAP, and full-ranking
-  MRR; optional normalized exact match, token F1, and context token overlap.
-- **Optional LLM judge:** correctness and faithfulness scored against an explicit,
-  versioned rubric. Invalid or incomplete responses fail the run.
+  MRR. Optional `answer_exact_match`, `answer_token_f1`, and
+  `context_token_precision` are lexical overlap with a reference or with
+  retrieved context. This overlap does not establish factual support.
+- **Optional LLM judge:** a separate rubric scores correctness and faithfulness
+  from 0 to 4. That rubric is not a SciFact evidence label. The lexical overlap
+  metrics are not that score.
 - **Operational metrics:** indexing and query latency, generation/judge timings,
   reported token usage, and cost estimates using supplied pricing.
 - **Regression gates:** absolute quality-drop and relative resource-increase

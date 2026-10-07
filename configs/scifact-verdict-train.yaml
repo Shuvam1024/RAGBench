@@ -1,0 +1,24 @@
+# SciFact claim verdicts. Retrieval is the frozen document-level BM25 index.
+# It is not retuned. This file selects a policy on the train claims only.
+# Dev is scored by configs/scifact-verdict-dev.yaml after the winner is committed.
+schema_version: 1
+claims_cache: ../.cache/scifact
+documents_path: ../.cache/beir/scifact
+beir_raw: ../.cache/beir/scifact/raw/scifact
+split: train
+retrieval:
+  type: bm25
+  k1: 0.9
+  b: 0.4
+  tokenizer: stem
+  unit: document
+nli:
+  model_name: cross-encoder/nli-MiniLM2-L6-H768
+  revision: b95119ce93d3e065de6214e38cd4a97b0f2f2c6d
+  max_length: 512
+  batch_size: 32
+  device: cpu
+grid:
+  doc_k: [1, 3]
+  sentence_k: [1, 2]
+  min_confidence: [0.5, 0.7]

@@ -1,0 +1,67 @@
+{
+  "claims": [
+    {
+      "id": "a",
+      "gold": "SUPPORT",
+      "predicted": "SUPPORT",
+      "gold_sentences": ["d1:0", "d1:2"],
+      "predicted_sentences": ["d1:0", "d1:1"],
+      "sentence_precision": 0.5,
+      "sentence_recall": 0.5,
+      "sentence_f1": 0.5
+    },
+    {
+      "id": "b",
+      "gold": "CONTRADICT",
+      "predicted": "NEI",
+      "gold_sentences": ["d2:1"],
+      "predicted_sentences": [],
+      "sentence_precision": 0.0,
+      "sentence_recall": 0.0,
+      "sentence_f1": 0.0
+    },
+    {
+      "id": "c",
+      "gold": "NEI",
+      "predicted": "NEI",
+      "gold_sentences": [],
+      "predicted_sentences": [],
+      "sentence_precision": 1.0,
+      "sentence_recall": 1.0,
+      "sentence_f1": 1.0
+    },
+    {
+      "id": "d",
+      "gold": "NEI",
+      "predicted": "SUPPORT",
+      "gold_sentences": [],
+      "predicted_sentences": ["d3:0"],
+      "sentence_precision": 0.0,
+      "sentence_recall": 0.0,
+      "sentence_f1": 0.0
+    },
+    {
+      "id": "e",
+      "gold": "SUPPORT",
+      "predicted": "SUPPORT",
+      "gold_sentences": ["d4:0"],
+      "predicted_sentences": ["d4:0", "d5:1"],
+      "sentence_precision": 0.5,
+      "sentence_recall": 1.0,
+      "sentence_f1": 0.6666666666666666
+    }
+  ],
+  "accuracy": 0.6,
+  "macro_f1": 0.43333333333333335,
+  "class_f1": {
+    "SUPPORT": 0.8,
+    "CONTRADICT": 0.0,
+    "NEI": 0.5
+  },
+  "sentence_precision": 0.4,
+  "sentence_recall": 0.5,
+  "sentence_f1": 0.4333333333333333,
+  "micro_sentence_precision": 0.4,
+  "micro_sentence_recall": 0.5,
+  "micro_sentence_f1": 0.4444444444444444
+}
