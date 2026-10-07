@@ -403,8 +403,31 @@ No kept sentence means NEI and an empty evidence set.
 covers the top 3 documents once. Smaller document depths reuse those
 probabilities. The winner maximizes train macro-F1. Ties prefer a higher mean
 sentence F1, then a smaller `doc_k`, then a smaller `sentence_k`, then a
-higher `min_confidence`. Dev is scored once after that choice is committed.
+higher `min_confidence`. Accuracy and macro-F1 do not change with `sentence_k`,
+because the verdict is the label of the first kept sentence. `sentence_k` only
+changes the evidence set. Dev is scored once after that choice is committed.
 Tests inject an NLI scorer. The pinned model is not required for those tests.
+[verdict-train-selection.json](benchmarks/scifact/verdict-train-selection.json):
+
+| doc_k | sentence_k | min_confidence | Accuracy | Macro-F1 | Sentence P | Sentence R | Sentence F1 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | 1 | 0.5 | 0.4722 | 0.4638 | 0.3943 | 0.3277 | 0.3453 |
+| 1 | 1 | 0.7 | 0.4969 | 0.4754 | 0.4265 | 0.3706 | 0.3854 |
+| 1 | 2 | 0.5 | 0.4722 | 0.4638 | 0.3770 | 0.3585 | 0.3569 |
+| 1 | 2 | 0.7 | 0.4969 | 0.4754 | 0.4129 | 0.3888 | 0.3908 |
+| 3 | 1 | 0.5 | 0.4215 | 0.4212 | 0.2806 | 0.2294 | 0.2426 |
+| 3 | 1 | 0.7 | 0.4586 | 0.4517 | 0.3288 | 0.2810 | 0.2932 |
+| 3 | 2 | 0.5 | 0.4215 | 0.4212 | 0.2645 | 0.2608 | 0.2532 |
+| 3 | 2 | 0.7 | 0.4586 | 0.4517 | 0.3103 | 0.2973 | 0.2952 |
+
+`doc_k` 1, `sentence_k` 2, `min_confidence` 0.7 is the frozen policy. It ties
+`sentence_k` 1 at the same accuracy and macro-F1, and its mean sentence F1 is
+higher. `doc_k` 3 is lower on train macro-F1. The majority-SUPPORT baseline on
+the same train claims has accuracy 0.4104, macro-F1 0.1940, and mean sentence
+F1 0.0142. The grid scored 23,066 sentence/claim pairs in 840.2 s. The winning
+depth, scored on its own, was 7,656 pairs in 279.8 s. None were truncated.
+Document-level retrieval p95 was 17.9 ms. One PyTorch thread. Dev is not scored
+in the commit that freezes this table.
 
 ## Judge sample
 
