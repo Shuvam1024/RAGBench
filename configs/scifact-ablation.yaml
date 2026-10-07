@@ -1,6 +1,7 @@
-# One factor at a time around the SciFact BM25 configuration.
+# Optional BM25 sensitivity on the train split. The reported test configuration
+# stays at chunk size 120, overlap 20, k1 1.5, and b 0.75.
 schema_version: 1
-base: scifact-bm25.yaml
+base: scifact-bm25-train.yaml
 axes:
   - name: chunk_size
     field: chunking.chunk_size

@@ -1,9 +1,10 @@
-# SciFact test split. Prepare it first:
-#   ragbench dataset scifact --cache .cache/beir
+# SciFact train split, used only to choose settings. Report held-out numbers
+# from configs/scifact-bm25.yaml. Prepare the split first:
+#   ragbench dataset scifact --split train --cache .cache/beir
 schema_version: 1
 dataset:
   documents_path: ../.cache/beir/scifact
-  benchmark_path: ../.cache/beir/scifact/benchmark.json
+  benchmark_path: ../.cache/beir/scifact/benchmark.train.json
 chunking:
   chunk_size: 120
   overlap: 20
@@ -11,8 +12,6 @@ retrieval:
   type: bm25
   k1: 1.5
   b: 0.75
-  # Snowball English stemmer after the vendored English stopword list.
-  # The default ``whitespace`` tokenizer is the older ``\w+`` baseline.
   tokenizer: stem
 evaluation:
   recall_at_k: [10, 100]

@@ -232,10 +232,17 @@ def dataset_command(
     cache: Annotated[Path, typer.Option("--cache")] = Path(".cache/beir"),
     manifest: Annotated[Path | None, typer.Option("--manifest")] = None,
     force: Annotated[bool, typer.Option("--force")] = False,
+    split: Annotated[
+        str | None,
+        typer.Option(
+            "--split",
+            help="BEIR qrels split to materialize. Defaults to the dataset's test split.",
+        ),
+    ] = None,
 ) -> None:
     """Download a checksum-verified corpus and write documents.jsonl plus a benchmark."""
     try:
-        result = prepare_dataset(name, cache, manifest_path=manifest, force=force)
+        result = prepare_dataset(name, cache, manifest_path=manifest, force=force, split=split)
     except (ValueError, OSError) as exc:
         typer.echo(f"Error: {exc}", err=True)
         raise typer.Exit(1) from exc

@@ -14,13 +14,11 @@ test:
 
 dataset-scifact:
 	$(UV) run ragbench dataset scifact --cache .cache/beir --manifest benchmarks/scifact/corpus_stats.json
+	$(UV) run ragbench dataset scifact --split train --cache .cache/beir --manifest benchmarks/scifact/corpus_stats_train.json
 
 eval-scifact: dataset-scifact
 	$(UV) run ragbench evaluate --config configs/scifact-bm25.yaml --output benchmarks/scifact/bm25.json --portable
-	$(UV) run ragbench evaluate --config configs/scifact-dense.yaml --output benchmarks/scifact/dense.json --portable
-	$(UV) run ragbench evaluate --config configs/scifact-hybrid.yaml --output benchmarks/scifact/hybrid-minmax.json --portable
-	$(UV) run ragbench evaluate --config configs/scifact-rrf.yaml --output benchmarks/scifact/hybrid-rrf.json --portable
+	$(UV) run ragbench evaluate --config configs/scifact-hybrid.yaml --output benchmarks/scifact/hybrid.json --portable
 
 sweep-scifact: dataset-scifact
-	$(UV) run ragbench sweep --config configs/scifact-ablation.yaml --output benchmarks/scifact/ablation-bm25.json
-	$(UV) run ragbench sweep --config configs/scifact-hybrid-ablation.yaml --output benchmarks/scifact/ablation-hybrid.json
+	$(UV) run ragbench sweep --config configs/scifact-hybrid-train-sweep.yaml --output benchmarks/scifact/hybrid-train-sweep.json

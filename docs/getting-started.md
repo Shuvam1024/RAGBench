@@ -101,13 +101,19 @@ optional judging. See [providers and scoring](providers.md).
 
 ```bash
 uv run ragbench dataset scifact --cache .cache/beir --manifest benchmarks/scifact/corpus_stats.json
+uv run ragbench dataset scifact --split train --cache .cache/beir
 uv run ragbench evaluate --config configs/scifact-bm25.yaml --output results/scifact-bm25.json --portable
 uv run ragbench sweep --config configs/scifact-ablation.yaml --output results/ablation-bm25.json
 ```
 
 The dataset command downloads the BEIR SciFact zip and rejects it unless the
-SHA-256 matches. Dense and hybrid configs need the `dense` extra and a Hugging
-Face cache. Reports under `benchmarks/scifact/` are the committed measurements.
+SHA-256 matches. `--split` defaults to `test` and still writes `benchmark.json`.
+`--split train` writes `benchmark.train.json` beside it (about 809 queries) and
+does not replace the test benchmark. Dense and hybrid configs need the `dense`
+extra and a Hugging Face cache. Reports under `benchmarks/scifact/` are the
+committed measurements. SciFact BM25 configs that set `tokenizer: stem` use
+Snowball stemming and a fixed English stopword list; omitting `tokenizer`
+keeps the original `\\w+` tokenizer.
 
 ## Tests
 

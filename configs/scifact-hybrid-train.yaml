@@ -1,16 +1,16 @@
-# dense_weight 0.75 is the SciFact hybrid ablation's best min-max weight.
-# See benchmarks/scifact/ablation-hybrid.json.
+# Train-split hybrid used to choose dense_weight. The held-out test config is
+# configs/scifact-hybrid.yaml. dense_weight here is only the sweep's base value.
 schema_version: 1
 dataset:
   documents_path: ../.cache/beir/scifact
-  benchmark_path: ../.cache/beir/scifact/benchmark.json
+  benchmark_path: ../.cache/beir/scifact/benchmark.train.json
 chunking:
   chunk_size: 120
   overlap: 20
 retrieval:
   type: hybrid
   fusion: minmax
-  dense_weight: 0.75
+  dense_weight: 0.5
   rrf_k: 60
   bm25:
     type: bm25

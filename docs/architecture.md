@@ -138,11 +138,15 @@ interface must be usable independently of evaluation.
 
 ## 6. BM25 is the first baseline
 
-Use `rank_bm25.BM25Okapi`. Tokenize both corpus and query with Unicode word
-matches (`\w+`) after `casefold()`. This tokenizer is separate from the chunk
-window definition. Initially there is no stemming or stopword removal.
-Reject corpora with no searchable tokens; allow empty token lists for individual
-chunks if the corpus contains searchable text elsewhere.
+Use `rank_bm25.BM25Okapi`. The default tokenizer, `whitespace`, splits both the
+corpus and the query with Unicode word matches (`\w+`) after `casefold()`.
+`tokenizer: stem` uses that same split, drops a vendored English stopword list,
+and applies the Snowball English stemmer from the pure-Python `snowballstemmer`
+package. The default stays `whitespace` so older configs keep their scores.
+This tokenizer is separate from the chunk window definition. Reject corpora
+with no searchable tokens; allow empty token lists for individual chunks if
+the corpus contains searchable text elsewhere. A query that is only stopwords
+returns no hits under the stem tokenizer.
 
 Keep library score values, including zero and negative values. A nonblank query
 whose terms do not appear in the corpus produces tied scores and therefore a

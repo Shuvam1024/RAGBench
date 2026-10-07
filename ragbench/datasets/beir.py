@@ -16,8 +16,9 @@ import urllib.request
 import zipfile
 from pathlib import Path
 from statistics import fmean
+from typing import Self
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, model_validator
 
 from ragbench.evaluation.models import Benchmark
 from ragbench.evaluation.timing import percentile
@@ -39,6 +40,13 @@ class BeirSource(_Record):
     urls: tuple[str, ...]
     sha256: str
     split: str = "test"
+    splits: tuple[str, ...] = ("test",)
+
+    @model_validator(mode="after")
+    def default_split_is_listed(self) -> Self:
+        if self.split not in self.splits:
+            raise ValueError(f"Default split {self.split!r} must be one of {self.splits}")
+        return self
 
 
 class LengthBucket(_Record):
@@ -78,6 +86,7 @@ DATASETS: dict[str, BeirSource] = {
         name="scifact",
         urls=(SCIFACT_URL,),
         sha256=SCIFACT_SHA256,
+        splits=("train", "test"),
     )
 }
 
@@ -222,10 +231,40 @@ def _read_corpus(path: Path) -> tuple[list[tuple[str, str]], int]:
     return documents, skipped
 
 
+def artifact_names(split: str, default_split: str) -> tuple[str, str]:
+    """Return the benchmark and manifest filenames for a qrels split.
+
+    The dataset's default split keeps the historical ``benchmark.json`` and
+    ``manifest.json`` names. Any other split is written beside them so train
+    and test can both stay on disk.
+    """
+    if split == default_split:
+        return "benchmark.json", "manifest.json"
+    return f"benchmark.{split}.json", f"manifest.{split}.json"
+
+
+def resolve_split(source: BeirSource, split: str | None) -> str:
+    chosen = source.split if split is None else split
+    if chosen not in source.splits:
+        available = ", ".join(source.splits)
+        raise ValueError(
+            f"Split {chosen!r} is not available for {source.name}. Available splits: {available}"
+        )
+    return chosen
+
+
 def materialize_beir(
-    source: Path, destination: Path, *, dataset: str, split: str, source_url: str, sha256: str
+    source: Path,
+    destination: Path,
+    *,
+    dataset: str,
+    split: str,
+    source_url: str,
+    sha256: str,
+    benchmark_name: str = "benchmark.json",
+    manifest_name: str = "manifest.json",
 ) -> CorpusManifest:
-    """Convert an extracted BEIR directory into documents.jsonl and benchmark.json."""
+    """Convert an extracted BEIR directory into documents.jsonl and a benchmark."""
     documents, skipped = _read_corpus(_find(source, "corpus.jsonl"))
     queries = _read_queries(_find(source, "queries.jsonl"))
     qrels = _read_qrels(_find(source, f"qrels/{split}.tsv"))
@@ -261,7 +300,7 @@ def materialize_beir(
     with documents_path.open("w", encoding="utf-8") as handle:
         for document_id, text in sorted(documents, key=lambda item: _identity_key(item[0])):
             handle.write(json.dumps({"id": document_id, "text": text}, ensure_ascii=False) + "\n")
-    (destination / "benchmark.json").write_text(
+    (destination / benchmark_name).write_text(
         benchmark.model_dump_json(indent=2, exclude_none=True) + "\n", encoding="utf-8"
     )
     loaded = load_documents(destination)
@@ -300,36 +339,51 @@ def materialize_beir(
             ),
         ),
     )
-    (destination / "manifest.json").write_text(
+    (destination / manifest_name).write_text(
         manifest.model_dump_json(indent=2) + "\n", encoding="utf-8"
     )
     return manifest
 
 
 def prepare_dataset(
-    name: str, cache: Path, *, manifest_path: Path | None = None, force: bool = False
+    name: str,
+    cache: Path,
+    *,
+    manifest_path: Path | None = None,
+    force: bool = False,
+    split: str | None = None,
 ) -> CorpusManifest:
-    """Download, verify, and materialize a known BEIR dataset into ``cache/name``."""
+    """Download, verify, and materialize a known BEIR dataset into ``cache/name``.
+
+    ``split`` selects the qrels file. Omitting it keeps the dataset's default
+    split, which for SciFact is ``test`` and still writes ``benchmark.json``.
+    """
     try:
         source = DATASETS[name]
     except KeyError as exc:
         known = ", ".join(sorted(DATASETS))
         raise ValueError(f"Unknown dataset {name!r}. Known datasets: {known}") from exc
+    chosen = resolve_split(source, split)
+    benchmark_name, manifest_name = artifact_names(chosen, source.split)
     root = cache.resolve() / source.name
     archive = root / f"{source.name}.zip"
     extracted = root / "raw"
     prepared = root
-    manifest_file = prepared / "manifest.json"
+    manifest_file = prepared / manifest_name
     ready = (
         not force
         and archive.is_file()
         and file_sha256(archive) == source.sha256
         and (prepared / "documents.jsonl").is_file()
-        and (prepared / "benchmark.json").is_file()
+        and (prepared / benchmark_name).is_file()
         and manifest_file.is_file()
     )
     if ready:
         manifest = CorpusManifest.model_validate_json(manifest_file.read_text(encoding="utf-8"))
+        if manifest.split != chosen:
+            raise ValueError(
+                f"{manifest_file.name} records split {manifest.split!r}, expected {chosen!r}"
+            )
     else:
         _download(source.urls, archive, source.sha256)
         if extracted.exists():
@@ -339,9 +393,11 @@ def prepare_dataset(
             extracted,
             prepared,
             dataset=source.name,
-            split=source.split,
+            split=chosen,
             source_url=source.urls[0],
             sha256=source.sha256,
+            benchmark_name=benchmark_name,
+            manifest_name=manifest_name,
         )
     if manifest_path is not None:
         manifest_path.parent.mkdir(parents=True, exist_ok=True)

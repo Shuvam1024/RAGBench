@@ -14,6 +14,7 @@ retrieval:
     type: bm25
     k1: 1.5
     b: 0.75
+    tokenizer: stem
   dense:
     type: dense
     model_name: sentence-transformers/all-MiniLM-L6-v2

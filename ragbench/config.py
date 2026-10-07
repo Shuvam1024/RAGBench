@@ -39,6 +39,10 @@ class BM25Config(ConfigModel):
     type: Literal["bm25"] = "bm25"
     k1: Annotated[float, Field(strict=True, gt=0, allow_inf_nan=False)] = 1.5
     b: UnitFloat = 0.75
+    # ``whitespace`` is the historical ``\\w+`` tokenizer. ``stem`` also drops
+    # English stopwords and applies the Snowball English stemmer. The default
+    # keeps existing configs and committed reports on the original tokenizer.
+    tokenizer: Literal["whitespace", "stem"] = "whitespace"
 
 
 class DenseConfig(ConfigModel):

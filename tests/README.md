@@ -22,13 +22,16 @@ optionally set `HF_HUB_OFFLINE=1` after the model is cached.
   preserved text, Unicode, BOM/newline handling, sorted loading, empty files,
   symlink handling, corpus relocation, and invalid input.
 - `test_bm25.py`: known keyword rankings, case/punctuation handling, tied and
-  negative scores, invalid K, empty input, duplicate IDs, and index replacement.
+  negative scores, invalid K, empty input, duplicate IDs, index replacement,
+  and the stem tokenizer's stopword removal.
+- `test_trec_agreement.py`: Recall, Precision, nDCG, MAP, and MRR on a fixed
+  fixture against `pytrec_eval`.
 - `test_metrics.py`: hand-calculated Recall@K, MRR, Precision@K, average
   precision, and nDCG, duplicate hits, multiple relevant documents, no matches,
   and invalid metric arguments.
 - `test_statistics.py`: seeded bootstrap intervals and sign-flip p-values.
-- `test_dataset.py`: SciFact zip checksum, path safety, JSONL ordering, and
-  grade handling on a synthetic archive.
+- `test_dataset.py`: SciFact zip checksum, path safety, JSONL ordering, grade
+  handling on a synthetic archive, and train/test benchmark filenames.
 - `test_sweep.py`: a one-factor sweep changes only the named axis and skips the
   base value.
 - `test_benchmark.py`: nonblank fields, distinct labels and IDs, supported

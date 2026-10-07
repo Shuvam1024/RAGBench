@@ -4,6 +4,7 @@ import pytest
 from pydantic import ValidationError
 
 from ragbench.config import (
+    BM25Config,
     ChunkingConfig,
     DenseConfig,
     EvaluationConfig,
@@ -76,12 +77,20 @@ def test_bad_yaml(tmp_path: Path, content: str) -> None:
         {"retrieval": {"type": "unknown"}},
         {"retrieval": {"type": "bm25", "b": 2}},
         {"retrieval": {"type": "bm25", "k1": 0}},
+        {"retrieval": {"type": "bm25", "tokenizer": "porter"}},
     ],
 )
 def test_bad_root_config(extra: dict[str, object]) -> None:
     raw = {"dataset": {"documents_path": "docs", "benchmark_path": "questions.json"}, **extra}
     with pytest.raises(ValueError):
         RunConfig.model_validate(raw)
+
+
+def test_bm25_tokenizer_defaults_to_whitespace_for_older_configs() -> None:
+    parsed = BM25Config.model_validate({"type": "bm25", "k1": 1.5, "b": 0.75})
+    assert parsed.tokenizer == "whitespace"
+    hybrid = HybridConfig.model_validate({"bm25": {"k1": 1.2}})
+    assert hybrid.bm25.tokenizer == "whitespace"
 
 
 def test_missing_config(tmp_path: Path) -> None:
