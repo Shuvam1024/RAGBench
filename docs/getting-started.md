@@ -9,16 +9,17 @@ same versions CI uses.
 From the repository root:
 
 ```bash
-python3.12 -m venv .venv
-source .venv/bin/activate
-python -m pip install -e ".[dev,api]"
-python -m pip check
-ragstat evaluate --config configs/baseline.yaml
+uv sync --frozen --python 3.12 --extra dev --extra api
+uv run ragstat evaluate --config configs/baseline.yaml
 ```
 
-If the environment already exists, start with `source .venv/bin/activate`.
-An editable install means Python imports this working copy. Reinstall when
-package metadata, dependencies, or console entry points change.
+`uv sync --frozen` installs the versions in `uv.lock`. The default extras do
+not build `pytrec_eval`. That package needs a C++ compiler and lives in the
+`agreement` extra:
+
+```bash
+uv sync --frozen --python 3.12 --extra dev --extra api --extra agreement
+```
 
 `pyproject.toml` defines the package and dependency groups. `.python-version`
 records Python 3.12 for tools that read it. `.venv`, `.cache`, and generated
@@ -32,11 +33,11 @@ explains editable installs and dependency groups.
 ## Run all three retrievers
 
 ```bash
-python -m pip install -e ".[dev,dense]"
+uv sync --frozen --python 3.12 --extra dev --extra dense
 export HF_HOME="$PWD/.cache/huggingface"
-ragstat evaluate --config configs/baseline.yaml --output results/baseline.json
-ragstat evaluate --config configs/dense.yaml --output results/dense.json
-ragstat evaluate --config configs/hybrid.yaml --output results/hybrid.json
+uv run ragstat evaluate --config configs/baseline.yaml --output results/baseline.json
+uv run ragstat evaluate --config configs/dense.yaml --output results/dense.json
+uv run ragstat evaluate --config configs/hybrid.yaml --output results/hybrid.json
 ```
 
 The dense extra adds sentence-transformers, FAISS, and their numerical
@@ -45,14 +46,7 @@ key is required. The example model revision is pinned in YAML and the resolved
 revision appears in the report. Once cached, `HF_HUB_OFFLINE=1` prevents Hub
 network calls.
 
-For the tested package versions:
-
-```bash
-python -m pip install -c requirements/constraints-py312.txt -e ".[dev,dense]"
-```
-
-`requirements/constraints-py312.txt` is a historical snapshot from Python 3.12.10
-on macOS 15.6 arm64. CI and Docker install from `uv.lock` instead:
+CI and Docker install from `uv.lock`:
 
 ```bash
 uv sync --frozen --python 3.12 --extra dev --extra api
@@ -102,7 +96,8 @@ optional judging. See [providers and scoring](providers.md).
 ```bash
 uv run ragstat dataset scifact --cache .cache/beir --manifest benchmarks/scifact/corpus_stats.json
 uv run ragstat dataset scifact --split train --cache .cache/beir
-uv run ragstat evaluate --config configs/scifact-bm25.yaml --output results/scifact-bm25.json --portable
+uv run ragstat evaluate --config configs/scifact-bm25-document.yaml --output results/scifact-document.json --portable
+uv run ragstat evaluate --config configs/scifact-bm25-selected.yaml --output results/scifact-selected.json --portable
 uv run ragstat sweep --config configs/scifact-ablation.yaml --output results/ablation-bm25.json
 ```
 

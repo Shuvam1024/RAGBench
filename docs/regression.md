@@ -2,6 +2,12 @@
 
 A comparison answers whether a candidate's measured behavior stays within the
 allowed change from a baseline. It never silently changes that baseline.
+Continuous integration gates the support fixture and two frozen SciFact BM25
+configs, `configs/scifact-bm25-document.yaml` and
+`configs/scifact-bm25-selected.yaml`, with a zero point-drop. The exploratory
+chunk-120 file is not that gate. A newly written comparison stores the
+statistics recipe when the thresholds file sets one. Committed comparison
+files keep the bytes they were saved with.
 
 ```bash
 ragstat evaluate --config configs/baseline.yaml --output results/candidate.json
