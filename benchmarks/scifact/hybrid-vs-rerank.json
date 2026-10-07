@@ -1,6 +1,6 @@
 {
   "baseline_run_id": "7596e926-513f-403a-9238-7b75d33fe94a",
-  "candidate_run_id": "7c2dca96-4313-4799-8716-f1f8cebef872",
+  "candidate_run_id": "f5359319-5c1f-4c6d-9148-76ced9fb0304",
   "passed": true,
   "checks": [
     {
@@ -12070,5 +12070,12 @@
       "delta": 0.0,
       "direction": "unchanged"
     }
-  ]
+  ],
+  "statistics": {
+    "seed": 0,
+    "bootstrap_samples": 10000,
+    "permutation_samples": 10000,
+    "confidence": 0.95,
+    "gate_mode": "point_drop"
+  }
 }

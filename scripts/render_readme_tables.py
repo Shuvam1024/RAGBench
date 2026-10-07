@@ -211,10 +211,8 @@ def format_value(fmt: str, value: object) -> str:
     if fmt == "metric":
         return f"{_number(value):.3f}"
     if fmt == "signed":
-        number = _number(value)
-        if round(number, 3) == 0:
-            return "+0.000"
-        return f"{number:+.3f}"
+        # A value inside ±0.0005 keeps its sign, so -0.00031 renders as -0.000.
+        return f"{_number(value):+.3f}"
     if fmt == "metric4":
         return f"{_number(value):.4f}"
     if fmt == "ms":

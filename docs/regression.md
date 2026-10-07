@@ -59,6 +59,8 @@ and a two-sided sign-flip permutation p-value. Seeds are the strings
 `ragbench-stats-v1:{seed}:permutation:{metric}`, drawn with `random.Random`.
 The seed prefix `ragbench-stats-v1`, the rubric id `ragbench-judge-v1`, and the
 judge tool name `ragbench_judge` keep the original name so saved reports stay valid.
+Reports committed before the rename keep `"versions": {"ragbench": ...}` for
+compatibility, alongside those legacy schema IDs.
 The interval is uncertainty from resampling this fixed question list. It is not
 a model of retrieval noise or hardware. The permutation p-value is
 `(extreme + 1) / (samples + 1)` and cannot be zero.
