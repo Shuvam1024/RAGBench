@@ -51,8 +51,11 @@ optionally set `HF_HUB_OFFLINE=1` after the model is cached.
   CLI commands, including report contents and resolved model revision.
 
 - `test_comparison.py`: tolerance boundaries, incompatible inputs, missing metrics,
-  zero cost baselines, per-question changes, the confidence-interval gate, and
-  CLI pass/regression/error exit codes.
+  zero cost baselines, per-question changes, `point_drop`, `proven_regression`,
+  and `non_inferior`, and CLI pass/regression/error exit codes.
+- `test_gate_demo.py`: a 0.07 drop on the support fixture fails the committed
+  point-drop thresholds, and the one-question illustration separates the two
+  interval policies.
 - `test_generation.py`: prompt payloads, usage/cost arithmetic, strict judge JSON,
   malformed/incomplete responses, timeout/error redaction, lexical metrics,
   aggregate consistency, judge identity gates, and local answer evaluation.

@@ -168,6 +168,12 @@ record the thread setting; the current report includes it in retriever metadata.
 ragbench evaluate --config configs/baseline.yaml --output results/candidate.json
 ragbench compare --baseline benchmarks/baseline.json \
   --candidate results/candidate.json --thresholds configs/thresholds.yaml
+
+# Deliberate 0.07 drop. The script exits 0 after the gate rejects it.
+# The compare command exits 2.
+uv run python scripts/demonstrate_gate_failure.py results/degraded-baseline.json
+ragbench compare --baseline benchmarks/baseline.json \
+  --candidate results/degraded-baseline.json --thresholds configs/thresholds.yaml
 ragbench evaluate --config configs/answers.yaml --db results/runs.sqlite
 ragbench history --db results/runs.sqlite
 ragbench serve --db results/runs.sqlite
