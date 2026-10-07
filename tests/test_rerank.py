@@ -188,7 +188,9 @@ def test_injected_cross_encoder_counts_truncation_and_rejects_bad_scores() -> No
         ) -> np.ndarray:
             assert batch_size == 4
             assert show_progress_bar is False
-            return np.asarray(self.values, dtype=np.float64)
+            if len(pairs) == len(self.values):
+                return np.asarray(self.values, dtype=np.float64)
+            return np.full(len(pairs), self.values[-1], dtype=np.float64)
 
     config = RerankConfig(max_length=8, batch_size=4, revision="abc")
     reranker = CrossEncoderReranker(config, model=_Model([0.2, 1.5]), revision="abc")
@@ -197,6 +199,11 @@ def test_injected_cross_encoder_counts_truncation_and_rejects_bad_scores() -> No
         assert reranker.score([("q", "short"), ("q", "long")]) == [0.2, 1.5]
     assert reranker.truncated_pairs == 1
     assert any("truncated" in str(item.message) for item in caught)
+    with warnings.catch_warnings(record=True) as again:
+        warnings.simplefilter("always")
+        assert reranker.score([("q", "long")]) == [1.5]
+    assert reranker.truncated_pairs == 2
+    assert again == []
     broken = CrossEncoderReranker(config, model=_Model([float("nan")]), revision="abc")
     with pytest.raises(ValueError, match="finite"):
         broken.score([("q", "short")])

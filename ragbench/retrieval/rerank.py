@@ -137,6 +137,7 @@ class CrossEncoderReranker:
     ) -> None:
         self._config = config
         self._truncated_pairs = 0
+        self._warned = False
         if model is None:
             model, revision = load_cross_encoder(config)
         if not revision:
@@ -164,7 +165,8 @@ class CrossEncoderReranker:
         lengths = [len(ids) for ids in input_ids]
         overlong = count_overlong(lengths, self._config.max_length)
         self._truncated_pairs += overlong
-        if overlong:
+        if overlong and not self._warned:
+            self._warned = True
             warnings.warn(
                 f"{overlong} query/document pair(s) exceed the cross-encoder "
                 f"{self._config.max_length}-token limit and will be truncated.",
