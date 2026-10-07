@@ -53,10 +53,44 @@ The interval is uncertainty from resampling this fixed question list. It is not
 a model of retrieval noise or hardware. The permutation p-value is
 `(extreme + 1) / (samples + 1)` and cannot be zero.
 
-`gate_on_ci: false` keeps the point-drop rule. `gate_on_ci: true` replaces it:
-the check fails only when the interval's upper bound is below `-tolerance`.
-That is a more conservative failure rule than the point estimate. Resource
-thresholds stay relative and are not bootstrapped.
+`gate_mode` chooses how that interval, or the point estimate, is turned into
+pass or fail. `max_drop` is the allowed negative margin in every mode.
+Resource thresholds stay relative and are not bootstrapped.
+
+| `gate_mode` | Decision |
+| --- | --- |
+| `point_drop` | Fail when the point estimate drops by more than `max_drop`. |
+| `proven_regression` | Fail only when the upper confidence bound of `(candidate - baseline)` is below `-max_drop`. A wide interval keeps a real drop from failing. |
+| `non_inferior` | Fail unless the lower confidence bound of `(candidate - baseline)` is at least `-max_drop`. A wide interval fails until the candidate is shown to stay inside the margin. |
+
+`gate_on_ci: false` leaves the mode at `point_drop`. `gate_on_ci: true` is the
+older spelling of `proven_regression` and conflicts with any other `gate_mode`.
+`configs/thresholds.yaml` and `configs/scifact-thresholds.yaml` both set
+`gate_on_ci: false`, so CI uses point-drop thresholds. The support fixture
+allows a 0.02 drop in MRR, Recall@1, and Recall@3.
+
+The support fixture has 27 questions. One changed question moves the mean a
+little and leaves an interval wide enough that `proven_regression` can pass
+while `non_inferior` fails. A 300-query benchmark narrows the same kind of
+interval. The two interval policies answer different questions; CI stays on
+`point_drop` because that rule does not depend on the interval width.
+
+## Failing gate
+
+```bash
+uv run python scripts/demonstrate_gate_failure.py results/degraded-baseline.json
+uv run ragbench compare --baseline benchmarks/baseline.json \
+  --candidate results/degraded-baseline.json \
+  --thresholds configs/thresholds.yaml
+```
+
+The first command lowers MRR, Recall@1, and Recall@3 by 0.07, prints both
+metric tables, and exits 0 because the gate rejected the candidate. The second
+command is `ragbench compare` itself and exits 2. In GitHub Actions the job
+`gate-negative-control` runs the first command and appends the tables to the
+job summary. That job is green when the rejection happens. It is a labeled
+negative control, separate from the happy-path support-fixture and SciFact
+gates.
 
 Every gated quality metric also lists per-question changes, sorted by metric
 then question ID, with direction `improved`, `regressed`, or `unchanged`
@@ -95,7 +129,11 @@ reports from private corpora. Reports also include questions and generated text.
 
 `.github/workflows/ci.yml` installs from `uv.lock` with uv, then runs Ruff,
 mypy, tests with a coverage floor, the support-fixture gate, and a SciFact BM25
-gate on Python 3.12/Linux and macOS. Separate Linux jobs run real-model retrieval
-and Docker. Candidate/comparison JSON is uploaded as a workflow artifact,
-including on failure. No credentials or paid provider calls are needed. The
-SciFact zip is downloaded in CI and rejected unless its SHA-256 matches.
+gate on Python 3.12/Linux and macOS. Those gates fail the workflow on exit 2.
+The separate `gate-negative-control` job degrades the support fixture by 0.07
+and stays green only when `point_drop` rejects that candidate. Its metric table
+is written to the Actions job summary. Separate Linux jobs run real-model
+retrieval and Docker. Candidate/comparison JSON is uploaded as a workflow
+artifact, including on failure. No credentials or paid provider calls are
+needed. The SciFact zip is downloaded in CI and rejected unless its SHA-256
+matches.

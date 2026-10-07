@@ -264,9 +264,12 @@ are expected to differ between repeated runs.
 drops and relative resource increases. Missing measurements fail rather than pass.
 Aggregate retrieval and answer/judge scores must match their per-question values.
 Optional `statistics` settings add a seeded paired bootstrap percentile interval
-and a two-sided sign-flip permutation test on per-question deltas. `gate_on_ci`
-replaces the point-drop rule: the check fails only when the confidence-interval
-upper bound of `(candidate - baseline)` is below `-tolerance`. The comparison
+and a two-sided sign-flip permutation test on per-question deltas. `gate_mode`
+names the quality decision. `point_drop` uses the point estimate and is the CI
+policy (`gate_on_ci: false`). `proven_regression` fails only when the upper
+confidence bound of `(candidate - baseline)` is below `-tolerance`.
+`non_inferior` fails unless the lower bound is at least `-tolerance`.
+`gate_on_ci: true` is the older spelling of `proven_regression`. The comparison
 also lists questions that improved, regressed, or stayed unchanged on each gated
 quality metric. See [regression semantics](regression.md).
 

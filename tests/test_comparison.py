@@ -6,7 +6,13 @@ from typer.testing import CliRunner
 
 from ragbench.cli import app, save_result
 from ragbench.config import load_config
-from ragbench.evaluation.comparison import StatisticsConfig, Thresholds, compare, load_report
+from ragbench.evaluation.comparison import (
+    StatisticsConfig,
+    Thresholds,
+    compare,
+    load_report,
+    load_thresholds,
+)
 from ragbench.evaluation.models import EvaluationResult
 from ragbench.evaluation.runner import evaluate
 
@@ -85,6 +91,28 @@ def test_question_changes_and_ci_gate(report: EvaluationResult) -> None:
         ),
     )
     assert gated.passed
+    assert gated.checks[0].rule.startswith("proven_regression:")
+    non_inferior = compare(
+        report,
+        candidate,
+        Thresholds(
+            max_drop={"mrr": 0.0},
+            statistics=statistics.model_copy(update={"gate_mode": "non_inferior"}),
+        ),
+    )
+    assert not non_inferior.passed
+    assert non_inferior.checks[0].ci_low is not None
+    assert non_inferior.checks[0].ci_low < 0
+    assert non_inferior.checks[0].rule.startswith("non_inferior:")
+    wide_margin = compare(
+        report,
+        candidate,
+        Thresholds(
+            max_drop={"mrr": 1.0},
+            statistics=statistics.model_copy(update={"gate_mode": "non_inferior"}),
+        ),
+    )
+    assert wide_margin.passed
     regressed = [item for item in gated.question_changes if item.direction == "regressed"]
     assert [item.question_id for item in regressed] == [report.questions[index].id]
     again = compare(report, candidate, Thresholds(max_drop={"mrr": 0.0}, statistics=statistics))
@@ -117,3 +145,20 @@ def test_cli_exit_codes_and_corrupt_report(report: EvaluationResult, tmp_path: P
     assert CliRunner().invoke(app, args).exit_code == 1
     with pytest.raises(ValueError):
         load_report(candidate)
+
+
+def test_gate_mode_names_and_committed_ci_policy() -> None:
+    legacy = StatisticsConfig(gate_on_ci=True)
+    assert legacy.resolved_gate_mode() == "proven_regression"
+    named = StatisticsConfig(gate_mode="non_inferior")
+    assert named.resolved_gate_mode() == "non_inferior"
+    with pytest.raises(ValueError, match="conflicts"):
+        StatisticsConfig(gate_on_ci=True, gate_mode="non_inferior")
+    with pytest.raises(ValueError):
+        StatisticsConfig.model_validate({"gate_mode": "upper_bound"})
+    root = Path(__file__).resolve().parents[1]
+    for name in ("thresholds.yaml", "scifact-thresholds.yaml"):
+        limits = load_thresholds(root / "configs" / name)
+        assert limits.statistics is not None
+        assert limits.statistics.gate_on_ci is False
+        assert limits.statistics.resolved_gate_mode() == "point_drop"

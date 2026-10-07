@@ -399,9 +399,12 @@ MAP and MRR use the full document ranking. The JSON report stores only
 
 The bootstrap interval is uncertainty from resampling this fixed query list.
 It is not retrieval noise, corpus sampling, or hardware noise. The permutation
-test is a two-sided sign flip of the mean paired delta. `gate_on_ci` is off
-unless a threshold file turns it on, and it replaces the point-drop rule rather
-than adding a second one. Latencies are one pass, not a load test.
+test is a two-sided sign flip of the mean paired delta. CI thresholds set
+`gate_on_ci: false`, which is the `point_drop` policy: a drop larger than
+`max_drop` fails. `gate_mode: proven_regression` fails only when the upper
+confidence bound of `(candidate - baseline)` is below `-max_drop`.
+`gate_mode: non_inferior` fails unless the lower bound stays at or above
+`-max_drop`. Latencies are one pass, not a load test.
 
 MiniLM runs on CPU at one PyTorch thread with the revision pinned in the dense
 configs. A word window can still exceed the 256-token limit; truncation is
