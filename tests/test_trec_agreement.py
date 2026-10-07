@@ -10,7 +10,6 @@ import json
 from pathlib import Path
 
 import pytest
-import pytrec_eval
 
 from ragstat.evaluation.retrieval import (
     average_precision,
@@ -19,6 +18,8 @@ from ragstat.evaluation.retrieval import (
     recall_at_k,
     reciprocal_rank,
 )
+
+pytrec_eval = pytest.importorskip("pytrec_eval")
 
 FIXTURE = Path(__file__).parent / "fixtures" / "pytrec_agreement.json"
 _MEASURES = {"map", "recip_rank", "ndcg_cut_10", "recall_10", "P_10"}

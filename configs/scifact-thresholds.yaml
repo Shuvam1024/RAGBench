@@ -1,4 +1,7 @@
-# BM25 on SciFact is deterministic. Any quality movement fails the gate.
+# Frozen SciFact BM25 is deterministic. Any quality movement fails the gate.
+# CI scores configs/scifact-bm25-document.yaml and
+# configs/scifact-bm25-selected.yaml against their committed reports.
+# The exploratory whitespace chunk-120 config is not this gate.
 # gate_on_ci false is the point_drop policy, the same family as configs/thresholds.yaml.
 max_drop:
   mrr: 0.0

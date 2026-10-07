@@ -166,6 +166,16 @@ def _grade(raw: str) -> int:
     return int(raw)
 
 
+def read_qrels(path: Path) -> dict[str, dict[str, int]]:
+    """Positive relevance grades keyed by query id, then document id."""
+    return _read_qrels(path)
+
+
+def read_queries(path: Path) -> dict[str, str]:
+    """Query text keyed by query id."""
+    return _read_queries(path)
+
+
 def _read_qrels(path: Path) -> dict[str, dict[str, int]]:
     rows: dict[str, dict[str, int]] = {}
     for line_number, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):

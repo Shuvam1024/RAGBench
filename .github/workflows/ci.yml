@@ -21,7 +21,11 @@ jobs:
       - uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
-      - run: uv sync --frozen --python 3.12 --extra dev --extra api
+      - name: Install a C++ compiler for pytrec_eval on Linux
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y g++
+      - name: Sync dependencies
+        run: uv sync --frozen --python 3.12 --extra dev --extra api ${{ runner.os == 'Linux' && '--extra agreement' || '' }}
       - run: uv run ruff check .
       - run: uv run ruff format --check .
       - run: uv run mypy
@@ -30,11 +34,13 @@ jobs:
         run: uv run ragstat evaluate --config configs/baseline.yaml --output results/candidate.json
       - name: Enforce quality thresholds
         run: uv run ragstat compare --baseline benchmarks/baseline.json --candidate results/candidate.json --thresholds configs/thresholds.yaml --output results/comparison.json
-      - name: Prepare SciFact and enforce the BM25 gate
+      - name: Prepare SciFact and enforce the frozen BM25 gates
         run: |
           uv run ragstat dataset scifact --cache .cache/beir
-          uv run ragstat evaluate --config configs/scifact-bm25.yaml --output results/scifact-bm25.json
-          uv run ragstat compare --baseline benchmarks/scifact/bm25.json --candidate results/scifact-bm25.json --thresholds configs/scifact-thresholds.yaml --output results/scifact-comparison.json
+          uv run ragstat evaluate --config configs/scifact-bm25-document.yaml --output results/scifact-document.json
+          uv run ragstat compare --baseline benchmarks/scifact/bm25-document.json --candidate results/scifact-document.json --thresholds configs/scifact-thresholds.yaml --output results/scifact-document-comparison.json
+          uv run ragstat evaluate --config configs/scifact-bm25-selected.yaml --output results/scifact-selected.json
+          uv run ragstat compare --baseline benchmarks/scifact/bm25-selected.json --candidate results/scifact-selected.json --thresholds configs/scifact-thresholds.yaml --output results/scifact-selected-comparison.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:

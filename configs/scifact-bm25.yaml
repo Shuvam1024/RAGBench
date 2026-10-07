@@ -2,7 +2,8 @@
 # whitespace \w+ split. Windows are 120 words with overlap 20. k1=1.5, b=0.75.
 # Indexed field: prepared title and body joined by one newline.
 # This is a RAG-style chunked index. It is not Pyserini BEIR BM25 and is not
-# the train-selected system. CI compares this file with benchmarks/scifact/bm25.json.
+# the train-selected system. It is an exploratory run. CI gates the frozen
+# document-level and selected BM25 configs instead.
 # Prepare the corpus first:
 #   ragstat dataset scifact --cache .cache/beir
 schema_version: 1
