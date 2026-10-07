@@ -269,7 +269,10 @@ tokens, are truncated. The model name and revision are recorded on the report.
 The score is the model's raw output. For `cross-encoder/ms-marco-MiniLM-L-6-v2`
 that activation is the identity, so the value is a ranking logit.
 
-`rerank_p95_ms` is the cross-encoder alone. `pipeline_p95_ms` adds the
+`index_ms` is the first-stage index build. It does not include cross-encoder
+weight loading. Embedding-model initialization still sits inside that index
+build, because the embedder is constructed while the first-stage index is
+built. `rerank_p95_ms` is the cross-encoder alone. `pipeline_p95_ms` adds the
 full-ranking first stage and the cross-encoder. Min-max hybrid normalizes over
 every chunk, so this pipeline does not have a cheaper early-exit first stage.
 The full-ranking number stays in `retrieval_p95_ms`.

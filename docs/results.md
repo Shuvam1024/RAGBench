@@ -135,7 +135,7 @@ committed.
 | 100 | 0.712 | 0.831 | 0.955 | 0.955 | 0.675 | 0.685 |
 
 The frozen hybrid's train nDCG@10 is 0.733.
-The train report for depth 20 truncated 1,966 of 16,180 query/document pairs. Full-ranking retrieval p95 was 298 ms, rerank p95 was 2,081 ms, and the top-K pipeline p95 was 2,302 ms.
+The train report for depth 20 truncated 1,966 of 16,180 query/document pairs. Full-ranking retrieval p95 was 245 ms, rerank p95 was 1,993 ms, and the top-K pipeline p95 was 2,171 ms.
 <!-- tables:end rerank-train -->
 
 Recall@100 on a reranked list is the recall of the returned documents.
@@ -280,7 +280,7 @@ on the reranked list is lower because the returned list stops at `candidate_k`.
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Reranked top 20 | 0.840 | 0.890 | 0.702 | 0.094 | 0.657 | 0.670 | 0.952 |
 
-The run truncated 767 of 6,000 query/document pairs. Full-ranking retrieval p95 was 248 ms, rerank p95 was 1,995 ms, and the top-K pipeline p95 was 2,168 ms.
+The run truncated 767 of 6,000 query/document pairs. Full-ranking retrieval p95 was 243 ms, rerank p95 was 1,961 ms, and the top-K pipeline p95 was 2,114 ms.
 <!-- tables:end scifact-rerank -->
 
 Reranked candidates minus the selected hybrid

@@ -96,7 +96,10 @@ API dollars and has no API token count. Local embedding compute and hardware are
 excluded. Estimates depend on your supplied rates and provider usage, and are not
 billing statements.
 
-Index timing includes model initialization and any first-run download. Retrieval
-latency includes query encoding and full-corpus retrieval. Generation and judge
-latencies cover their respective calls. Percentiles use linear interpolation over
-one pass through benchmark questions; there is no warm-up exclusion or load test.
+Index timing includes embedding-model initialization when that load happens
+inside indexing, and any first-run download. On a reranked run, `index_ms` is
+the first-stage index only and does not include cross-encoder weight loading.
+Retrieval latency includes query encoding and full-corpus retrieval. Generation
+and judge latencies cover their respective calls. Percentiles use linear
+interpolation over one pass through benchmark questions; there is no warm-up
+exclusion or load test.
