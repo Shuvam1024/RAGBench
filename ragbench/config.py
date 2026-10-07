@@ -69,6 +69,23 @@ class HybridConfig(ConfigModel):
 RetrieverConfig = Annotated[BM25Config | DenseConfig | HybridConfig, Field(discriminator="type")]
 
 
+class RerankConfig(ConfigModel):
+    """Cross-encoder second stage over a fixed first-stage document set.
+
+    ``text`` is the only supported passage rule: the highest-scoring first-stage
+    chunk. ``max_length`` is the token limit, including special tokens. Longer
+    pairs are truncated. ``candidate_k`` is the number of documents reranked.
+    """
+
+    model_name: Nonblank = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    revision: Nonblank | None = None
+    candidate_k: PositiveInt = 100
+    max_length: PositiveInt = 512
+    batch_size: PositiveInt = 32
+    device: Literal["cpu"] = "cpu"
+    text: Literal["best_first_stage_chunk"] = "best_first_stage_chunk"
+
+
 class EvaluationConfig(ConfigModel):
     recall_at_k: tuple[PositiveInt, ...] = (1, 3, 5)
     ndcg_at_k: tuple[PositiveInt, ...] | None = None
@@ -140,6 +157,7 @@ class RunConfig(ConfigModel):
     dataset: DatasetConfig
     chunking: ChunkingConfig = Field(default_factory=ChunkingConfig)
     retrieval: RetrieverConfig = Field(default_factory=BM25Config)
+    rerank: RerankConfig | None = None
     evaluation: EvaluationConfig = Field(default_factory=EvaluationConfig)
     output: OutputConfig = Field(default_factory=OutputConfig)
     generation: GenerationConfig | None = None

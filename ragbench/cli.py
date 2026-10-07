@@ -124,8 +124,26 @@ def evaluate(
         typer.echo(f"P@{k:<8} {value:.4f}")
     if result.mean_average_precision is not None:
         typer.echo(f"MAP        {result.mean_average_precision:.4f}")
-    typer.echo(f"MRR        {result.mrr:.4f} (full document ranking)")
-    typer.echo(f"Retrieval p95: {result.timings.retrieval_p95_ms:.3f} ms | Run: {result.run_id}")
+    if result.candidate_recall_at_100 is not None:
+        typer.echo(f"MRR        {result.mrr:.4f} (reranked candidate set)")
+    else:
+        typer.echo(f"MRR        {result.mrr:.4f} (full document ranking)")
+    if result.candidate_recall_at_100 is not None:
+        typer.echo(
+            "Candidate Recall@100 "
+            f"{result.candidate_recall_at_100:.4f} (first stage, before rerank)"
+        )
+    typer.echo(
+        f"Full-ranking retrieval p95: {result.timings.retrieval_p95_ms:.3f} ms | "
+        f"Run: {result.run_id}"
+    )
+    if result.timings.rerank_p95_ms is not None:
+        typer.echo(f"Rerank p95: {result.timings.rerank_p95_ms:.3f} ms")
+    if result.timings.pipeline_p95_ms is not None:
+        typer.echo(
+            f"Top-K pipeline p95: {result.timings.pipeline_p95_ms:.3f} ms "
+            "(full-ranking first stage plus rerank)"
+        )
     for name, value in (result.answer_metrics or {}).items():
         typer.echo(f"{name}: {value:.4f}")
     for name, value in (result.judge_metrics or {}).items():

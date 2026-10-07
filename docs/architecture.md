@@ -247,9 +247,32 @@ and at least one question per benchmark. A metric called MRR@K would be
 truncated; the current MRR uses the complete document ranking.
 
 Full-corpus scoring and sorting costs more than bounded retrieval. That is an
-accepted first-version limit. The default synthetic fixture contains 12 documents and 27 questions. It checks
-engineering behavior, not accuracy on unseen domains. The original three-document
-fixture remains available through `configs/smoke.yaml`.
+accepted first-version limit. `retrieval_p95_ms` is this full-ranking time:
+the retriever scores every chunk, including when a later stage only keeps the
+top documents. The default synthetic fixture contains 12 documents and 27
+questions. It checks engineering behavior, not accuracy on unseen domains.
+The original three-document fixture remains available through `configs/smoke.yaml`.
+
+Optional `rerank` settings add a cross-encoder second stage. The first stage
+still produces the full document ranking. The cross-encoder then reorders the
+first `candidate_k` documents and the reported nDCG, MRR, MAP, and Recall are
+computed on that reordered list alone. Documents outside the candidate set are
+not returned. `candidate_recall_at_100` is separate: it is the first stage's
+Recall@100, measured before the cross-encoder runs. When `candidate_k` is 100,
+reranked Recall@100 matches that number because reranking only permutes the
+same documents.
+
+A multi-chunk document contributes one string: the text of its highest-scoring
+first-stage chunk. Other chunks are not concatenated and are not scored on
+their own. Pairs longer than `rerank.max_length` tokens, counting special
+tokens, are truncated. The model name and revision are recorded on the report.
+The score is the model's raw output. For `cross-encoder/ms-marco-MiniLM-L-6-v2`
+that activation is the identity, so the value is a ranking logit.
+
+`rerank_p95_ms` is the cross-encoder alone. `pipeline_p95_ms` adds the
+full-ranking first stage and the cross-encoder. Min-max hybrid normalizes over
+every chunk, so this pipeline does not have a cheaper early-exit first stage.
+The full-ranking number stays in `retrieval_p95_ms`.
 
 ## 10. Results and comparison
 

@@ -113,7 +113,10 @@ class QuestionResult(Record):
     ndcg_at_k: dict[int, UnitFloat] | None = None
     precision_at_k: dict[int, UnitFloat] | None = None
     average_precision: UnitFloat | None = None
+    candidate_recall_at_100: UnitFloat | None = None
     retrieval_ms: NonnegativeFloat = 0.0
+    rerank_ms: NonnegativeFloat | None = None
+    pipeline_ms: NonnegativeFloat | None = None
     generation_ms: NonnegativeFloat | None = None
     judge_ms: NonnegativeFloat | None = None
     answer: GeneratedAnswer | None = None
@@ -127,6 +130,10 @@ class Timings(Record):
     index_ms: NonnegativeFloat
     retrieval_p50_ms: NonnegativeFloat
     retrieval_p95_ms: NonnegativeFloat
+    rerank_p50_ms: NonnegativeFloat | None = None
+    rerank_p95_ms: NonnegativeFloat | None = None
+    pipeline_p50_ms: NonnegativeFloat | None = None
+    pipeline_p95_ms: NonnegativeFloat | None = None
     generation_p95_ms: NonnegativeFloat | None = None
     judge_p95_ms: NonnegativeFloat | None = None
 
@@ -149,6 +156,7 @@ class EvaluationResult(Record):
     ndcg_at_k: dict[int, UnitFloat] | None = None
     precision_at_k: dict[int, UnitFloat] | None = None
     mean_average_precision: UnitFloat | None = None
+    candidate_recall_at_100: UnitFloat | None = None
     multi_chunk_documents: int | None = Field(default=None, ge=0)
     questions: tuple[QuestionResult, ...]
     timings: Timings
@@ -179,6 +187,11 @@ class EvaluationResult(Record):
             self.mean_average_precision,
             [q.average_precision for q in self.questions],
             "mean average precision",
+        )
+        _aligned_scalar(
+            self.candidate_recall_at_100,
+            [q.candidate_recall_at_100 for q in self.questions],
+            "candidate recall@100",
         )
         _aligned_means(
             self.answer_metrics,
