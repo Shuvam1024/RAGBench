@@ -40,6 +40,9 @@ def test_readme_quotes_report_metrics_at_four_decimals() -> None:
         assert f"{ndcg['10']:.4f}" in README
         assert f"{recall['10']:.4f}" in README
         assert f"{report['mean_average_precision']:.4f}" in README
+        candidate_recall = report.get("candidate_recall_at_100")
+        if isinstance(candidate_recall, float):
+            assert f"{candidate_recall:.4f}" in README
 
 
 def test_readme_quotes_paired_deltas() -> None:

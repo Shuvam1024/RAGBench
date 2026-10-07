@@ -71,7 +71,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: /home/runner/.cache/huggingface
-          key: minilm-${{ runner.os }}-${{ hashFiles('configs/dense.yaml') }}
+          key: minilm-${{ runner.os }}-${{ hashFiles('configs/dense.yaml', 'configs/scifact-rerank-train.yaml') }}
       - run: uv sync --frozen --python 3.12 --extra dev --extra dense
       - run: uv run pytest -q tests/test_dense.py tests/test_integration.py --run-integration
   docker:

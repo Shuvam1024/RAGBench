@@ -1,6 +1,10 @@
 import pytest
 
-from ragbench.evaluation.train_selection import choose_dense_weight, selection_key
+from ragbench.evaluation.train_selection import (
+    choose_candidate_k,
+    choose_dense_weight,
+    selection_key,
+)
 
 
 def test_train_tie_break_prefers_smaller_chunks_then_whitespace() -> None:
@@ -33,3 +37,12 @@ def test_dense_weight_tie_prefers_the_smaller_weight() -> None:
         choose_dense_weight(())
     with pytest.raises(TypeError):
         choose_dense_weight([(True, 0.5)])
+
+
+def test_candidate_depth_tie_prefers_the_smaller_depth() -> None:
+    rows = [(100, 0.70), (50, 0.75), (20, 0.75)]
+    assert choose_candidate_k(rows) == 20
+    with pytest.raises(ValueError, match="at least one"):
+        choose_candidate_k(())
+    with pytest.raises(TypeError):
+        choose_candidate_k([(True, 0.5)])

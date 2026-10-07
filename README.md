@@ -102,6 +102,33 @@ a tie would prefer the smaller weight.
 
 The frozen weight is 0.50.
 
+### Cross-encoder second stage
+
+The candidate generator is that frozen hybrid. It is not retuned here. A
+cross-encoder then reorders the first `candidate_k` documents. The model is
+`cross-encoder/ms-marco-MiniLM-L-6-v2` at revision
+`233902d25c440f23af6f7d6e94d2946bac0bee0a`, on CPU, with one PyTorch thread
+and batch size 32. Its positional limit is 512. `max_length` is 512, so a
+query/document pair longer than 512 tokens, including special tokens, is
+truncated. The score is the raw model output. This checkpoint's activation is
+the identity, so the value is a ranking logit.
+
+Each document is sent as one string: the text of its highest-scoring
+first-stage chunk. Other chunks of that document are not joined on and are
+not scored separately. `candidate_recall_at_100` is the hybrid's Recall@100
+before this reorder. nDCG@10 and MRR below are computed on the reordered
+candidate list only. Documents outside that list are not returned.
+
+`retrieval_p95_ms` remains the full-ranking first stage, which scores every
+chunk. Min-max fusion normalizes over the whole corpus, so the first stage
+does not stop early. `rerank_p95_ms` is the cross-encoder alone.
+`pipeline_p95_ms` is the sum, the end-to-end cost of the reranked list.
+
+`scripts/select_scifact_rerank.py` scores candidate depths 20, 50, and 100 on
+the SciFact train split only. The highest train nDCG@10 wins. A tie prefers
+the smaller depth. The test split is scored once after that choice is
+committed.
+
 ### Held-out SciFact test
 
 300 queries, 339 binary qrels. Corpus fingerprint `0ae06d7ccabbb805…` and
