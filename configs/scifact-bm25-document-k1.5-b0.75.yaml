@@ -1,0 +1,27 @@
+# Post-hoc ablation on the SciFact test split. This file was written after
+# the frozen test numbers were reported. It is not a train selection and it
+# does not replace configs/scifact-bm25-document.yaml or
+# configs/scifact-bm25-selected.yaml.
+#
+# Same document-level index as configs/scifact-bm25-document.yaml (one string
+# per document, stem tokenizer) with the BM25Okapi parameters of the selected
+# chunked index: k1=1.5, b=0.75. The point is to separate those parameters
+# from chunking. rank_bm25, not Lucene, not Pyserini.
+schema_version: 1
+dataset:
+  documents_path: ../.cache/beir/scifact
+  benchmark_path: ../.cache/beir/scifact/benchmark.json
+chunking:
+  unit: document
+retrieval:
+  type: bm25
+  k1: 1.5
+  b: 0.75
+  tokenizer: stem
+evaluation:
+  recall_at_k: [10, 100]
+  ndcg_at_k: [10]
+  precision_at_k: [10]
+  stored_hits: 10
+output:
+  json_path: null

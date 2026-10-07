@@ -1,0 +1,28 @@
+# Post-hoc ablation on the NFCorpus test split. This file was written after
+# the frozen test numbers were reported. It is not a selection on NFCorpus
+# and it does not replace configs/nfcorpus-bm25-document.yaml or
+# configs/nfcorpus-bm25-selected.yaml.
+#
+# Same document-level index as configs/nfcorpus-bm25-document.yaml (one string
+# per document, stem tokenizer) with the BM25Okapi parameters copied from the
+# SciFact ablation configs/scifact-bm25-document-k1.5-b0.75.yaml: k1=1.5,
+# b=0.75. rank_bm25, not Lucene, not Pyserini. Grades 1 and 2: nDCG here uses
+# exponential gain.
+schema_version: 1
+dataset:
+  documents_path: ../.cache/beir/nfcorpus
+  benchmark_path: ../.cache/beir/nfcorpus/benchmark.json
+chunking:
+  unit: document
+retrieval:
+  type: bm25
+  k1: 1.5
+  b: 0.75
+  tokenizer: stem
+evaluation:
+  recall_at_k: [10, 100]
+  ndcg_at_k: [10]
+  precision_at_k: [10]
+  stored_hits: 10
+output:
+  json_path: null

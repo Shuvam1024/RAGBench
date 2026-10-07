@@ -154,8 +154,43 @@ def _number(value: object) -> float:
     return float(value)
 
 
+def _count(data: object, expr: str) -> int:
+    """Count list rows matching ``name[key=value][key!=value]`` filters."""
+    head, _, _rest = expr.partition("[")
+    rows = lookup(data, head)
+    if not isinstance(rows, list):
+        raise ValueError(f"{expr} does not name a list")
+    matched = 0
+    specs = re.findall(r"\[([^\]]+)\]", expr[len(head) :])
+    parsed: list[tuple[str, object, str, bool]] = []
+    for spec in specs:
+        if "!=" in spec:
+            key, raw = spec.split("!=", 1)
+            negate = True
+        elif "=" in spec:
+            key, raw = spec.split("=", 1)
+            negate = False
+        else:
+            raise ValueError(f"Cannot filter {expr}")
+        parsed.append((key, _coerce(raw), raw, negate))
+    for item in rows:
+        if not isinstance(item, dict):
+            continue
+        keep = True
+        for key, want, raw, negate in parsed:
+            equal = item.get(key) == want or str(item.get(key)) == raw
+            if equal == negate:
+                keep = False
+                break
+        if keep:
+            matched += 1
+    return matched
+
+
 def lookup(data: object, expr: str) -> object:
     """Resolve a dotted field, with one product or difference when needed."""
+    if expr.startswith("count:"):
+        return _count(data, expr.removeprefix("count:"))
     if " * " in expr:
         left, right = expr.split(" * ", 1)
         return _number(lookup(data, left)) * _number(lookup(data, right))
@@ -305,8 +340,11 @@ def render_at_a_glance() -> str:
     document = "benchmarks/scifact/bm25-document.json"
     sci_hybrid = "benchmarks/scifact/document-vs-hybrid-selected.json"
     nf_hybrid = "benchmarks/nfcorpus/document-vs-hybrid-selected.json"
-    sci_chunk = "benchmarks/scifact/document-vs-bm25-selected.json"
     nf_chunk = "benchmarks/nfcorpus/document-vs-bm25-selected.json"
+    ablation = "benchmarks/scifact/bm25-document-k1.5-b0.75.json"
+    sci_k15 = "benchmarks/scifact/document-vs-bm25-k15.json"
+    sci_chunk_vs_k15 = "benchmarks/scifact/bm25-k15-vs-selected.json"
+    nf_k15 = "benchmarks/nfcorpus/document-vs-bm25-k15.json"
     rerank_cmp = "benchmarks/scifact/hybrid-vs-rerank.json"
     rerank = "benchmarks/scifact/rerank-selected.json"
     sci_stats = "benchmarks/scifact/corpus_stats.json"
@@ -330,6 +368,10 @@ def render_at_a_glance() -> str:
     accuracy_high = _number(lookup(load_report(paired), "checks[metric=accuracy].ci_high"))
     if not accuracy_low < 0 < accuracy_high:
         raise ValueError("accuracy interval does not include zero")
+    nf_k15_low = _number(lookup(load_report(nf_k15), "checks[metric=ndcg@10].ci_low"))
+    nf_k15_high = _number(lookup(load_report(nf_k15), "checks[metric=ndcg@10].ci_high"))
+    if not nf_k15_low < 0 < nf_k15_high:
+        raise ValueError("NFCorpus parameter ablation interval does not include zero")
     sci = "[SciFact test split](docs/results.md#held-out-scifact-test)"
     nf = "[NFCorpus](docs/results.md#nfcorpus-confirmation)"
     dev = "[SciFact dev](docs/results.md#held-out-scifact-dev)"
@@ -358,17 +400,30 @@ def render_at_a_glance() -> str:
                 f"{cite(sci_stats, 'document_count', 'count')} SciFact documents ("
                 f"{cite(nf_stats, 'word_length.longer_than[words=480].documents', 'count')} of "
                 f"{cite(nf_stats, 'document_count', 'count')} on NFCorpus) exceed the "
-                f"{cite(train, 'winner.chunk_size', 'count')}-word window. Its nDCG@10 "
-                f"{cite(sci_chunk, 'checks[metric=ndcg@10].mean_delta', 'signed')} over "
-                f"document-level BM25 on the {sci} comes mostly from the BM25 parameters ("
+                f"{cite(train, 'winner.chunk_size', 'count')}-word window. A post-hoc ablation, "
+                "run after the test numbers were reported and not used to select a setting, "
+                "scores document-level BM25 with parameters "
                 f"{cite(selected_cfg, 'retrieval.k1', 'weight')}/"
-                f"{cite(selected_cfg, 'retrieval.b', 'weight')} vs "
-                f"{cite(document_cfg, 'retrieval.k1', 'weight')}/"
-                f"{cite(document_cfg, 'retrieval.b', 'weight')}), not from splitting documents. "
-                "On train the two tie at "
+                f"{cite(selected_cfg, 'retrieval.b', 'weight')}. On the {sci} its nDCG@10 is "
+                f"{cite(ablation, 'ndcg_at_k.10', 'metric4')}, the selected chunked index is "
+                f"{cite('benchmarks/scifact/bm25-selected.json', 'ndcg_at_k.10', 'metric4')} "
+                "(they differ on "
+                f"{cite(sci_chunk_vs_k15, 'count:question_changes[metric=ndcg@10][direction!=unchanged]', 'count')} "
+                f"of {cite(ablation, 'question_count', 'count')} queries), and document-level "
+                f"BM25 at {cite(document_cfg, 'retrieval.k1', 'weight')}/"
+                f"{cite(document_cfg, 'retrieval.b', 'weight')} is "
+                f"{cite(document, 'ndcg_at_k.10', 'metric')}. The gap of "
+                f"{cite(sci_k15, 'checks[metric=ndcg@10].mean_delta', 'signed')} is that "
+                f"parameter change, {level}% CI ["
+                f"{cite(sci_k15, 'checks[metric=ndcg@10].ci_low', 'signed')}, "
+                f"{cite(sci_k15, 'checks[metric=ndcg@10].ci_high', 'signed')}]. "
+                "Chunking adds about nothing on this split. On train the frozen pair tie at "
                 f"{cite(train, 'winner.metrics.ndcg@10', 'metric4')} vs "
                 f"{cite(train, 'document_level_reference.metrics.ndcg@10', 'metric4')}. "
-                f"{nf} does not confirm the test gap."
+                "The same ablation on "
+                f"{nf} changes document-level nDCG@10 by "
+                f"{cite(nf_k15, 'checks[metric=ndcg@10].mean_delta', 'signed')}, "
+                "and that interval includes zero."
             ),
             (
                 "- Cross-encoder rerank, not fine-tuned, is a negative result on the "
@@ -752,7 +807,6 @@ def render_chunk_window() -> str:
     train = "benchmarks/scifact/bm25-train-selection.json"
     selected_cfg = "configs/scifact-bm25-selected.yaml"
     document_cfg = "configs/scifact-bm25-document.yaml"
-    sci_chunk = "benchmarks/scifact/document-vs-bm25-selected.json"
     return (
         "Only "
         f"{cite(sci_stats, 'word_length.longer_than[words=480].documents', 'count')} of "
@@ -760,13 +814,26 @@ def render_chunk_window() -> str:
         f"{cite(nf_stats, 'word_length.longer_than[words=480].documents', 'count')} of "
         f"{cite(nf_stats, 'document_count', 'count')} NFCorpus documents are longer than "
         f"{cite(train, 'winner.chunk_size', 'count')} words, so the selected chunked index "
-        "is nearly one chunk per document. The test nDCG@10 gap of "
-        f"{cite(sci_chunk, 'checks[metric=ndcg@10].mean_delta', 'signed')} versus "
-        "document-level BM25 comes mostly from the BM25 parameters ("
+        "is nearly one chunk per document. A post-hoc ablation, scored after the test "
+        "numbers were reported and not used to select a setting, uses that document-level "
+        "index with parameters "
         f"{cite(selected_cfg, 'retrieval.k1', 'weight')}/"
-        f"{cite(selected_cfg, 'retrieval.b', 'weight')} vs "
+        f"{cite(selected_cfg, 'retrieval.b', 'weight')}. Its test nDCG@10 is "
+        f"{cite('benchmarks/scifact/bm25-document-k1.5-b0.75.json', 'ndcg_at_k.10', 'metric4')}. "
+        "Document-level BM25 at "
         f"{cite(document_cfg, 'retrieval.k1', 'weight')}/"
-        f"{cite(document_cfg, 'retrieval.b', 'weight')}). On train the two tie at "
+        f"{cite(document_cfg, 'retrieval.b', 'weight')} is "
+        f"{cite('benchmarks/scifact/bm25-document.json', 'ndcg_at_k.10', 'metric')}, and the "
+        "parameter change is "
+        f"{cite('benchmarks/scifact/document-vs-bm25-k15.json', 'checks[metric=ndcg@10].mean_delta', 'signed')}. "
+        "The selected chunked index scores "
+        f"{cite('benchmarks/scifact/bm25-selected.json', 'ndcg_at_k.10', 'metric4')}. "
+        "Those two differ on "
+        f"{cite('benchmarks/scifact/bm25-k15-vs-selected.json', 'count:question_changes[metric=ndcg@10][direction!=unchanged]', 'count')} "
+        "of "
+        f"{cite('benchmarks/scifact/bm25-document-k1.5-b0.75.json', 'question_count', 'count')} "
+        "queries, so chunking adds about nothing on SciFact once the parameters match. "
+        "On train the frozen pair tie at "
         f"{cite(train, 'winner.metrics.ndcg@10', 'metric4')} vs "
         f"{cite(train, 'document_level_reference.metrics.ndcg@10', 'metric4')}."
     )
@@ -941,6 +1008,64 @@ def _comparison(path: str) -> str:
     return comparison_table(path) + "\n\n" + interval_notes(path)
 
 
+def _ndcg_differs(path: str, report: str) -> str:
+    return (
+        "Per-query nDCG@10 differs on "
+        + cite(
+            path,
+            "count:question_changes[metric=ndcg@10][direction!=unchanged]",
+            "count",
+        )
+        + " of "
+        + cite(report, "question_count", "count")
+        + " queries."
+    )
+
+
+def render_scifact_doc_vs_k15() -> str:
+    return (
+        _comparison("benchmarks/scifact/document-vs-bm25-k15.json")
+        + "\n\n"
+        + _ndcg_differs(
+            "benchmarks/scifact/document-vs-bm25-k15.json",
+            "benchmarks/scifact/bm25-document-k1.5-b0.75.json",
+        )
+    )
+
+
+def render_scifact_k15_vs_selected() -> str:
+    return (
+        _comparison("benchmarks/scifact/bm25-k15-vs-selected.json")
+        + "\n\n"
+        + _ndcg_differs(
+            "benchmarks/scifact/bm25-k15-vs-selected.json",
+            "benchmarks/scifact/bm25-document-k1.5-b0.75.json",
+        )
+    )
+
+
+def render_nfcorpus_doc_vs_k15() -> str:
+    return (
+        _comparison("benchmarks/nfcorpus/document-vs-bm25-k15.json")
+        + "\n\n"
+        + _ndcg_differs(
+            "benchmarks/nfcorpus/document-vs-bm25-k15.json",
+            "benchmarks/nfcorpus/bm25-document-k1.5-b0.75.json",
+        )
+    )
+
+
+def render_nfcorpus_k15_vs_selected() -> str:
+    return (
+        _comparison("benchmarks/nfcorpus/bm25-k15-vs-selected.json")
+        + "\n\n"
+        + _ndcg_differs(
+            "benchmarks/nfcorpus/bm25-k15-vs-selected.json",
+            "benchmarks/nfcorpus/bm25-document-k1.5-b0.75.json",
+        )
+    )
+
+
 RENDERERS: dict[str, Callable[[], str]] = {
     "at-a-glance": render_at_a_glance,
     "headline": render_headline,
@@ -953,6 +1078,8 @@ RENDERERS: dict[str, Callable[[], str]] = {
     "scifact-doc-vs-selected": lambda: _comparison(
         "benchmarks/scifact/document-vs-bm25-selected.json"
     ),
+    "scifact-doc-vs-k15": render_scifact_doc_vs_k15,
+    "scifact-k15-vs-selected": render_scifact_k15_vs_selected,
     "scifact-doc-vs-hybrid": lambda: _comparison(
         "benchmarks/scifact/document-vs-hybrid-selected.json"
     ),
@@ -965,6 +1092,8 @@ RENDERERS: dict[str, Callable[[], str]] = {
     "nfcorpus-doc-vs-selected": lambda: _comparison(
         "benchmarks/nfcorpus/document-vs-bm25-selected.json"
     ),
+    "nfcorpus-doc-vs-k15": render_nfcorpus_doc_vs_k15,
+    "nfcorpus-k15-vs-selected": render_nfcorpus_k15_vs_selected,
     "nfcorpus-doc-vs-hybrid": lambda: _comparison(
         "benchmarks/nfcorpus/document-vs-hybrid-selected.json"
     ),
