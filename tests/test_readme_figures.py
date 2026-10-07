@@ -1,93 +1,60 @@
-"""README tables stay aligned with the committed held-out reports."""
+"""README regions stay aligned with the committed reports."""
 
+import importlib.util
 import json
+import re
 from pathlib import Path
+from types import ModuleType
 
-README = Path("README.md").read_text(encoding="utf-8")
 ROOT = Path(__file__).resolve().parents[1]
+README_PATH = ROOT / "README.md"
 
-REPORTS = (
-    "benchmarks/scifact/bm25.json",
-    "benchmarks/scifact/bm25-document.json",
-    "benchmarks/scifact/bm25-selected.json",
-    "benchmarks/scifact/hybrid-selected.json",
-    "benchmarks/scifact/rerank-selected.json",
-    "benchmarks/scifact/bm25-stem-chunk120-exploratory.json",
-    "benchmarks/nfcorpus/bm25-whitespace.json",
-    "benchmarks/nfcorpus/bm25-document.json",
-    "benchmarks/nfcorpus/bm25-selected.json",
-    "benchmarks/nfcorpus/hybrid-selected.json",
-)
 
-COMPARISONS = (
-    "benchmarks/scifact/document-vs-bm25-selected.json",
-    "benchmarks/scifact/document-vs-hybrid-selected.json",
-    "benchmarks/scifact/bm25-selected-vs-hybrid.json",
-    "benchmarks/scifact/hybrid-vs-rerank.json",
-    "benchmarks/scifact/verdict-baseline-vs-nli.json",
-    "benchmarks/nfcorpus/document-vs-bm25-selected.json",
-    "benchmarks/nfcorpus/document-vs-hybrid-selected.json",
-)
-
-VERDICT_REPORTS = (
-    "benchmarks/scifact/verdict-dev.json",
-    "benchmarks/scifact/verdict-baseline-dev.json",
-)
+def _renderer() -> ModuleType:
+    spec = importlib.util.spec_from_file_location(
+        "render_readme_tables", ROOT / "scripts" / "render_readme_tables.py"
+    )
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def _load(path: str) -> dict[str, object]:
     return json.loads((ROOT / path).read_text(encoding="utf-8"))
 
 
-def test_readme_quotes_report_metrics_at_four_decimals() -> None:
-    for path in REPORTS:
-        report = _load(path)
-        ndcg = report["ndcg_at_k"]
-        recall = report["recall_at_k"]
-        assert isinstance(ndcg, dict) and isinstance(recall, dict)
-        assert f"{ndcg['10']:.4f}" in README
-        assert f"{recall['10']:.4f}" in README
-        assert f"{report['mean_average_precision']:.4f}" in README
-        candidate_recall = report.get("candidate_recall_at_100")
-        if isinstance(candidate_recall, float):
-            assert f"{candidate_recall:.4f}" in README
+def test_readme_regions_match_the_reports() -> None:
+    renderer = _renderer()
+    text = README_PATH.read_text(encoding="utf-8")
+    assert renderer.render_readme(text) == text
 
 
-def test_readme_quotes_paired_deltas() -> None:
-    for path in COMPARISONS:
-        comparison = _load(path)
-        checks = comparison["checks"]
-        assert isinstance(checks, list)
-        for check in checks:
-            assert isinstance(check, dict)
-            delta = f"{check['mean_delta']:+.4f}"
-            interval = f"[{check['ci_low']:+.4f}, {check['ci_high']:+.4f}]"
-            assert delta in README
-            assert interval in README
+def test_rendered_numbers_trace_to_report_fields() -> None:
+    renderer = _renderer()
+    text = README_PATH.read_text(encoding="utf-8")
+    rendered = renderer.render_readme(text)
+    shown: dict[str, list[str]] = {}
+    for citation in renderer.CITATIONS:
+        value = renderer.lookup(renderer.load_report(citation.path), citation.expr)
+        assert renderer.format_value(citation.fmt, value) == citation.shown
+        shown.setdefault(citation.region, []).append(citation.shown)
+    regions = list(renderer.REGION_PATTERN.finditer(rendered))
+    assert {match.group("name") for match in regions} == set(renderer.RENDERERS)
+    for match in regions:
+        name = match.group("name")
+        body = match.group("body")
+        for token in shown[name]:
+            assert token in body
+        assert renderer.uncited_digits(body, shown[name]) == ""
 
 
-def test_readme_quotes_verdict_metrics_at_four_decimals() -> None:
-    for path in VERDICT_REPORTS:
-        report = _load(path)
-        for key in (
-            "accuracy",
-            "macro_f1",
-            "sentence_precision",
-            "sentence_recall",
-            "sentence_f1",
-            "micro_sentence_precision",
-            "micro_sentence_recall",
-            "micro_sentence_f1",
-        ):
-            value = report[key]
-            assert isinstance(value, float)
-            assert f"{value:.4f}" in README
-        class_f1 = report["class_f1"]
-        assert isinstance(class_f1, dict)
-        for label in ("SUPPORT", "CONTRADICT", "NEI"):
-            score = class_f1[label]
-            assert isinstance(score, float)
-            assert f"{score:.4f}" in README
+def test_readme_prose_outside_regions_has_no_long_decimals() -> None:
+    renderer = _renderer()
+    text = README_PATH.read_text(encoding="utf-8")
+    stripped = renderer.REGION_PATTERN.sub("", text)
+    stripped = re.sub(r"```.*?```", "", stripped, flags=re.DOTALL)
+    assert re.search(r"\d+\.\d{4,}", stripped) is None
 
 
 def test_held_out_scifact_reports_share_the_test_fingerprint() -> None:

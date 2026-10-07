@@ -24,12 +24,14 @@ uv run ragbench compare --baseline benchmarks/baseline.json \
 The default BM25 run needs no credentials or model download. On the included
 12-document, 27-question synthetic support fixture:
 
+<!-- tables:begin support-fixture -->
 ```text
-Recall@1   0.8333
-Recall@3   1.0000
-Recall@5   1.0000
-MRR        0.9383 (full document ranking)
+Recall@1   0.833
+Recall@3   1.000
+Recall@5   1.000
+MRR        0.938 (full document ranking)
 ```
+<!-- tables:end support-fixture -->
 
 This fixture exercises the pipeline; these scores do not establish performance
 on unseen domains. The committed [baseline report](benchmarks/baseline.json)
@@ -44,8 +46,11 @@ hybrid weight were still being compared. Those runs stay in this repository as
 exploratory results. Revised settings were selected on the 809-query train
 split ([ir-datasets `beir/scifact/train`](https://ir-datasets.com/beir.html#beir/scifact/train))
 and committed before this test split was scored again. NFCorpus was not used
-to choose any setting. README figures below are rounded to 4 decimals. The
-JSON reports keep full precision.
+to choose any setting. README metric figures below are rounded to 3 decimals.
+Millisecond latencies are whole milliseconds, and latencies in seconds use one
+decimal. Sign-flip p-values stay at 4 decimals so the permutation floor does
+not display as zero. The JSON reports keep full precision.
+`scripts/render_readme_tables.py` rewrites the marked regions from those reports.
 
 ### Definitions
 
@@ -82,25 +87,29 @@ maximizes train nDCG@10. Ties prefer the smaller window, then whitespace.
 Document-level BM25 is scored and cannot win.
 [bm25-train-selection.json](benchmarks/scifact/bm25-train-selection.json):
 
+<!-- tables:begin lexical-train -->
 | Candidate | Train nDCG@10 | Recall@10 | Recall@100 | MAP | MRR |
 | --- | --- | --- | --- | --- | --- |
-| Selected chunked (stem, 480) | 0.6972 | 0.8196 | 0.9316 | 0.6591 | 0.6695 |
-| Document-level reference | 0.6957 | 0.8091 | 0.9272 | 0.6608 | 0.6709 |
+| Selected chunked (stem, 480) | 0.697 | 0.820 | 0.932 | 0.659 | 0.670 |
+| Document-level reference | 0.696 | 0.809 | 0.927 | 0.661 | 0.671 |
+<!-- tables:end lexical-train -->
 
 On that lexical winner, `configs/scifact-hybrid-train-sweep.yaml` scores
 `dense_weight` 0, 0.25, 0.5, 0.75, and 1. The highest train nDCG@10 wins, and
 a tie would prefer the smaller weight.
 [hybrid-weight-train.json](benchmarks/scifact/hybrid-weight-train.json):
 
+<!-- tables:begin hybrid-weights -->
 | dense_weight | Train nDCG@10 |
 | --- | --- |
-| 0.00 | 0.6972 |
-| 0.25 | 0.7145 |
-| 0.50 | 0.7331 |
-| 0.75 | 0.7325 |
-| 1.00 | 0.6628 |
+| 0.00 | 0.697 |
+| 0.25 | 0.714 |
+| 0.50 | 0.733 |
+| 0.75 | 0.732 |
+| 1.00 | 0.663 |
 
 The frozen weight is 0.50.
+<!-- tables:end hybrid-weights -->
 
 ### Cross-encoder second stage
 
@@ -126,185 +135,219 @@ does not stop early. `rerank_p95_ms` is the cross-encoder alone.
 
 `scripts/select_scifact_rerank.py` scores candidate depths 20, 50, and 100 on
 the SciFact train split only. The highest train nDCG@10 wins. A tie prefers
-the smaller depth. The frozen hybrid's train nDCG@10 is 0.7331. The reranked
-depths score lower on that metric. Depth 20 is the highest of the three, so
+the smaller depth. The frozen hybrid's train nDCG@10 is in the table below.
+The reranked depths score lower on that metric. Depth 20 is the highest of the
+three, so
 it is the frozen depth. The test split is scored once after that choice is
 committed.
 [rerank-train-selection.json](benchmarks/scifact/rerank-train-selection.json):
 
+<!-- tables:begin rerank-train -->
 | candidate_k | Train nDCG@10 | Recall@10 | Recall@100 | Candidate Recall@100 | MAP | MRR |
 | --- | --- | --- | --- | --- | --- | --- |
-| 20 | 0.7211 | 0.8505 | 0.8938 | 0.9551 | 0.6787 | 0.6876 |
-| 50 | 0.7166 | 0.8430 | 0.9402 | 0.9551 | 0.6771 | 0.6868 |
-| 100 | 0.7116 | 0.8311 | 0.9551 | 0.9551 | 0.6747 | 0.6846 |
+| 20 | 0.721 | 0.850 | 0.894 | 0.955 | 0.679 | 0.688 |
+| 50 | 0.717 | 0.843 | 0.940 | 0.955 | 0.677 | 0.687 |
+| 100 | 0.712 | 0.831 | 0.955 | 0.955 | 0.675 | 0.685 |
+
+The frozen hybrid's train nDCG@10 is 0.733.
+The train report for depth 20 truncated 1,966 of 16,180 query/document pairs. Full-ranking retrieval p95 was 298 ms, rerank p95 was 2,081 ms, and the top-K pipeline p95 was 2,302 ms.
+<!-- tables:end rerank-train -->
 
 Recall@100 on a reranked list is the recall of the returned documents.
 Candidate Recall@100 is the first stage, before the reorder. At depth 100
 those two recalls match, because reranking only permutes the same 100
 documents. At depth 20 the reranked list cannot retrieve a document that the
-first stage placed at rank 21–100, so its Recall@100 is lower. The train
-report for depth 20 truncated 1,966 of 16,180 query/document pairs. Full-ranking
-retrieval p95 was 298.3 ms, rerank p95 was 2,081.4 ms, and the top-K pipeline
-p95 was 2,301.7 ms. The pipeline is the full-ranking first stage plus the
-cross-encoder. One PyTorch thread.
+first stage placed at rank 21–100, so its Recall@100 is lower. The pipeline is
+the full-ranking first stage plus the cross-encoder. One PyTorch thread.
 
 ### Held-out SciFact test
 
-300 queries, 339 binary qrels. Corpus fingerprint `0ae06d7ccabbb805…` and
-benchmark fingerprint `cc8042c8f9795069…` match the earlier reports. 5,183
-documents. Word length (`\S+`) has minimum 33, median 204, mean 214.628, and
-maximum 1,541.
+<!-- tables:begin scifact-test -->
+Corpus fingerprint `0ae06d7ccabbb805` and benchmark fingerprint `cc8042c8f9795069` are the leading digits of those fields in the original chunked report. 300 queries, 339 binary qrels. 5,183 documents. Word length (`\S+`) has minimum 33, median 204, mean 214.628, and maximum 1,541.
 
 | Setup | Chunks | Recall@10 | Recall@100 | nDCG@10 | P@10 | MAP | MRR |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Original chunked | 12647 | 0.7707 | 0.8729 | 0.6433 | 0.0843 | 0.6034 | 0.6136 |
-| Document-level baseline | 5183 | 0.7961 | 0.9260 | 0.6741 | 0.0873 | 0.6368 | 0.6458 |
-| Selected chunked | 5236 | 0.8335 | 0.9227 | 0.6907 | 0.0920 | 0.6448 | 0.6555 |
-| Selected hybrid | 5236 | 0.8539 | 0.9517 | 0.7294 | 0.0957 | 0.6894 | 0.7003 |
+| Original chunked | 12,647 | 0.771 | 0.873 | 0.643 | 0.084 | 0.603 | 0.614 |
+| Document-level baseline | 5,183 | 0.796 | 0.926 | 0.674 | 0.087 | 0.637 | 0.646 |
+| Selected chunked | 5,236 | 0.834 | 0.923 | 0.691 | 0.092 | 0.645 | 0.655 |
+| Selected hybrid | 5,236 | 0.854 | 0.952 | 0.729 | 0.096 | 0.689 | 0.700 |
+
+The selected hybrid truncated 3,699 of 5,236 chunk texts. Full-ranking retrieval p95 was 29 ms for selected chunked BM25, 28 ms for document-level BM25, and 181 ms for the hybrid.
+<!-- tables:end scifact-test -->
 
 Sources: [bm25.json](benchmarks/scifact/bm25.json),
 [bm25-document.json](benchmarks/scifact/bm25-document.json),
 [bm25-selected.json](benchmarks/scifact/bm25-selected.json),
 [hybrid-selected.json](benchmarks/scifact/hybrid-selected.json).
-The selected hybrid truncated 3,699 of 5,236 chunk texts. Full-ranking
-retrieval p95 was 28.9 ms for selected chunked BM25, 28.3 ms for
-document-level BM25, and 180.6 ms for the hybrid.
 
-Paired deltas use seed 0, 10,000 bootstrap resamples, 10,000 sign-flips, and
-a 95% percentile interval (`configs/paired-uncertainty.yaml`). Positive delta
-means the candidate is higher. That file sets `max_drop` to 1.0 so the
-comparison records the interval. `passed` in those files is a measurement
+<!-- tables:begin paired-settings -->
+Paired deltas use seed 0, 10,000 bootstrap resamples, 10,000 sign-flips, and a 95% percentile interval. Retrieval comparison files do not store that recipe. It matches `configs/paired-uncertainty.yaml` and the verdict comparison.
+<!-- tables:end paired-settings -->
+Positive delta means the candidate is higher. That file sets `max_drop` to 1.0
+so the comparison records the interval. `passed` in those files is a measurement
 flag. The CI quality gate remains the zero point-drop check of the original
 chunked report in `configs/scifact-thresholds.yaml`.
 
 Selected chunked BM25 minus the document-level baseline
 ([document-vs-bm25-selected.json](benchmarks/scifact/document-vs-bm25-selected.json)):
 
+<!-- tables:begin scifact-doc-vs-selected -->
 | Metric | Mean delta | 95% CI | Sign-flip p |
 | --- | --- | --- | --- |
-| nDCG@10 | +0.0166 | [+0.0049, +0.0283] | 0.0056 |
-| Recall@10 | +0.0374 | [+0.0158, +0.0611] | 0.0006 |
-| Recall@100 | -0.0033 | [-0.0100, +0.0000] | 1.0000 |
-| MAP | +0.0080 | [-0.0039, +0.0201] | 0.2053 |
-| MRR | +0.0096 | [-0.0037, +0.0233] | 0.1714 |
+| nDCG@10 | +0.017 | [+0.005, +0.028] | 0.0056 |
+| Recall@10 | +0.037 | [+0.016, +0.061] | 0.0006 |
+| Recall@100 | -0.003 | [-0.010, +0.000] | 1.0000 |
+| MAP | +0.008 | [-0.004, +0.020] | 0.2053 |
+| MRR | +0.010 | [-0.004, +0.023] | 0.1714 |
 
-nDCG@10 and Recall@10 are higher. The MAP and MRR intervals include zero.
-Recall@100 is not higher.
+Above zero: nDCG@10, Recall@10. Intervals that include zero: Recall@100, MAP, MRR.
+<!-- tables:end scifact-doc-vs-selected -->
 
 Selected hybrid minus the same document-level baseline
 ([document-vs-hybrid-selected.json](benchmarks/scifact/document-vs-hybrid-selected.json)):
 
+<!-- tables:begin scifact-doc-vs-hybrid -->
 | Metric | Mean delta | 95% CI | Sign-flip p |
 | --- | --- | --- | --- |
-| nDCG@10 | +0.0553 | [+0.0366, +0.0749] | 0.0001 |
-| Recall@10 | +0.0578 | [+0.0308, +0.0869] | 0.0002 |
-| Recall@100 | +0.0257 | [+0.0100, +0.0447] | 0.0039 |
-| MAP | +0.0526 | [+0.0327, +0.0734] | 0.0001 |
-| MRR | +0.0544 | [+0.0335, +0.0762] | 0.0001 |
+| nDCG@10 | +0.055 | [+0.037, +0.075] | 0.0001 |
+| Recall@10 | +0.058 | [+0.031, +0.087] | 0.0002 |
+| Recall@100 | +0.026 | [+0.010, +0.045] | 0.0039 |
+| MAP | +0.053 | [+0.033, +0.073] | 0.0001 |
+| MRR | +0.054 | [+0.033, +0.076] | 0.0001 |
+
+Above zero: nDCG@10, Recall@10, Recall@100, MAP, MRR.
+<!-- tables:end scifact-doc-vs-hybrid -->
 
 Selected hybrid minus selected chunked BM25, same windows
 ([bm25-selected-vs-hybrid.json](benchmarks/scifact/bm25-selected-vs-hybrid.json)):
 
+<!-- tables:begin scifact-selected-vs-hybrid -->
 | Metric | Mean delta | 95% CI | Sign-flip p |
 | --- | --- | --- | --- |
-| nDCG@10 | +0.0387 | [+0.0243, +0.0536] | 0.0001 |
-| Recall@10 | +0.0204 | [-0.0004, +0.0425] | 0.0600 |
-| Recall@100 | +0.0290 | [+0.0120, +0.0490] | 0.0018 |
-| MAP | +0.0446 | [+0.0289, +0.0621] | 0.0001 |
-| MRR | +0.0448 | [+0.0282, +0.0627] | 0.0001 |
+| nDCG@10 | +0.039 | [+0.024, +0.054] | 0.0001 |
+| Recall@10 | +0.020 | [-0.000, +0.043] | 0.0600 |
+| Recall@100 | +0.029 | [+0.012, +0.049] | 0.0018 |
+| MAP | +0.045 | [+0.029, +0.062] | 0.0001 |
+| MRR | +0.045 | [+0.028, +0.063] | 0.0001 |
 
-The Recall@10 interval for that fusion comparison includes zero.
+Above zero: nDCG@10, Recall@100, MAP, MRR. Intervals that include zero: Recall@10.
+<!-- tables:end scifact-selected-vs-hybrid -->
 
-The frozen cross-encoder reorders the top 20 hybrid documents
-([rerank-selected.json](benchmarks/scifact/rerank-selected.json)). Candidate
-Recall@100 is 0.9517, the same value as the selected hybrid's Recall@100.
-Reranked Recall@10 is 0.8396, Recall@100 is 0.8897, nDCG@10 is 0.7015, P@10
-is 0.0940, MAP is 0.6565, and MRR is 0.6696. Recall@100 here is lower because
-the returned list has 20 documents. The run truncated 767 of 6,000
-query/document pairs. Full-ranking retrieval p95 was 247.6 ms, rerank p95 was
-1,995.1 ms, and the top-K pipeline p95 was 2,167.9 ms.
+The frozen cross-encoder reorders the hybrid's first-stage candidates
+([rerank-selected.json](benchmarks/scifact/rerank-selected.json)). Recall@100
+on the reranked list is lower because the returned list stops at `candidate_k`.
 
-Reranked top 20 minus the selected hybrid
+<!-- tables:begin scifact-rerank -->
+| Setup | Recall@10 | Recall@100 | nDCG@10 | P@10 | MAP | MRR | Candidate Recall@100 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Reranked top 20 | 0.840 | 0.890 | 0.702 | 0.094 | 0.657 | 0.670 | 0.952 |
+
+The run truncated 767 of 6,000 query/document pairs. Full-ranking retrieval p95 was 248 ms, rerank p95 was 1,995 ms, and the top-K pipeline p95 was 2,168 ms.
+<!-- tables:end scifact-rerank -->
+
+Reranked candidates minus the selected hybrid
 ([hybrid-vs-rerank.json](benchmarks/scifact/hybrid-vs-rerank.json)):
 
+<!-- tables:begin scifact-hybrid-vs-rerank -->
 | Metric | Mean delta | 95% CI | Sign-flip p |
 | --- | --- | --- | --- |
-| nDCG@10 | -0.0279 | [-0.0543, -0.0010] | 0.0424 |
-| Recall@10 | -0.0143 | [-0.0411, +0.0130] | 0.3180 |
-| Recall@100 | -0.0620 | [-0.0897, -0.0367] | 0.0001 |
-| MAP | -0.0329 | [-0.0642, -0.0028] | 0.0317 |
-| MRR | -0.0306 | [-0.0624, +0.0014] | 0.0619 |
+| nDCG@10 | -0.028 | [-0.054, -0.001] | 0.0424 |
+| Recall@10 | -0.014 | [-0.041, +0.013] | 0.3180 |
+| Recall@100 | -0.062 | [-0.090, -0.037] | 0.0001 |
+| MAP | -0.033 | [-0.064, -0.003] | 0.0317 |
+| MRR | -0.031 | [-0.062, +0.001] | 0.0619 |
 
-nDCG@10 and MAP are lower. The Recall@100 drop is the 20-document cutoff.
-The Recall@10 and MRR intervals include zero. This checkpoint was not
+Below zero: nDCG@10, Recall@100, MAP. Intervals that include zero: Recall@10, MRR.
+<!-- tables:end scifact-hybrid-vs-rerank -->
+
+The Recall@100 drop is the candidate cutoff. This checkpoint was not
 fine-tuned on SciFact.
 
 ### NFCorpus confirmation
 
 `ragbench dataset nfcorpus` checks SHA-256
 `efe5be03f8c5b86a5870102d0599d227c8c6e2484328e68c6522560385671b0b`.
-The test split has 3,633 documents, 323 queries, and 12,334 qrels (11,758
-grade 1 and 576 grade 2). Word length has minimum 17, median 237, mean
-233.765, and maximum 1,481. nDCG uses gain `2^grade - 1`, so these nDCG
-numbers differ from `pytrec_eval` `ndcg_cut` and from published BEIR nDCG.
-The configs copy the frozen SciFact settings.
+nDCG uses gain `2^grade - 1`, so these nDCG numbers differ from `pytrec_eval`
+`ndcg_cut` and from published BEIR nDCG. The configs copy the frozen SciFact
+settings.
+
+<!-- tables:begin nfcorpus-test -->
+3,633 documents, 323 queries, and 12,334 qrels (11,758 grade 1 and 576 grade 2). Word length has minimum 17, median 237, mean 233.765, and maximum 1,481.
 
 | Setup | Chunks | Recall@10 | Recall@100 | nDCG@10 | P@10 | MAP | MRR |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Original chunked definition | 9541 | 0.1479 | 0.2407 | 0.2939 | 0.2053 | 0.1480 | 0.4946 |
-| Document-level baseline | 3633 | 0.1535 | 0.2560 | 0.3273 | 0.2368 | 0.1624 | 0.5298 |
-| Selected chunked | 3667 | 0.1571 | 0.2554 | 0.3326 | 0.2427 | 0.1621 | 0.5411 |
-| Selected hybrid | 3667 | 0.1712 | 0.3179 | 0.3595 | 0.2632 | 0.1913 | 0.5670 |
+| Original chunked definition | 9,541 | 0.148 | 0.241 | 0.294 | 0.205 | 0.148 | 0.495 |
+| Document-level baseline | 3,633 | 0.153 | 0.256 | 0.327 | 0.237 | 0.162 | 0.530 |
+| Selected chunked | 3,667 | 0.157 | 0.255 | 0.333 | 0.243 | 0.162 | 0.541 |
+| Selected hybrid | 3,667 | 0.171 | 0.318 | 0.359 | 0.263 | 0.191 | 0.567 |
 
-The selected hybrid truncated 2,877 of 3,667 chunk texts. Full-ranking
-retrieval p95 was 18.6 ms, 19.4 ms, and 179.7 ms for selected chunked BM25,
-document-level BM25, and the hybrid.
+The selected hybrid truncated 2,877 of 3,667 chunk texts. Full-ranking retrieval p95 was 19 ms, 19 ms, and 180 ms for selected chunked BM25, document-level BM25, and the hybrid.
+<!-- tables:end nfcorpus-test -->
 
 Selected chunked BM25 minus document-level BM25
 ([document-vs-bm25-selected.json](benchmarks/nfcorpus/document-vs-bm25-selected.json)):
 
+<!-- tables:begin nfcorpus-doc-vs-selected -->
 | Metric | Mean delta | 95% CI | Sign-flip p |
 | --- | --- | --- | --- |
-| nDCG@10 | +0.0053 | [+0.0004, +0.0099] | 0.0228 |
-| Recall@10 | +0.0036 | [-0.0015, +0.0090] | 0.1737 |
-| Recall@100 | -0.0007 | [-0.0096, +0.0065] | 0.8926 |
-| MAP | -0.0003 | [-0.0034, +0.0023] | 0.8801 |
-| MRR | +0.0113 | [-0.0031, +0.0257] | 0.1207 |
+| nDCG@10 | +0.005 | [+0.000, +0.010] | 0.0228 |
+| Recall@10 | +0.004 | [-0.001, +0.009] | 0.1737 |
+| Recall@100 | -0.001 | [-0.010, +0.007] | 0.8926 |
+| MAP | -0.000 | [-0.003, +0.002] | 0.8801 |
+| MRR | +0.011 | [-0.003, +0.026] | 0.1207 |
 
-On NFCorpus the selected windows are only narrowly higher on nDCG@10. The
-other four intervals include zero. That does not confirm a general advantage
-for the 480-word stem index over document-level BM25.
+Above zero: nDCG@10. Intervals that include zero: Recall@10, Recall@100, MAP, MRR. nDCG@10 is above zero, but its lower bound rounds to +0.000.
+<!-- tables:end nfcorpus-doc-vs-selected -->
+
+That does not confirm a general advantage for the 480-word stem index over
+document-level BM25.
 
 Selected hybrid minus document-level BM25
 ([document-vs-hybrid-selected.json](benchmarks/nfcorpus/document-vs-hybrid-selected.json)):
 
+<!-- tables:begin nfcorpus-doc-vs-hybrid -->
 | Metric | Mean delta | 95% CI | Sign-flip p |
 | --- | --- | --- | --- |
-| nDCG@10 | +0.0322 | [+0.0213, +0.0438] | 0.0001 |
-| Recall@10 | +0.0177 | [+0.0076, +0.0295] | 0.0002 |
-| Recall@100 | +0.0619 | [+0.0448, +0.0799] | 0.0001 |
-| MAP | +0.0289 | [+0.0216, +0.0369] | 0.0001 |
-| MRR | +0.0372 | [+0.0176, +0.0566] | 0.0002 |
+| nDCG@10 | +0.032 | [+0.021, +0.044] | 0.0001 |
+| Recall@10 | +0.018 | [+0.008, +0.029] | 0.0002 |
+| Recall@100 | +0.062 | [+0.045, +0.080] | 0.0001 |
+| MAP | +0.029 | [+0.022, +0.037] | 0.0001 |
+| MRR | +0.037 | [+0.018, +0.057] | 0.0002 |
 
-Those five intervals are above zero. The hybrid comparison is the one that
-repeats on this second corpus.
+Above zero: nDCG@10, Recall@10, Recall@100, MAP, MRR.
+<!-- tables:end nfcorpus-doc-vs-hybrid -->
+
+The hybrid comparison is the one that repeats on this second corpus.
 [bm25-selected-vs-hybrid.json](benchmarks/nfcorpus/bm25-selected-vs-hybrid.json)
-is the same hybrid minus the selected chunked BM25 index (nDCG@10 delta
-+0.0269, CI [+0.0170, +0.0376]).
+is the same hybrid minus the selected chunked BM25 index:
+
+<!-- tables:begin nfcorpus-selected-vs-hybrid -->
+| Metric | Mean delta | 95% CI | Sign-flip p |
+| --- | --- | --- | --- |
+| nDCG@10 | +0.027 | [+0.017, +0.038] | 0.0001 |
+| Recall@10 | +0.014 | [+0.005, +0.025] | 0.0045 |
+| Recall@100 | +0.063 | [+0.047, +0.079] | 0.0001 |
+| MAP | +0.029 | [+0.023, +0.036] | 0.0001 |
+| MRR | +0.026 | [+0.008, +0.044] | 0.0046 |
+
+Above zero: nDCG@10, Recall@10, Recall@100, MAP, MRR.
+<!-- tables:end nfcorpus-selected-vs-hybrid -->
 
 ### Exploratory test-split runs
 
 These looked at the 300 test queries before the freeze. They did not choose
 the settings above.
 
+<!-- tables:begin exploratory -->
 | Setup | Recall@10 | Recall@100 | nDCG@10 | MAP | MRR |
 | --- | --- | --- | --- | --- | --- |
-| Whitespace chunked BM25 | 0.7707 | 0.8729 | 0.6433 | 0.6034 | 0.6136 |
-| Stem, 120-word windows | 0.8096 | 0.9116 | 0.6828 | 0.6434 | 0.6539 |
-| Dense MiniLM, 120-word windows | 0.8243 | 0.9427 | 0.6699 | 0.6213 | 0.6315 |
-| Hybrid min-max, dense_weight 0.5 | 0.8338 | 0.9443 | 0.7087 | 0.6699 | 0.6763 |
-| Hybrid RRF, rrf_k 60 | 0.8171 | 0.9610 | 0.6978 | 0.6612 | 0.6736 |
-| Hybrid min-max, dense_weight 0.75 | 0.8371 | 0.9567 | 0.7252 | 0.6900 | 0.7006 |
+| Whitespace chunked BM25 | 0.771 | 0.873 | 0.643 | 0.603 | 0.614 |
+| Stem, 120-word windows | 0.810 | 0.912 | 0.683 | 0.643 | 0.654 |
+| Dense MiniLM, 120-word windows | 0.824 | 0.943 | 0.670 | 0.621 | 0.632 |
+| Hybrid min-max, dense_weight 0.50 | 0.834 | 0.944 | 0.709 | 0.670 | 0.676 |
+| Hybrid RRF, rrf_k 60 | 0.817 | 0.961 | 0.698 | 0.661 | 0.674 |
+| Hybrid min-max, dense_weight 0.75 | 0.837 | 0.957 | 0.725 | 0.690 | 0.701 |
+<!-- tables:end exploratory -->
 
 The stem 120-word run is
 [bm25-stem-chunk120-exploratory.json](benchmarks/scifact/bm25-stem-chunk120-exploratory.json).
@@ -333,17 +376,21 @@ schema in [doc/data.md](https://github.com/allenai/scifact/blob/master/doc/data.
 They are not read from BEIR qrels. A qrel row is `query-id`, `corpus-id`, and
 an integer `score`. On this export every score is 1. For the train claims and
 for the dev claims, that document set equals `cited_doc_ids`. It does not equal
-the evidence-document set. Train has 809 claims: the qrel set matches the
-evidence documents for 480 of them and differs for the other 329. Dev has 300
-claims: 175 match and 125 differ. A claim with no annotated evidence is still
-cited, and some claims cite a document that has no rationale. Claim 263
-contradicts from documents 11328820 and 30041340 and also cites 14853989,
-which has no evidence annotation and is still a grade-1 qrel.
+the evidence-document set.
+
+<!-- tables:begin verdict-counts -->
+Train has 809 claims: the qrel set matches the evidence documents for 480 of them and differs for the other 329. Dev has 300 claims: 175 match and 125 differ. 1,055 of 5,183 abstracts differ from a single-space join before whitespace is collapsed. Train label counts are SUPPORT 332, CONTRADICT 173, and NEI 304.
+<!-- tables:end verdict-counts -->
+
+A claim with no annotated evidence is still cited, and some claims cite a
+document that has no rationale. Claim 263 contradicts from documents 11328820
+and 30041340 and also cites 14853989, which has no evidence annotation and is
+still a grade-1 qrel.
 
 Sentence IDs index the `corpus.jsonl` abstract list. They do not index the
 title, and they are not recovered by splitting the BEIR body. After whitespace
 is collapsed, the BEIR body matches the abstract sentences joined by spaces.
-1,055 of 5,183 abstracts differ from a single-space join before that collapse.
+The mismatch count is in the claim-mapping paragraph above.
 
 The public `claims_test.jsonl` has no evidence field. Those 300 labels are
 withheld, so this repository does not score that file and does not treat the
@@ -377,8 +424,8 @@ is the fraction of exact label matches. Macro-F1 is the unweighted mean of the
 SUPPORT, CONTRADICT, and NEI F1 scores. A class with no gold and no predictions
 scores 0.
 
-The baseline predicts the majority train verdict. Train counts are SUPPORT 332,
-CONTRADICT 173, and NEI 304, so the majority is SUPPORT. A tie would prefer
+The baseline predicts the majority train verdict. Those counts are in the
+claim-mapping paragraph above, and the majority is SUPPORT. A tie would prefer
 NEI, then SUPPORT, then CONTRADICT. The baseline's evidence sentence is
 sentence 0 of the top retrieved document. It predicts no sentence when the
 verdict is NEI. It does not use the NLI model.
@@ -409,66 +456,69 @@ changes the evidence set. Dev is scored once after that choice is committed.
 Tests inject an NLI scorer. The pinned model is not required for those tests.
 [verdict-train-selection.json](benchmarks/scifact/verdict-train-selection.json):
 
+<!-- tables:begin verdict-train -->
 | doc_k | sentence_k | min_confidence | Accuracy | Macro-F1 | Sentence P | Sentence R | Sentence F1 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | 1 | 0.5 | 0.4722 | 0.4638 | 0.3943 | 0.3277 | 0.3453 |
-| 1 | 1 | 0.7 | 0.4969 | 0.4754 | 0.4265 | 0.3706 | 0.3854 |
-| 1 | 2 | 0.5 | 0.4722 | 0.4638 | 0.3770 | 0.3585 | 0.3569 |
-| 1 | 2 | 0.7 | 0.4969 | 0.4754 | 0.4129 | 0.3888 | 0.3908 |
-| 3 | 1 | 0.5 | 0.4215 | 0.4212 | 0.2806 | 0.2294 | 0.2426 |
-| 3 | 1 | 0.7 | 0.4586 | 0.4517 | 0.3288 | 0.2810 | 0.2932 |
-| 3 | 2 | 0.5 | 0.4215 | 0.4212 | 0.2645 | 0.2608 | 0.2532 |
-| 3 | 2 | 0.7 | 0.4586 | 0.4517 | 0.3103 | 0.2973 | 0.2952 |
+| 1 | 1 | 0.5 | 0.472 | 0.464 | 0.394 | 0.328 | 0.345 |
+| 1 | 1 | 0.7 | 0.497 | 0.475 | 0.426 | 0.371 | 0.385 |
+| 1 | 2 | 0.5 | 0.472 | 0.464 | 0.377 | 0.359 | 0.357 |
+| 1 | 2 | 0.7 | 0.497 | 0.475 | 0.413 | 0.389 | 0.391 |
+| 3 | 1 | 0.5 | 0.422 | 0.421 | 0.281 | 0.229 | 0.243 |
+| 3 | 1 | 0.7 | 0.459 | 0.452 | 0.329 | 0.281 | 0.293 |
+| 3 | 2 | 0.5 | 0.422 | 0.421 | 0.265 | 0.261 | 0.253 |
+| 3 | 2 | 0.7 | 0.459 | 0.452 | 0.310 | 0.297 | 0.295 |
 
-`doc_k` 1, `sentence_k` 2, `min_confidence` 0.7 is the frozen policy. It ties
-`sentence_k` 1 at the same accuracy and macro-F1, and its mean sentence F1 is
-higher. `doc_k` 3 is lower on train macro-F1. The majority-SUPPORT baseline on
-the same train claims has accuracy 0.4104, macro-F1 0.1940, and mean sentence
-F1 0.0142. The grid scored 23,066 sentence/claim pairs in 840.2 s. The winning
-depth, scored on its own, was 7,656 pairs in 279.8 s. None were truncated.
-Document-level retrieval p95 was 17.9 ms. One PyTorch thread.
+`doc_k` 1, `sentence_k` 2, `min_confidence` 0.7 is the frozen policy. Its train macro-F1 is 0.475 and its mean sentence F1 is 0.391. The majority-SUPPORT baseline on the same train claims has accuracy 0.410, macro-F1 0.194, and mean sentence F1 0.014. The grid scored 23,066 sentence/claim pairs in 840.2 s. The winning depth, scored on its own, was 7,656 pairs in 279.8 s. 0 pairs were truncated. Document-level retrieval p95 was 18 ms.
+<!-- tables:end verdict-train -->
+
+The `sentence_k` 1 row at the same `doc_k` and `min_confidence` has the same
+train accuracy and macro-F1. The frozen row wins on mean sentence F1. The
+`doc_k` 3 rows are lower on train macro-F1. One PyTorch thread.
 
 ### Held-out SciFact dev
 
-300 labeled claims, scored once after the train freeze. These are the same
-claim IDs the retrieval reports call the SciFact test split. The public SciFact
-test file is still unscored. Gold counts are SUPPORT 124, CONTRADICT 64, and
-NEI 112.
+Scored once after the train freeze. These are the same claim IDs the retrieval
+reports call the SciFact test split. The public SciFact test file is still unscored.
 
-| | Accuracy | Macro-F1 | Sentence P | Sentence R | Sentence F1 |
+<!-- tables:begin verdict-dev -->
+300 labeled claims. Gold counts are SUPPORT 124, CONTRADICT 64, and NEI 112.
+
+|  | Accuracy | Macro-F1 | Sentence P | Sentence R | Sentence F1 |
 | --- | --- | --- | --- | --- | --- |
-| Majority SUPPORT | 0.4133 | 0.1950 | 0.0167 | 0.0100 | 0.0115 |
-| Frozen NLI | 0.4933 | 0.4767 | 0.4100 | 0.3815 | 0.3841 |
+| Majority SUPPORT | 0.413 | 0.195 | 0.017 | 0.010 | 0.012 |
+| Frozen NLI | 0.493 | 0.477 | 0.410 | 0.382 | 0.384 |
 
-Class F1 for the frozen NLI is SUPPORT 0.4025, CONTRADICT 0.4713, and NEI
-0.5563. The majority baseline's class F1 is SUPPORT 0.5849, CONTRADICT 0.0000,
-and NEI 0.0000. It always predicts SUPPORT, so that class F1 is higher and the
-other two are zero. Macro-F1 is the unweighted mean of the three.
+Class F1 for the frozen NLI is SUPPORT 0.403, CONTRADICT 0.471, and NEI 0.556. The majority baseline's class F1 is SUPPORT 0.585, CONTRADICT 0.000, and NEI 0.000.
+
+Micro precision, recall, and F1 are 0.319, 0.161, and 0.214 for the frozen NLI, and 0.017, 0.014, and 0.015 for the baseline.
+
+Document-level retrieval p95 was 26 ms. The NLI pass scored 2,853 pairs in 110.4 s. 0 pairs were truncated.
+<!-- tables:end verdict-dev -->
+
+It always predicts SUPPORT, so that class F1 is higher and the other two are
+zero. Macro-F1 is the unweighted mean of the three.
 
 Frozen NLI minus the majority baseline
-([verdict-baseline-vs-nli.json](benchmarks/scifact/verdict-baseline-vs-nli.json)),
-seed 0, 10,000 bootstrap resamples, 10,000 sign-flips, 95% interval:
+([verdict-baseline-vs-nli.json](benchmarks/scifact/verdict-baseline-vs-nli.json)):
 
+<!-- tables:begin verdict-paired -->
 | Metric | Mean delta | 95% CI | Sign-flip p |
 | --- | --- | --- | --- |
-| Accuracy | +0.0800 | [-0.0133, +0.1700] | 0.1125 |
-| Macro-F1 | +0.2818 | [+0.2163, +0.3465] | none |
-| Sentence precision | +0.3933 | [+0.3383, +0.4483] | 0.0001 |
-| Sentence recall | +0.3715 | [+0.3190, +0.4247] | 0.0001 |
-| Sentence F1 | +0.3726 | [+0.3203, +0.4247] | 0.0001 |
+| Accuracy | +0.080 | [-0.013, +0.170] | 0.1125 |
+| Macro-F1 | +0.282 | [+0.216, +0.347] | none |
+| Sentence precision | +0.393 | [+0.338, +0.448] | 0.0001 |
+| Sentence recall | +0.372 | [+0.319, +0.425] | 0.0001 |
+| Sentence F1 | +0.373 | [+0.320, +0.425] | 0.0001 |
 
-The accuracy interval includes zero. Macro-F1 was the train selection metric.
-It is recomputed on each resampled claim list, so that row has no sign-flip
-p-value. Sentence precision, recall, and F1 are means of the per-claim evidence
-scores against the gold rationale sentences.
+Above zero: Macro-F1, Sentence precision, Sentence recall, Sentence F1. Intervals that include zero: Accuracy.
+<!-- tables:end verdict-paired -->
 
-Micro scores pool sentence counts. Both-empty claims add nothing. The frozen
-NLI micro precision, recall, and F1 are 0.3189, 0.1612, and 0.2142. The
-baseline's are 0.0167, 0.0137, and 0.0150.
-
-On the dev run, document-level retrieval p95 was 25.7 ms. The NLI pass scored
-2,853 pairs in 110.4 s. None were truncated. One PyTorch thread. This
-comparison file has no `passed` field. It is a measurement, not a quality gate.
+Macro-F1 was the train selection metric. It is recomputed on each resampled
+claim list, so that row has no sign-flip p-value. Sentence precision, recall,
+and F1 are means of the per-claim evidence scores against the gold rationale
+sentences. Micro scores pool sentence counts. Both-empty claims add nothing.
+One PyTorch thread. This comparison file has no `passed` field. It is a
+measurement, not a quality gate.
 
 ## Judge sample
 
@@ -478,10 +528,15 @@ judges two questions copied from the support fixture (`api-keys-1`,
 `gpt-5-nano`, and the response records `gpt-5-nano-2025-08-07`. Rates in
 [configs/support-judge.yaml](configs/support-judge.yaml) are the published
 text prices of $0.05 input, $0.005 cached input, and $0.40 output per million
-tokens. The report's own totals are 1,236 input tokens, 2,692 output tokens,
-estimated cost $0.0011386000000000002, mean correctness 0.5, and mean
-faithfulness 0.625 (scores divided by 4). One answer was the Markdown heading
-rather than the expiration sentence, and the judge scored that correctness 0.
+tokens.
+
+<!-- tables:begin judge-sample -->
+The report's own totals are 1,236 input tokens, 2,692 output tokens, estimated cost $0.001139, mean correctness 0.500, and mean faithfulness 0.625.
+<!-- tables:end judge-sample -->
+
+Scores are divided by the rubric maximum. One answer was the Markdown heading
+rather than the expiration sentence, and the judge scored that correctness at
+the bottom of the rubric.
 There are no human labels and no agreement statistic.
 
 ## Capabilities
@@ -555,10 +610,12 @@ uv run pytest -q --run-integration
 Offline tests cover retrieval mathematics, report validation, regression failures,
 provider HTTP contracts, judge parsing, storage, and API behavior. Two additional
 integration tests use real MiniLM embeddings through the dense and hybrid CLIs.
-[benchmarks/pytest-junit.xml](benchmarks/pytest-junit.xml) records 135 tests,
-0 failures, and 2 skipped. [benchmarks/test-coverage.json](benchmarks/test-coverage.json)
-records 1,728 statements, 1,540 covered, 188 missing, and `percent_covered`
-89.12037037037037. CI fails the job under 85% and also runs mypy. It enforces
+
+<!-- tables:begin coverage -->
+[benchmarks/pytest-junit.xml](benchmarks/pytest-junit.xml) records 135 tests, 0 failures, and 2 skipped. [benchmarks/test-coverage.json](benchmarks/test-coverage.json) records 1,728 statements, 1,540 covered, 188 missing, and `percent_covered` 89.120.
+<!-- tables:end coverage -->
+
+CI fails the job under 85% and also runs mypy. It enforces
 the support-fixture baseline and a SciFact BM25 gate on Linux and macOS, runs
 real-model integration checks on Linux, and builds/runs Docker from `uv.lock`.
 It makes no paid LLM requests. See the [testing guide](tests/README.md).
@@ -608,7 +665,7 @@ ranking and fusion inspectable. It is the wrong shape for a multi-million
 document production index.
 
 The committed BM25 baseline on the 12-document fixture has Recall@3 and
-Recall@5 of 1.0, and its document count equals its chunk count, so that
+Recall@5 of 1.000, and its document count equals its chunk count, so that
 configuration never splits a document. SciFact is one BEIR dataset. NFCorpus
 is a second corpus used only to repeat frozen settings. FiQA is not run.
 Reported scores collapse chunk hits to documents. They are not a reproduction
