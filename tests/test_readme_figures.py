@@ -63,6 +63,13 @@ def test_readme_prose_outside_regions_has_no_long_decimals() -> None:
         assert re.search(r"\d+\.\d{4,}", stripped) is None
 
 
+def test_signed_zero_keeps_its_sign() -> None:
+    renderer = _renderer()
+    assert renderer.format_value("signed", -0.00031) == "-0.000"
+    assert renderer.format_value("signed", 0.00031) == "+0.000"
+    assert renderer.format_value("signed", 0.0) == "+0.000"
+
+
 def test_held_out_scifact_reports_share_the_test_fingerprint() -> None:
     baseline = _load("benchmarks/scifact/bm25.json")
     for path in (

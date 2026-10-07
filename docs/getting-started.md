@@ -179,5 +179,5 @@ Open `http://127.0.0.1:8000/docs` for the local API explorer. Use `--limit` with
 in YAML. JSON and SQLite destinations must differ and cannot overwrite inputs.
 
 See [regression rules](regression.md), [optional paid providers](providers.md), and
-the [Docker commands](../README.md#docker). Keep custom provider config and API keys
+the [Docker image](architecture.md#12-persistence-and-delivery). Keep custom provider config and API keys
 out of Git. The default workflows never require credentials.

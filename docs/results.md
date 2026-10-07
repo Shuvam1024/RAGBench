@@ -71,7 +71,7 @@ batch size 32. Chunk texts longer than 256 tokens are truncated.
 60, 120, 240, and 480, with overlap 20, k1 1.5, and b 0.75. The winner
 maximizes train nDCG@10. Ties prefer the smaller window, then whitespace.
 Document-level BM25 is scored and cannot win.
-[bm25-train-selection.json](benchmarks/scifact/bm25-train-selection.json):
+[bm25-train-selection.json](../benchmarks/scifact/bm25-train-selection.json):
 
 <!-- tables:begin lexical-train -->
 | Candidate | Train nDCG@10 | Recall@10 | Recall@100 | MAP | MRR |
@@ -83,7 +83,7 @@ Document-level BM25 is scored and cannot win.
 On that lexical winner, `configs/scifact-hybrid-train-sweep.yaml` scores
 `dense_weight` 0, 0.25, 0.5, 0.75, and 1. The highest train nDCG@10 wins, and
 a tie would prefer the smaller weight.
-[hybrid-weight-train.json](benchmarks/scifact/hybrid-weight-train.json):
+[hybrid-weight-train.json](../benchmarks/scifact/hybrid-weight-train.json):
 
 <!-- tables:begin hybrid-weights -->
 | dense_weight | Train nDCG@10 |
@@ -125,7 +125,7 @@ the smaller depth. The frozen hybrid's train nDCG@10 is in the table below.
 The reranked depths score lower on that metric. Depth 20 is the highest of the
 three, so it is the frozen depth. The test split is scored once after that choice is
 committed.
-[rerank-train-selection.json](benchmarks/scifact/rerank-train-selection.json):
+[rerank-train-selection.json](../benchmarks/scifact/rerank-train-selection.json):
 
 <!-- tables:begin rerank-train -->
 | candidate_k | Train nDCG@10 | Recall@10 | Recall@100 | Candidate Recall@100 | MAP | MRR |
@@ -160,10 +160,10 @@ Corpus fingerprint `0ae06d7ccabbb805` and benchmark fingerprint `cc8042c8f979506
 The selected hybrid truncated 3,699 of 5,236 chunk texts. Full-ranking retrieval p95 was 29 ms for selected chunked BM25, 28 ms for document-level BM25, and 181 ms for the hybrid.
 <!-- tables:end scifact-test -->
 
-Sources: [bm25.json](benchmarks/scifact/bm25.json),
-[bm25-document.json](benchmarks/scifact/bm25-document.json),
-[bm25-selected.json](benchmarks/scifact/bm25-selected.json),
-[hybrid-selected.json](benchmarks/scifact/hybrid-selected.json).
+Sources: [bm25.json](../benchmarks/scifact/bm25.json),
+[bm25-document.json](../benchmarks/scifact/bm25-document.json),
+[bm25-selected.json](../benchmarks/scifact/bm25-selected.json),
+[hybrid-selected.json](../benchmarks/scifact/hybrid-selected.json).
 
 <!-- tables:begin paired-settings -->
 Paired deltas use seed 0, 10,000 bootstrap resamples, 10,000 sign-flips, and a 95% percentile interval. Committed retrieval comparison files do not store that recipe. A newly written comparison does, when its thresholds set statistics. The recipe matches `configs/paired-uncertainty.yaml` and the verdict comparison.
@@ -179,7 +179,7 @@ Only 46 of 5,183 SciFact documents and 26 of 3,633 NFCorpus documents are longer
 <!-- tables:end chunk-window -->
 
 Selected chunked BM25 minus the document-level baseline
-([document-vs-bm25-selected.json](benchmarks/scifact/document-vs-bm25-selected.json)):
+([document-vs-bm25-selected.json](../benchmarks/scifact/document-vs-bm25-selected.json)):
 
 <!-- tables:begin scifact-doc-vs-selected -->
 | Metric | Mean delta | 95% CI | Sign-flip p |
@@ -202,7 +202,7 @@ with the selected parameters (1.50 and 0.75) and the same stem tokenizer
 (`configs/scifact-bm25-document-k1.5-b0.75.yaml`).
 
 Document-level BM25 at those parameters minus the frozen document-level baseline
-([document-vs-bm25-k15.json](benchmarks/scifact/document-vs-bm25-k15.json)):
+([document-vs-bm25-k15.json](../benchmarks/scifact/document-vs-bm25-k15.json)):
 
 <!-- tables:begin scifact-doc-vs-k15 -->
 | Metric | Mean delta | 95% CI | Sign-flip p |
@@ -219,19 +219,19 @@ Per-query nDCG@10 differs on 51 of 300 queries.
 <!-- tables:end scifact-doc-vs-k15 -->
 
 Selected chunked BM25 minus that ablation
-([bm25-k15-vs-selected.json](benchmarks/scifact/bm25-k15-vs-selected.json)).
+([bm25-k15-vs-selected.json](../benchmarks/scifact/bm25-k15-vs-selected.json)).
 Positive delta would mean chunking scored higher:
 
 <!-- tables:begin scifact-k15-vs-selected -->
 | Metric | Mean delta | 95% CI | Sign-flip p |
 | --- | --- | --- | --- |
-| nDCG@10 | +0.000 | [-0.001, +0.000] | 0.0621 |
+| nDCG@10 | -0.000 | [-0.001, -0.000] | 0.0621 |
 | Recall@10 | +0.000 | [+0.000, +0.000] | 1.0000 |
 | Recall@100 | +0.000 | [+0.000, +0.000] | 1.0000 |
-| MAP | +0.000 | [-0.001, +0.000] | 0.0222 |
-| MRR | +0.000 | [-0.001, +0.000] | 0.0166 |
+| MAP | -0.000 | [-0.001, -0.000] | 0.0222 |
+| MRR | -0.000 | [-0.001, -0.000] | 0.0166 |
 
-Below zero: nDCG@10, MAP, MRR. Intervals that include zero: Recall@10, Recall@100. nDCG@10 is below zero, but its upper bound rounds to +0.000. MAP is below zero, but its upper bound rounds to +0.000. MRR is below zero, but its upper bound rounds to +0.000.
+Below zero: nDCG@10, MAP, MRR. Intervals that include zero: Recall@10, Recall@100. nDCG@10 is below zero, but its upper bound rounds to -0.000. MAP is below zero, but its upper bound rounds to -0.000. MRR is below zero, but its upper bound rounds to -0.000.
 
 Per-query nDCG@10 differs on 5 of 300 queries.
 <!-- tables:end scifact-k15-vs-selected -->
@@ -242,7 +242,7 @@ the chunking deltas are 0.000, so the gap versus the frozen document-level
 baseline is the parameter change, not the 480-word windows.
 
 Selected hybrid minus the same document-level baseline
-([document-vs-hybrid-selected.json](benchmarks/scifact/document-vs-hybrid-selected.json)):
+([document-vs-hybrid-selected.json](../benchmarks/scifact/document-vs-hybrid-selected.json)):
 
 <!-- tables:begin scifact-doc-vs-hybrid -->
 | Metric | Mean delta | 95% CI | Sign-flip p |
@@ -257,13 +257,13 @@ Above zero: nDCG@10, Recall@10, Recall@100, MAP, MRR.
 <!-- tables:end scifact-doc-vs-hybrid -->
 
 Selected hybrid minus selected chunked BM25, same windows
-([bm25-selected-vs-hybrid.json](benchmarks/scifact/bm25-selected-vs-hybrid.json)):
+([bm25-selected-vs-hybrid.json](../benchmarks/scifact/bm25-selected-vs-hybrid.json)):
 
 <!-- tables:begin scifact-selected-vs-hybrid -->
 | Metric | Mean delta | 95% CI | Sign-flip p |
 | --- | --- | --- | --- |
 | nDCG@10 | +0.039 | [+0.024, +0.054] | 0.0001 |
-| Recall@10 | +0.020 | [+0.000, +0.043] | 0.0600 |
+| Recall@10 | +0.020 | [-0.000, +0.043] | 0.0600 |
 | Recall@100 | +0.029 | [+0.012, +0.049] | 0.0018 |
 | MAP | +0.045 | [+0.029, +0.062] | 0.0001 |
 | MRR | +0.045 | [+0.028, +0.063] | 0.0001 |
@@ -272,7 +272,7 @@ Above zero: nDCG@10, Recall@100, MAP, MRR. Intervals that include zero: Recall@1
 <!-- tables:end scifact-selected-vs-hybrid -->
 
 The frozen cross-encoder reorders the hybrid's first-stage candidates
-([rerank-selected.json](benchmarks/scifact/rerank-selected.json)). Recall@100
+([rerank-selected.json](../benchmarks/scifact/rerank-selected.json)). Recall@100
 on the reranked list is lower because the returned list stops at `candidate_k`.
 
 <!-- tables:begin scifact-rerank -->
@@ -284,7 +284,7 @@ The run truncated 767 of 6,000 query/document pairs. Full-ranking retrieval p95 
 <!-- tables:end scifact-rerank -->
 
 Reranked candidates minus the selected hybrid
-([hybrid-vs-rerank.json](benchmarks/scifact/hybrid-vs-rerank.json)):
+([hybrid-vs-rerank.json](../benchmarks/scifact/hybrid-vs-rerank.json)):
 
 <!-- tables:begin scifact-hybrid-vs-rerank -->
 | Metric | Mean delta | 95% CI | Sign-flip p |
@@ -323,7 +323,7 @@ The selected hybrid truncated 2,877 of 3,667 chunk texts. Full-ranking retrieval
 <!-- tables:end nfcorpus-test -->
 
 Selected chunked BM25 minus document-level BM25
-([document-vs-bm25-selected.json](benchmarks/nfcorpus/document-vs-bm25-selected.json)):
+([document-vs-bm25-selected.json](../benchmarks/nfcorpus/document-vs-bm25-selected.json)):
 
 <!-- tables:begin nfcorpus-doc-vs-selected -->
 | Metric | Mean delta | 95% CI | Sign-flip p |
@@ -331,7 +331,7 @@ Selected chunked BM25 minus document-level BM25
 | nDCG@10 | +0.005 | [+0.000, +0.010] | 0.0228 |
 | Recall@10 | +0.004 | [-0.001, +0.009] | 0.1737 |
 | Recall@100 | -0.001 | [-0.010, +0.007] | 0.8926 |
-| MAP | +0.000 | [-0.003, +0.002] | 0.8801 |
+| MAP | -0.000 | [-0.003, +0.002] | 0.8801 |
 | MRR | +0.011 | [-0.003, +0.026] | 0.1207 |
 
 Above zero: nDCG@10. Intervals that include zero: Recall@10, Recall@100, MAP, MRR. nDCG@10 is above zero, but its lower bound rounds to +0.000.
@@ -346,7 +346,7 @@ used to choose a setting
 (`configs/nfcorpus-bm25-document-k1.5-b0.75.yaml`).
 
 That ablation minus the frozen document-level baseline
-([document-vs-bm25-k15.json](benchmarks/nfcorpus/document-vs-bm25-k15.json)):
+([document-vs-bm25-k15.json](../benchmarks/nfcorpus/document-vs-bm25-k15.json)):
 
 <!-- tables:begin nfcorpus-doc-vs-k15 -->
 | Metric | Mean delta | 95% CI | Sign-flip p |
@@ -354,7 +354,7 @@ That ablation minus the frozen document-level baseline
 | nDCG@10 | +0.004 | [-0.001, +0.008] | 0.0975 |
 | Recall@10 | +0.000 | [-0.004, +0.004] | 0.8648 |
 | Recall@100 | +0.001 | [-0.001, +0.004] | 0.4209 |
-| MAP | +0.000 | [-0.004, +0.002] | 0.8198 |
+| MAP | -0.000 | [-0.004, +0.002] | 0.8198 |
 | MRR | +0.010 | [-0.005, +0.024] | 0.1819 |
 
 Intervals that include zero: nDCG@10, Recall@10, Recall@100, MAP, MRR.
@@ -363,15 +363,15 @@ Per-query nDCG@10 differs on 114 of 323 queries.
 <!-- tables:end nfcorpus-doc-vs-k15 -->
 
 Selected chunked BM25 minus that ablation
-([bm25-k15-vs-selected.json](benchmarks/nfcorpus/bm25-k15-vs-selected.json)):
+([bm25-k15-vs-selected.json](../benchmarks/nfcorpus/bm25-k15-vs-selected.json)):
 
 <!-- tables:begin nfcorpus-k15-vs-selected -->
 | Metric | Mean delta | 95% CI | Sign-flip p |
 | --- | --- | --- | --- |
-| nDCG@10 | +0.001 | [+0.000, +0.003] | 0.0789 |
+| nDCG@10 | +0.001 | [-0.000, +0.003] | 0.0789 |
 | Recall@10 | +0.003 | [+0.000, +0.007] | 0.0273 |
 | Recall@100 | -0.002 | [-0.010, +0.005] | 0.7118 |
-| MAP | +0.000 | [+0.000, +0.001] | 0.6297 |
+| MAP | +0.000 | [-0.000, +0.001] | 0.6297 |
 | MRR | +0.002 | [+0.000, +0.004] | 0.0462 |
 
 Above zero: Recall@10, MRR. Intervals that include zero: nDCG@10, Recall@100, MAP. Recall@10 is above zero, but its lower bound rounds to +0.000. MRR is above zero, but its lower bound rounds to +0.000.
@@ -384,7 +384,7 @@ nDCG difference between the chunked index and the matched document-level
 parameters. Recall@10 is slightly higher for the chunked index.
 
 Selected hybrid minus document-level BM25
-([document-vs-hybrid-selected.json](benchmarks/nfcorpus/document-vs-hybrid-selected.json)):
+([document-vs-hybrid-selected.json](../benchmarks/nfcorpus/document-vs-hybrid-selected.json)):
 
 <!-- tables:begin nfcorpus-doc-vs-hybrid -->
 | Metric | Mean delta | 95% CI | Sign-flip p |
@@ -399,7 +399,7 @@ Above zero: nDCG@10, Recall@10, Recall@100, MAP, MRR.
 <!-- tables:end nfcorpus-doc-vs-hybrid -->
 
 The hybrid comparison is the one that repeats on this second corpus.
-[bm25-selected-vs-hybrid.json](benchmarks/nfcorpus/bm25-selected-vs-hybrid.json)
+[bm25-selected-vs-hybrid.json](../benchmarks/nfcorpus/bm25-selected-vs-hybrid.json)
 is the same hybrid minus the selected chunked BM25 index:
 
 <!-- tables:begin nfcorpus-selected-vs-hybrid -->
@@ -431,14 +431,14 @@ the settings above.
 <!-- tables:end exploratory -->
 
 The stem 120-word run is
-[bm25-stem-chunk120-exploratory.json](benchmarks/scifact/bm25-stem-chunk120-exploratory.json).
+[bm25-stem-chunk120-exploratory.json](../benchmarks/scifact/bm25-stem-chunk120-exploratory.json).
 It was scored before the train grid finished. `dense_weight` 0.75 was the
 highest nDCG@10 in the test-split hybrid ablation
-([ablation-hybrid.json](benchmarks/scifact/ablation-hybrid.json)); the train
+([ablation-hybrid.json](../benchmarks/scifact/ablation-hybrid.json)); the train
 sweep later froze 0.50 on the 480-word stem index. One-factor BM25 rows
-remain in [ablation-bm25.json](benchmarks/scifact/ablation-bm25.json). The
+remain in [ablation-bm25.json](../benchmarks/scifact/ablation-bm25.json). The
 paired comparison of the exploratory 0.75 hybrid with whitespace BM25 remains
-in [bm25-vs-hybrid-w075.json](benchmarks/scifact/bm25-vs-hybrid-w075.json).
+in [bm25-vs-hybrid-w075.json](../benchmarks/scifact/bm25-vs-hybrid-w075.json).
 
 ## SciFact claim verdicts
 
@@ -535,7 +535,7 @@ higher `min_confidence`. Accuracy and macro-F1 do not change with `sentence_k`,
 because the verdict is the label of the first kept sentence. `sentence_k` only
 changes the evidence set. Dev is scored once after that choice is committed.
 Tests inject an NLI scorer. The pinned model is not required for those tests.
-[verdict-train-selection.json](benchmarks/scifact/verdict-train-selection.json):
+[verdict-train-selection.json](../benchmarks/scifact/verdict-train-selection.json):
 
 <!-- tables:begin verdict-train -->
 | doc_k | sentence_k | min_confidence | Accuracy | Macro-F1 | Sentence P | Sentence R | Sentence F1 |
@@ -580,7 +580,7 @@ It always predicts SUPPORT, so that class F1 is higher and the other two are
 zero. Macro-F1 is the unweighted mean of the three.
 
 Frozen NLI minus the majority baseline
-([verdict-baseline-vs-nli.json](benchmarks/scifact/verdict-baseline-vs-nli.json)):
+([verdict-baseline-vs-nli.json](../benchmarks/scifact/verdict-baseline-vs-nli.json)):
 
 <!-- tables:begin verdict-paired -->
 | Metric | Mean delta | 95% CI | Sign-flip p |
@@ -619,11 +619,11 @@ The oracle gives the frozen sentence policy every gold evidence document and doe
 
 ## Judge sample
 
-[benchmarks/support/judge-sample.json](benchmarks/support/judge-sample.json)
+[benchmarks/support/judge-sample.json](../benchmarks/support/judge-sample.json)
 judges two questions copied from the support fixture (`api-keys-1`,
 `rate-limits-1`). Answers come from the extractive generator. The judge is
 `gpt-5-nano`, and the response records `gpt-5-nano-2025-08-07`. Rates in
-[configs/support-judge.yaml](configs/support-judge.yaml) are the published
+[configs/support-judge.yaml](../configs/support-judge.yaml) are the published
 text prices of $0.05 input, $0.005 cached input, and $0.40 output per million
 tokens.
 
