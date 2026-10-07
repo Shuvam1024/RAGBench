@@ -99,12 +99,23 @@ class QuestionChange(Record):
     direction: Literal["improved", "regressed", "unchanged"]
 
 
+class ComparisonStatistics(Record):
+    """The uncertainty recipe that produced a comparison file."""
+
+    seed: int
+    bootstrap_samples: int
+    permutation_samples: int
+    confidence: float
+    gate_mode: GateMode
+
+
 class Comparison(Record):
     baseline_run_id: str
     candidate_run_id: str
     passed: bool
     checks: tuple[MetricCheck, ...]
     question_changes: tuple[QuestionChange, ...] = ()
+    statistics: ComparisonStatistics | None = None
 
 
 def load_report(path: Path) -> EvaluationResult:
@@ -335,8 +346,17 @@ def compare(
                 tolerance=tolerance,
                 change=change,
                 passed=passed,
-                rule="maximum relative increase",
+                rule="point_drop: maximum relative increase",
             )
+        )
+    recipe = None
+    if limits.statistics is not None:
+        recipe = ComparisonStatistics(
+            seed=limits.statistics.seed,
+            bootstrap_samples=limits.statistics.bootstrap_samples,
+            permutation_samples=limits.statistics.permutation_samples,
+            confidence=limits.statistics.confidence,
+            gate_mode=limits.statistics.resolved_gate_mode(),
         )
     return Comparison(
         baseline_run_id=baseline.run_id,
@@ -344,4 +364,5 @@ def compare(
         passed=all(item.passed for item in checks),
         checks=tuple(checks),
         question_changes=tuple(sorted(changes, key=lambda item: (item.metric, item.question_id))),
+        statistics=recipe,
     )
