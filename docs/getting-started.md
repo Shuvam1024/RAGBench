@@ -124,10 +124,13 @@ chunked RAG setup and is not a Pyserini reproduction
 Omitting `tokenizer` keeps the original `\w+` tokenizer. Dense and hybrid
 configs need the `dense` extra and a Hugging Face cache.
 
-`ragbench dataset nfcorpus` prepares a second BEIR corpus
-([BEIR NFCorpus](https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/nfcorpus.zip)).
-Its test qrels are used only to repeat the frozen SciFact settings. Do not
-select chunk size, tokenizer, or fusion weight on NFCorpus.
+`ragbench dataset nfcorpus` prepares a second BEIR corpus. Its test qrels
+repeat the frozen SciFact settings. Chunk size, tokenizer, and fusion weight
+stay on the values committed from the SciFact train split. The held-out
+reports are `benchmarks/scifact/bm25-selected.json`,
+`benchmarks/scifact/bm25-document.json`, `benchmarks/scifact/hybrid-selected.json`,
+and the matching files under `benchmarks/nfcorpus/`. Paired intervals use
+`configs/paired-uncertainty.yaml`.
 
 ## Tests
 

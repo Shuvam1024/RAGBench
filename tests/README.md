@@ -35,6 +35,8 @@ optionally set `HF_HUB_OFFLINE=1` after the model is cached.
   filenames. NFCorpus is a confirmation corpus, not a tuning split.
 - `test_train_selection.py`: train-split tie breaks for chunk size, tokenizer,
   and hybrid dense weight.
+- `test_readme_figures.py`: README metric tables match the committed reports
+  at four decimals.
 - `test_sweep.py`: a one-factor sweep changes only the named axis and skips the
   base value.
 - `test_benchmark.py`: nonblank fields, distinct labels and IDs, supported
