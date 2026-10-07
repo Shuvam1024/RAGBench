@@ -24,8 +24,14 @@ COMPARISONS = (
     "benchmarks/scifact/document-vs-hybrid-selected.json",
     "benchmarks/scifact/bm25-selected-vs-hybrid.json",
     "benchmarks/scifact/hybrid-vs-rerank.json",
+    "benchmarks/scifact/verdict-baseline-vs-nli.json",
     "benchmarks/nfcorpus/document-vs-bm25-selected.json",
     "benchmarks/nfcorpus/document-vs-hybrid-selected.json",
+)
+
+VERDICT_REPORTS = (
+    "benchmarks/scifact/verdict-dev.json",
+    "benchmarks/scifact/verdict-baseline-dev.json",
 )
 
 
@@ -58,6 +64,30 @@ def test_readme_quotes_paired_deltas() -> None:
             interval = f"[{check['ci_low']:+.4f}, {check['ci_high']:+.4f}]"
             assert delta in README
             assert interval in README
+
+
+def test_readme_quotes_verdict_metrics_at_four_decimals() -> None:
+    for path in VERDICT_REPORTS:
+        report = _load(path)
+        for key in (
+            "accuracy",
+            "macro_f1",
+            "sentence_precision",
+            "sentence_recall",
+            "sentence_f1",
+            "micro_sentence_precision",
+            "micro_sentence_recall",
+            "micro_sentence_f1",
+        ):
+            value = report[key]
+            assert isinstance(value, float)
+            assert f"{value:.4f}" in README
+        class_f1 = report["class_f1"]
+        assert isinstance(class_f1, dict)
+        for label in ("SUPPORT", "CONTRADICT", "NEI"):
+            score = class_f1[label]
+            assert isinstance(score, float)
+            assert f"{score:.4f}" in README
 
 
 def test_held_out_scifact_reports_share_the_test_fingerprint() -> None:

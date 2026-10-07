@@ -303,10 +303,13 @@ extraction, and a direct HTTP adapter. The runner selects one best chunk per uni
 document and bounds total context characters. Reference answers are used only by
 metrics and the separate judge. Each stage records its own timing and responses.
 
-Lexical answer metrics live in `evaluation/answers.py`; versioned judge instructions
-and strict score validation live in `evaluation/judge.py`. Keeping these separate
-makes their different assumptions visible. The provider returns actual token usage
-and model identity; prices are configuration data. See [providers](providers.md).
+Lexical answer metrics live in `evaluation/answers.py`. They are token overlap.
+`context_token_precision` does not establish factual support, and it is not a
+faithfulness score. Versioned judge instructions and strict score validation
+live in `evaluation/judge.py`. The judge rubric is a separate 0–4 model score,
+not a SciFact SUPPORT or CONTRADICT label. Keeping these separate makes their
+different assumptions visible. The provider returns actual token usage and model
+identity; prices are configuration data. See [providers](providers.md).
 
 ## 12. Persistence and delivery
 
@@ -340,3 +343,14 @@ only when some qrel score is not 1. The command also writes a corpus-length
 manifest. FiQA and NFCorpus are not wired up: SciFact is large enough for
 chunking to split thousands of documents, and a 57k-passage corpus would
 multiply CPU embedding time without changing the method.
+
+## 14. SciFact verdicts use the claim files
+
+`evaluation/factual.py` scores SUPPORT, CONTRADICT, and NEI plus evidence
+sentences. `datasets/scifact_claims.py` reads the AllenAI claim files and checks
+them against BEIR query IDs. BEIR qrels stay retrieval grades. `evaluation/nli.py`
+loads a pinned NLI model, and tests can inject a scorer. `evaluation/verdict.py`
+selects the decision rule on the train claims. The frozen rule is `doc_k` 1,
+`sentence_k` 2, and `min_confidence` 0.7. The public SciFact test labels
+are withheld, so the held-out labeled split is the dev claims. Dev is scored
+once after that choice.

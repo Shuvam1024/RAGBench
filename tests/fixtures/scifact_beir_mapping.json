@@ -1,0 +1,69 @@
+{
+  "train": [
+    {
+      "id": 0,
+      "claim": "0-dimensional biomaterials lack inductive properties.",
+      "evidence": {},
+      "cited_doc_ids": [31715818]
+    },
+    {
+      "id": 47,
+      "claim": "A strong bias in the phage genome locations where the spacers were derived has been observed in many CRISPR subtypes that confer the immunity to phage.",
+      "evidence": {"26996935": [{"sentences": [6], "label": "SUPPORT"}]},
+      "cited_doc_ids": [3512154, 26996935]
+    },
+    {
+      "id": 263,
+      "claim": "Citrullinated proteins externalized in neutrophil extracellular traps act indirectly to disrupt the inflammatory cycle.",
+      "evidence": {
+        "11328820": [{"sentences": [7, 9], "label": "CONTRADICT"}],
+        "30041340": [
+          {"sentences": [0, 1], "label": "CONTRADICT"},
+          {"sentences": [11], "label": "CONTRADICT"}
+        ]
+      },
+      "cited_doc_ids": [11328820, 30041340, 14853989]
+    }
+  ],
+  "dev": [
+    {
+      "id": 1,
+      "claim": "0-dimensional biomaterials show inductive properties.",
+      "evidence": {},
+      "cited_doc_ids": [31715818]
+    },
+    {
+      "id": 3,
+      "claim": "1,000 genomes project enables mapping of genetic sequence variation consisting of rare variants with larger penetrance effects than common variants.",
+      "evidence": {
+        "14717500": [
+          {"sentences": [2, 5], "label": "SUPPORT"},
+          {"sentences": [7], "label": "SUPPORT"}
+        ]
+      },
+      "cited_doc_ids": [14717500]
+    }
+  ],
+  "test": [
+    {
+      "id": 7,
+      "claim": "10-20% of people with severe mental disorder receive no treatment in low and middle income countries."
+    }
+  ],
+  "queries": {
+    "0": "0-dimensional biomaterials lack inductive properties.",
+    "1": "0-dimensional biomaterials show inductive properties.",
+    "3": "1,000 genomes project enables mapping of genetic sequence variation consisting of rare variants with larger penetrance effects than common variants.",
+    "47": "A strong bias in the phage genome locations where the spacers were derived has been observed in many CRISPR subtypes that confer the immunity to phage.",
+    "263": "Citrullinated proteins externalized in neutrophil extracellular traps act indirectly to disrupt the inflammatory cycle."
+  },
+  "train_qrels": {
+    "0": {"31715818": 1},
+    "47": {"3512154": 1, "26996935": 1},
+    "263": {"11328820": 1, "30041340": 1, "14853989": 1}
+  },
+  "beir_test_qrels": {
+    "1": {"31715818": 1},
+    "3": {"14717500": 1}
+  }
+}
