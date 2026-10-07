@@ -1,0 +1,104 @@
+[
+  {
+    "id": "binary-two",
+    "ranking": [
+      "b",
+      "a",
+      "c"
+    ],
+    "grades": {
+      "a": 1,
+      "c": 1
+    },
+    "pytrec": {
+      "P_10": 0.2,
+      "map": 0.5833333333333333,
+      "ndcg_cut_10": 0.6934264036172708,
+      "recall_10": 1.0,
+      "recip_rank": 0.5
+    },
+    "ragbench": {
+      "map": 0.5833333333333333,
+      "recip_rank": 0.5,
+      "ndcg_at_10": 0.6934264036172708,
+      "recall_10": 1.0,
+      "P_10": 0.2
+    }
+  },
+  {
+    "id": "binary-first",
+    "ranking": [
+      "a",
+      "b"
+    ],
+    "grades": {
+      "a": 1
+    },
+    "pytrec": {
+      "P_10": 0.1,
+      "map": 1.0,
+      "ndcg_cut_10": 1.0,
+      "recall_10": 1.0,
+      "recip_rank": 1.0
+    },
+    "ragbench": {
+      "map": 1.0,
+      "recip_rank": 1.0,
+      "ndcg_at_10": 1.0,
+      "recall_10": 1.0,
+      "P_10": 0.1
+    }
+  },
+  {
+    "id": "binary-both",
+    "ranking": [
+      "c",
+      "b",
+      "a"
+    ],
+    "grades": {
+      "a": 1,
+      "b": 1
+    },
+    "pytrec": {
+      "P_10": 0.2,
+      "map": 0.5833333333333333,
+      "ndcg_cut_10": 0.6934264036172708,
+      "recall_10": 1.0,
+      "recip_rank": 0.5
+    },
+    "ragbench": {
+      "map": 0.5833333333333333,
+      "recip_rank": 0.5,
+      "ndcg_at_10": 0.6934264036172708,
+      "recall_10": 1.0,
+      "P_10": 0.2
+    }
+  },
+  {
+    "id": "graded",
+    "ranking": [
+      "b",
+      "a",
+      "c"
+    ],
+    "grades": {
+      "a": 1,
+      "c": 2
+    },
+    "pytrec": {
+      "P_10": 0.2,
+      "map": 0.5833333333333333,
+      "ndcg_cut_10": 0.6199062332840657,
+      "recall_10": 1.0,
+      "recip_rank": 0.5
+    },
+    "ragbench": {
+      "map": 0.5833333333333333,
+      "recip_rank": 0.5,
+      "ndcg_at_10": 0.58688267143572,
+      "recall_10": 1.0,
+      "P_10": 0.2
+    }
+  }
+]

@@ -100,4 +100,7 @@ class HybridRetriever(Retriever):
         }
         if self.fusion == "rrf":
             details["rrf_k"] = self.rrf_k
+        tokenizer = self.bm25.metadata.get("tokenizer")
+        if isinstance(tokenizer, str):
+            details["bm25_tokenizer"] = tokenizer
         return details

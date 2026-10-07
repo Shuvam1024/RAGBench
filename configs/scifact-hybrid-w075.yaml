@@ -1,5 +1,6 @@
-# dense_weight 0.75 is the SciFact hybrid ablation's best min-max weight.
-# See benchmarks/scifact/ablation-hybrid.json.
+# Exploratory test-split hybrid. dense_weight 0.75 was the highest nDCG@10
+# in benchmarks/scifact/ablation-hybrid.json. That choice looked at the test
+# split. It is not the train-frozen weight. Tokenizer is whitespace.
 schema_version: 1
 dataset:
   documents_path: ../.cache/beir/scifact

@@ -31,6 +31,18 @@ def test_windows(text: str, size: int, overlap: int, expected: list[str]) -> Non
     assert all(chunk.end_word - chunk.start_word == len(chunk.text.split()) for chunk in result)
 
 
+def test_document_unit_indexes_the_full_text_once() -> None:
+    text = "a b c d e f"
+    source = document(text)
+    whole = chunk_document(source, ChunkingConfig(unit="document", chunk_size=2, overlap=0))
+    windows = chunk_document(source, ChunkingConfig(chunk_size=2, overlap=0))
+    assert [chunk.text for chunk in whole] == [text]
+    assert (whole[0].start_word, whole[0].end_word) == (0, 6)
+    assert whole[0].id != windows[0].id
+    assert chunk_document(document(" \n\t "), ChunkingConfig(unit="document")) == []
+    assert whole == chunk_document(source, ChunkingConfig(unit="document"))
+
+
 def test_chunk_ids_are_stable_and_sensitive_to_inputs() -> None:
     source = document("a b c d e f")
     config = ChunkingConfig(chunk_size=3, overlap=1)

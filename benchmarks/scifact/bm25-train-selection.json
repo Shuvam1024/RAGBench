@@ -1,0 +1,197 @@
+{
+  "split": "train",
+  "question_count": 809,
+  "selection_metric": "ndcg@10",
+  "tie_break": [
+    "smaller chunk_size",
+    "whitespace before stem"
+  ],
+  "candidates": [
+    {
+      "tokenizer": "whitespace",
+      "chunk_size": 60,
+      "overlap": 20,
+      "k1": 1.5,
+      "b": 0.75,
+      "unit": "words",
+      "question_count": 809,
+      "chunk_count": 27747,
+      "multi_chunk_documents": 5168,
+      "metrics": {
+        "ndcg@10": 0.6208903518991911,
+        "recall@10": 0.7520395550061805,
+        "recall@100": 0.888298310671611,
+        "precision@10": 0.08417799752781212,
+        "map": 0.5810873755335207,
+        "mrr": 0.5908750867203588
+      }
+    },
+    {
+      "tokenizer": "whitespace",
+      "chunk_size": 120,
+      "overlap": 20,
+      "k1": 1.5,
+      "b": 0.75,
+      "unit": "words",
+      "question_count": 809,
+      "chunk_count": 12647,
+      "multi_chunk_documents": 4738,
+      "metrics": {
+        "ndcg@10": 0.6438065191293444,
+        "recall@10": 0.773259167696745,
+        "recall@100": 0.8954058508446642,
+        "precision@10": 0.08627935723114956,
+        "map": 0.6040184377061694,
+        "mrr": 0.6147232622104732
+      }
+    },
+    {
+      "tokenizer": "whitespace",
+      "chunk_size": 240,
+      "overlap": 20,
+      "k1": 1.5,
+      "b": 0.75,
+      "unit": "words",
+      "question_count": 809,
+      "chunk_count": 6984,
+      "multi_chunk_documents": 1719,
+      "metrics": {
+        "ndcg@10": 0.6589994014066656,
+        "recall@10": 0.7830449114132674,
+        "recall@100": 0.9045735475896167,
+        "precision@10": 0.08763906056860322,
+        "map": 0.6208000264941317,
+        "mrr": 0.6297416363102245
+      }
+    },
+    {
+      "tokenizer": "whitespace",
+      "chunk_size": 480,
+      "overlap": 20,
+      "k1": 1.5,
+      "b": 0.75,
+      "unit": "words",
+      "question_count": 809,
+      "chunk_count": 5236,
+      "multi_chunk_documents": 46,
+      "metrics": {
+        "ndcg@10": 0.6586127227831471,
+        "recall@10": 0.7836629583848372,
+        "recall@100": 0.9051915945611866,
+        "precision@10": 0.08776266996291718,
+        "map": 0.61991353060634,
+        "mrr": 0.629220297936891
+      }
+    },
+    {
+      "tokenizer": "stem",
+      "chunk_size": 60,
+      "overlap": 20,
+      "k1": 1.5,
+      "b": 0.75,
+      "unit": "words",
+      "question_count": 809,
+      "chunk_count": 27747,
+      "multi_chunk_documents": 5168,
+      "metrics": {
+        "ndcg@10": 0.6600583347776287,
+        "recall@10": 0.7871652245570664,
+        "recall@100": 0.9179645653069634,
+        "precision@10": 0.08788627935723116,
+        "map": 0.621478888879412,
+        "mrr": 0.6312096300221013
+      }
+    },
+    {
+      "tokenizer": "stem",
+      "chunk_size": 120,
+      "overlap": 20,
+      "k1": 1.5,
+      "b": 0.75,
+      "unit": "words",
+      "question_count": 809,
+      "chunk_count": 12647,
+      "multi_chunk_documents": 4738,
+      "metrics": {
+        "ndcg@10": 0.6808876456369611,
+        "recall@10": 0.8066337041615164,
+        "recall@100": 0.9235269880510919,
+        "precision@10": 0.0899876390605686,
+        "map": 0.6417960185003949,
+        "mrr": 0.6514455503052659
+      }
+    },
+    {
+      "tokenizer": "stem",
+      "chunk_size": 240,
+      "overlap": 20,
+      "k1": 1.5,
+      "b": 0.75,
+      "unit": "words",
+      "question_count": 809,
+      "chunk_count": 6984,
+      "multi_chunk_documents": 1719,
+      "metrics": {
+        "ndcg@10": 0.6947888991213211,
+        "recall@10": 0.8165224557066337,
+        "recall@100": 0.9301194890811703,
+        "precision@10": 0.09060568603213844,
+        "map": 0.6571977574557873,
+        "mrr": 0.6670401967064996
+      }
+    },
+    {
+      "tokenizer": "stem",
+      "chunk_size": 480,
+      "overlap": 20,
+      "k1": 1.5,
+      "b": 0.75,
+      "unit": "words",
+      "question_count": 809,
+      "chunk_count": 5236,
+      "multi_chunk_documents": 46,
+      "metrics": {
+        "ndcg@10": 0.6971974365161454,
+        "recall@10": 0.8196126905644829,
+        "recall@100": 0.9315615986814998,
+        "precision@10": 0.09122373300370828,
+        "map": 0.6591360468166909,
+        "mrr": 0.6695303758872599
+      }
+    }
+  ],
+  "winner": {
+    "tokenizer": "stem",
+    "chunk_size": 480,
+    "overlap": 20,
+    "k1": 1.5,
+    "b": 0.75,
+    "unit": "words",
+    "metrics": {
+      "ndcg@10": 0.6971974365161454,
+      "recall@10": 0.8196126905644829,
+      "recall@100": 0.9315615986814998,
+      "precision@10": 0.09122373300370828,
+      "map": 0.6591360468166909,
+      "mrr": 0.6695303758872599
+    }
+  },
+  "document_level_reference": {
+    "eligible": false,
+    "config": "configs/scifact-bm25-document-train.yaml",
+    "unit": "document",
+    "tokenizer": "stem",
+    "k1": 0.9,
+    "b": 0.4,
+    "question_count": 809,
+    "chunk_count": 5183,
+    "metrics": {
+      "ndcg@10": 0.6957142292980188,
+      "recall@10": 0.8091058920477957,
+      "recall@100": 0.9272352698805109,
+      "precision@10": 0.09011124845488258,
+      "map": 0.6607553350482138,
+      "mrr": 0.670879547862912
+    }
+  }
+}

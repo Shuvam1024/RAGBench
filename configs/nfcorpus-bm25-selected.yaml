@@ -1,0 +1,26 @@
+# NFCorpus test split, using the SciFact train-frozen chunked BM25 settings.
+# This corpus is not used to choose tokenizer, chunk size, or BM25 parameters.
+# Same definition as configs/scifact-bm25-selected.yaml: stem, 480-word
+# windows, overlap 20, k1 1.5, b 0.75, title+body field, rank_bm25.
+# NFCorpus qrels include grades 1 and 2. RAGBench nDCG uses exponential gain,
+# so its nDCG@10 is not the BEIR linear-gain number.
+schema_version: 1
+dataset:
+  documents_path: ../.cache/beir/nfcorpus
+  benchmark_path: ../.cache/beir/nfcorpus/benchmark.json
+chunking:
+  unit: words
+  chunk_size: 480
+  overlap: 20
+retrieval:
+  type: bm25
+  k1: 1.5
+  b: 0.75
+  tokenizer: stem
+evaluation:
+  recall_at_k: [10, 100]
+  ndcg_at_k: [10]
+  precision_at_k: [10]
+  stored_hits: 10
+output:
+  json_path: null

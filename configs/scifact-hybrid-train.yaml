@@ -1,0 +1,36 @@
+# Train-split hybrid sweep base. Lexical settings are the train-grid winner:
+# stem, 480-word windows, overlap 20, k1 1.5, b 0.75. The sweep selected
+# dense_weight 0.5 (highest train nDCG@10; a tie would prefer the smaller
+# weight). See benchmarks/scifact/hybrid-weight-train.json. The test split
+# is not used here. MiniLM revision is pinned. Chunk texts longer than 256
+# tokens are truncated.
+schema_version: 1
+dataset:
+  documents_path: ../.cache/beir/scifact
+  benchmark_path: ../.cache/beir/scifact/benchmark.train.json
+chunking:
+  chunk_size: 480
+  overlap: 20
+retrieval:
+  type: hybrid
+  fusion: minmax
+  dense_weight: 0.5
+  rrf_k: 60
+  bm25:
+    type: bm25
+    k1: 1.5
+    b: 0.75
+    tokenizer: stem
+  dense:
+    type: dense
+    model_name: sentence-transformers/all-MiniLM-L6-v2
+    revision: 1110a243fdf4706b3f48f1d95db1a4f5529b4d41
+    device: cpu
+    batch_size: 32
+evaluation:
+  recall_at_k: [10, 100]
+  ndcg_at_k: [10]
+  precision_at_k: [10]
+  stored_hits: 10
+output:
+  json_path: null

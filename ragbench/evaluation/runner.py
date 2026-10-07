@@ -77,7 +77,16 @@ def build_retriever(config: RetrieverConfig) -> Retriever:
 
 
 def dependency_versions(dense: bool) -> dict[str, str]:
-    names = ["ragbench", "pydantic", "PyYAML", "rank-bm25", "numpy", "typer", "httpx"]
+    names = [
+        "ragbench",
+        "pydantic",
+        "PyYAML",
+        "rank-bm25",
+        "snowballstemmer",
+        "numpy",
+        "typer",
+        "httpx",
+    ]
     if dense:
         names += ["sentence-transformers", "faiss-cpu", "torch", "transformers", "huggingface-hub"]
     versions = {"python": platform.python_version()}

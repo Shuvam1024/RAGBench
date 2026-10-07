@@ -39,113 +39,212 @@ run never emits a second chunk.
 
 ## SciFact
 
-`ragbench dataset scifact` downloads the BEIR SciFact zip and rejects it unless
-its SHA-256 is `536e14446a0ba56ed1398ab1055f39fe852686ecad24a6306c80c490fa8e0165`.
-The committed length manifest is [benchmarks/scifact/corpus_stats.json](benchmarks/scifact/corpus_stats.json):
-5,183 documents, 300 test queries, 339 qrels, every qrel grade 1. Word length
-(`\S+` spans) has minimum 33, median 204, mean 214.6280146633224, and maximum
-1,541. 4,738 documents are longer than 120 words, so the default chunker splits
-them.
+The 300-query test split was used while the original chunk size, tokenizer, and
+hybrid weight were still being compared. Those runs stay in this repository as
+exploratory results. Revised settings were selected on the 809-query train
+split ([ir-datasets `beir/scifact/train`](https://ir-datasets.com/beir.html#beir/scifact/train))
+and committed before this test split was scored again. NFCorpus was not used
+to choose any setting. README figures below are rounded to 4 decimals. The
+JSON reports keep full precision.
 
-BM25 (`k1=1.5`, `b=0.75`, chunk size 120, overlap 20) from
-[benchmarks/scifact/bm25.json](benchmarks/scifact/bm25.json):
+### Definitions
 
-| Metric | Value |
+Every index uses the same prepared field: the BEIR title and body joined by
+one newline when both are non-empty. `rank_bm25` `BM25Okapi` scores that
+field. The stem tokenizer splits on `\w+` after casefold, drops the vendored
+NLTK English stopword list, and applies the Snowball English stemmer from
+`snowballstemmer`. A document's retrieval score is its highest-scoring chunk.
+`retrieval_p95_ms` in these reports is the full-ranking pass, which scores
+every chunk. It is a different measurement from a top-K pipeline latency.
+
+| Setup | Role | Tokenizer | Units | BM25 | Other |
+| --- | --- | --- | --- | --- | --- |
+| Original chunked | Exploratory test run and CI baseline | whitespace `\w+` | 120-word windows, overlap 20 | k1 1.5, b 0.75 | `configs/scifact-bm25.yaml` |
+| Selected chunked | Chosen on train, then scored once on test | stem | 480-word windows, overlap 20 | k1 1.5, b 0.75 | `configs/scifact-bm25-selected.yaml` |
+| Document-level | Pre-specified comparison baseline | stem | one string per document | k1 0.9, b 0.4 | `configs/scifact-bm25-document.yaml` |
+| Selected hybrid | Weight chosen on train after the lexical freeze | stem, same windows as selected chunked | 480-word windows, overlap 20 | k1 1.5, b 0.75 | min-max, dense_weight 0.5 |
+
+`chunking.unit: document` does not apply the chunk-size default stored beside
+it. Pyserini's BEIR flat run reports SciFact test nDCG@10 0.679
+([2CR](https://castorini.github.io/pyserini/2cr/beir.html)). That figure is
+Lucene BM25 with Lucene's English analyzer. The document-level row here is
+the separate `rank_bm25` configuration above.
+
+The hybrid dense model is `sentence-transformers/all-MiniLM-L6-v2` at
+revision `1110a243fdf4706b3f48f1d95db1a4f5529b4d41`, CPU, one PyTorch thread,
+batch size 32. Chunk texts longer than 256 tokens are truncated.
+
+### Train selection
+
+`scripts/select_scifact_train.py` scores whitespace and stem at chunk sizes
+60, 120, 240, and 480, with overlap 20, k1 1.5, and b 0.75. The winner
+maximizes train nDCG@10. Ties prefer the smaller window, then whitespace.
+Document-level BM25 is scored and cannot win.
+[bm25-train-selection.json](benchmarks/scifact/bm25-train-selection.json):
+
+| Candidate | Train nDCG@10 | Recall@10 | Recall@100 | MAP | MRR |
+| --- | --- | --- | --- | --- | --- |
+| Selected chunked (stem, 480) | 0.6972 | 0.8196 | 0.9316 | 0.6591 | 0.6695 |
+| Document-level reference | 0.6957 | 0.8091 | 0.9272 | 0.6608 | 0.6709 |
+
+On that lexical winner, `configs/scifact-hybrid-train-sweep.yaml` scores
+`dense_weight` 0, 0.25, 0.5, 0.75, and 1. The highest train nDCG@10 wins, and
+a tie would prefer the smaller weight.
+[hybrid-weight-train.json](benchmarks/scifact/hybrid-weight-train.json):
+
+| dense_weight | Train nDCG@10 |
 | --- | --- |
-| Documents / chunks / multi-chunk documents | 5183 / 12647 / 4738 |
-| Recall@10 | 0.7706666666666666 |
-| Recall@100 | 0.8728888888888889 |
-| nDCG@10 | 0.6433126633988724 |
-| Precision@10 | 0.08433333333333333 |
-| MAP | 0.6034257029278666 |
-| MRR (full ranking) | 0.6136324295824112 |
+| 0.00 | 0.6972 |
+| 0.25 | 0.7145 |
+| 0.50 | 0.7331 |
+| 0.75 | 0.7325 |
+| 1.00 | 0.6628 |
 
-The same chunking with `all-MiniLM-L6-v2` at revision
-`1110a243fdf4706b3f48f1d95db1a4f5529b4d41`, CPU, one thread, from
-[benchmarks/scifact/dense.json](benchmarks/scifact/dense.json). 174 chunk texts
-exceeded the 256-token limit and were truncated:
+The frozen weight is 0.50.
 
-| Metric | BM25 | Dense MiniLM | Hybrid min-max | Hybrid RRF |
-| --- | --- | --- | --- | --- |
-| Recall@10 | 0.7706666666666666 | 0.8243333333333334 | 0.8337777777777777 | 0.8171111111111111 |
-| Recall@100 | 0.8728888888888889 | 0.9426666666666667 | 0.9443333333333334 | 0.9610000000000001 |
-| nDCG@10 | 0.6433126633988724 | 0.6698756028274417 | 0.7086771422459537 | 0.6978116364934386 |
-| Precision@10 | 0.08433333333333333 | 0.09233333333333334 | 0.09266666666666667 | 0.091 |
-| MAP | 0.6034257029278666 | 0.621310775891958 | 0.6699003860776047 | 0.661227195495906 |
-| MRR | 0.6136324295824112 | 0.631546372294966 | 0.6763456448001468 | 0.6736098317639135 |
+### Held-out SciFact test
+
+300 queries, 339 binary qrels. Corpus fingerprint `0ae06d7ccabbb805…` and
+benchmark fingerprint `cc8042c8f9795069…` match the earlier reports. 5,183
+documents. Word length (`\S+`) has minimum 33, median 204, mean 214.628, and
+maximum 1,541.
+
+| Setup | Chunks | Recall@10 | Recall@100 | nDCG@10 | P@10 | MAP | MRR |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Original chunked | 12647 | 0.7707 | 0.8729 | 0.6433 | 0.0843 | 0.6034 | 0.6136 |
+| Document-level baseline | 5183 | 0.7961 | 0.9260 | 0.6741 | 0.0873 | 0.6368 | 0.6458 |
+| Selected chunked | 5236 | 0.8335 | 0.9227 | 0.6907 | 0.0920 | 0.6448 | 0.6555 |
+| Selected hybrid | 5236 | 0.8539 | 0.9517 | 0.7294 | 0.0957 | 0.6894 | 0.7003 |
 
 Sources: [bm25.json](benchmarks/scifact/bm25.json),
-[dense.json](benchmarks/scifact/dense.json),
-[hybrid-minmax.json](benchmarks/scifact/hybrid-minmax.json)
-(`fusion: minmax`, `dense_weight: 0.5`), and
-[hybrid-rrf.json](benchmarks/scifact/hybrid-rrf.json) (`fusion: rrf`, `rrf_k: 60`).
-Among these four reports, min-max hybrid at `dense_weight` 0.5 has the highest
-nDCG@10, MAP, and MRR, and RRF has the highest Recall@100. The weight sweep
-below is higher still at 0.75. Precision@10 stays near 0.09 because most
-questions have one relevant document, so the maximum Precision@10 is 0.1.
+[bm25-document.json](benchmarks/scifact/bm25-document.json),
+[bm25-selected.json](benchmarks/scifact/bm25-selected.json),
+[hybrid-selected.json](benchmarks/scifact/hybrid-selected.json).
+The selected hybrid truncated 3,699 of 5,236 chunk texts. Full-ranking
+retrieval p95 was 28.9 ms for selected chunked BM25, 28.3 ms for
+document-level BM25, and 180.6 ms for the hybrid.
 
-### BM25 ablation
+Paired deltas use seed 0, 10,000 bootstrap resamples, 10,000 sign-flips, and
+a 95% percentile interval (`configs/paired-uncertainty.yaml`). Positive delta
+means the candidate is higher. That file sets `max_drop` to 1.0 so the
+comparison records the interval. `passed` in those files is a measurement
+flag. The CI quality gate remains the zero point-drop check of the original
+chunked report in `configs/scifact-thresholds.yaml`.
 
-[benchmarks/scifact/ablation-bm25.json](benchmarks/scifact/ablation-bm25.json)
-changes one field at a time around the BM25 configuration above. The `base` row
-matches that report. nDCG@10 is highest at chunk size 240
-(0.652031328715394) and lowest at chunk size 60 (0.610446240944331). MAP is
-highest at chunk size 240 (0.6160324275056419). Among `k1` values, 1.5 has the
-highest MAP (0.6034257029278666). Setting `b` to 0 raises MAP to
-0.6093889989164758 and lowers Recall@10 to 0.7653888888888889.
+Selected chunked BM25 minus the document-level baseline
+([document-vs-bm25-selected.json](benchmarks/scifact/document-vs-bm25-selected.json)):
 
-| Setting | Chunks | Recall@10 | nDCG@10 | MAP |
-| --- | --- | --- | --- | --- |
-| base (120 / overlap 20 / k1 1.5 / b 0.75) | 12647 | 0.7706666666666666 | 0.6433126633988724 | 0.6034257029278666 |
-| chunk_size 60 | 27747 | 0.7362222222222222 | 0.610446240944331 | 0.5725722091625471 |
-| chunk_size 240 | 6984 | 0.7673333333333333 | 0.652031328715394 | 0.6160324275056419 |
-| chunk_size 480 | 5236 | 0.7739999999999999 | 0.6510804364000519 | 0.6124775495112417 |
-| overlap 0 | 11987 | 0.7656666666666666 | 0.6390606916394254 | 0.5993497782270127 |
-| overlap 40 | 13856 | 0.7606666666666666 | 0.635057773043908 | 0.5962331871688584 |
-| overlap 80 | 20051 | 0.7687222222222222 | 0.638849900534349 | 0.5985841758505063 |
-| k1 0.5 | 12647 | 0.7595555555555555 | 0.6400868419204767 | 0.6028959394095554 |
-| k1 1.2 | 12647 | 0.7662222222222222 | 0.6398968575806755 | 0.6003470843330199 |
-| k1 2.0 | 12647 | 0.7673333333333333 | 0.6354825181089429 | 0.5944920278772259 |
-| b 0.0 | 12647 | 0.7653888888888889 | 0.6465302699817467 | 0.6093889989164758 |
-| b 0.3 | 12647 | 0.7623333333333333 | 0.6423073276044944 | 0.6051752086987539 |
-| b 1.0 | 12647 | 0.7685555555555555 | 0.6367394989174108 | 0.595717983951195 |
+| Metric | Mean delta | 95% CI | Sign-flip p |
+| --- | --- | --- | --- |
+| nDCG@10 | +0.0166 | [+0.0049, +0.0283] | 0.0056 |
+| Recall@10 | +0.0374 | [+0.0158, +0.0611] | 0.0006 |
+| Recall@100 | -0.0033 | [-0.0100, +0.0000] | 1.0000 |
+| MAP | +0.0080 | [-0.0039, +0.0201] | 0.2053 |
+| MRR | +0.0096 | [-0.0037, +0.0233] | 0.1714 |
 
-### Hybrid ablation
+nDCG@10 and Recall@10 are higher. The MAP and MRR intervals include zero.
+Recall@100 is not higher.
 
-[benchmarks/scifact/ablation-hybrid.json](benchmarks/scifact/ablation-hybrid.json)
-varies `dense_weight` and `fusion` around the min-max hybrid configuration.
-`dense_weight` 0 matches the BM25 report and `dense_weight` 1 matches the dense
-report on every metric above. The highest nDCG@10, MAP, and MRR in the sweep
-are at `dense_weight` 0.75. RRF (`rrf_k` 60) matches
-[hybrid-rrf.json](benchmarks/scifact/hybrid-rrf.json).
+Selected hybrid minus the same document-level baseline
+([document-vs-hybrid-selected.json](benchmarks/scifact/document-vs-hybrid-selected.json)):
 
-| Setting | Recall@10 | nDCG@10 | MAP | MRR |
-| --- | --- | --- | --- | --- |
-| dense_weight 0 (BM25) | 0.7706666666666666 | 0.6433126633988724 | 0.6034257029278666 | 0.6136324295824112 |
-| dense_weight 0.25 | 0.8085 | 0.6789228904880594 | 0.6368858684859617 | 0.6469993777795833 |
-| dense_weight 0.5 | 0.8337777777777777 | 0.7086771422459537 | 0.6699003860776047 | 0.6763456448001468 |
-| dense_weight 0.75 | 0.8371111111111111 | 0.7252294354215534 | 0.6899922087149296 | 0.7006330362736721 |
-| dense_weight 1 (dense) | 0.8243333333333334 | 0.6698756028274417 | 0.621310775891958 | 0.631546372294966 |
-| fusion rrf | 0.8171111111111111 | 0.6978116364934386 | 0.661227195495906 | 0.6736098317639135 |
+| Metric | Mean delta | 95% CI | Sign-flip p |
+| --- | --- | --- | --- |
+| nDCG@10 | +0.0553 | [+0.0366, +0.0749] | 0.0001 |
+| Recall@10 | +0.0578 | [+0.0308, +0.0869] | 0.0002 |
+| Recall@100 | +0.0257 | [+0.0100, +0.0447] | 0.0039 |
+| MAP | +0.0526 | [+0.0327, +0.0734] | 0.0001 |
+| MRR | +0.0544 | [+0.0335, +0.0762] | 0.0001 |
 
-The full report for `dense_weight` 0.75 is
-[hybrid-w075.json](benchmarks/scifact/hybrid-w075.json). It matches the sweep
-row. [bm25-vs-hybrid-w075.json](benchmarks/scifact/bm25-vs-hybrid-w075.json)
-compares it with the BM25 report under
-[configs/scifact-thresholds.yaml](configs/scifact-thresholds.yaml): seed 0,
-10,000 bootstrap samples, 10,000 sign-flips, 95% percentile interval,
-`gate_on_ci` false. Positive delta means the hybrid score is higher. The
-permutation p-value is 0.00009999000099990002 on every metric below, which is
-`1 / (10000 + 1)` when every sign-flip was less extreme than the observed mean.
-Question counts are improved / regressed / unchanged.
+Selected hybrid minus selected chunked BM25, same windows
+([bm25-selected-vs-hybrid.json](benchmarks/scifact/bm25-selected-vs-hybrid.json)):
 
-| Metric | Mean delta | 95% CI low | 95% CI high | Improved | Regressed | Unchanged |
-| --- | --- | --- | --- | --- | --- | --- |
-| MRR | 0.08700060669126096 | 0.05489705624961859 | 0.1196052776794214 | 109 | 36 | 155 |
-| MAP | 0.08656650578706318 | 0.05489012743235754 | 0.1190051064464023 | 119 | 37 | 144 |
-| Recall@10 | 0.06644444444444444 | 0.03477500000000002 | 0.10033611111111108 | 30 | 5 | 265 |
-| Recall@100 | 0.08377777777777777 | 0.05211111111111111 | 0.1176694444444444 | 31 | 2 | 267 |
-| nDCG@10 | 0.08191677202268108 | 0.053070846973144986 | 0.11094302901865047 | 88 | 26 | 186 |
+| Metric | Mean delta | 95% CI | Sign-flip p |
+| --- | --- | --- | --- |
+| nDCG@10 | +0.0387 | [+0.0243, +0.0536] | 0.0001 |
+| Recall@10 | +0.0204 | [-0.0004, +0.0425] | 0.0600 |
+| Recall@100 | +0.0290 | [+0.0120, +0.0490] | 0.0018 |
+| MAP | +0.0446 | [+0.0289, +0.0621] | 0.0001 |
+| MRR | +0.0448 | [+0.0282, +0.0627] | 0.0001 |
+
+The Recall@10 interval for that fusion comparison includes zero.
+
+### NFCorpus confirmation
+
+`ragbench dataset nfcorpus` checks SHA-256
+`efe5be03f8c5b86a5870102d0599d227c8c6e2484328e68c6522560385671b0b`.
+The test split has 3,633 documents, 323 queries, and 12,334 qrels (11,758
+grade 1 and 576 grade 2). Word length has minimum 17, median 237, mean
+233.765, and maximum 1,481. nDCG uses gain `2^grade - 1`, so these nDCG
+numbers differ from `pytrec_eval` `ndcg_cut` and from published BEIR nDCG.
+The configs copy the frozen SciFact settings.
+
+| Setup | Chunks | Recall@10 | Recall@100 | nDCG@10 | P@10 | MAP | MRR |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Original chunked definition | 9541 | 0.1479 | 0.2407 | 0.2939 | 0.2053 | 0.1480 | 0.4946 |
+| Document-level baseline | 3633 | 0.1535 | 0.2560 | 0.3273 | 0.2368 | 0.1624 | 0.5298 |
+| Selected chunked | 3667 | 0.1571 | 0.2554 | 0.3326 | 0.2427 | 0.1621 | 0.5411 |
+| Selected hybrid | 3667 | 0.1712 | 0.3179 | 0.3595 | 0.2632 | 0.1913 | 0.5670 |
+
+The selected hybrid truncated 2,877 of 3,667 chunk texts. Full-ranking
+retrieval p95 was 18.6 ms, 19.4 ms, and 179.7 ms for selected chunked BM25,
+document-level BM25, and the hybrid.
+
+Selected chunked BM25 minus document-level BM25
+([document-vs-bm25-selected.json](benchmarks/nfcorpus/document-vs-bm25-selected.json)):
+
+| Metric | Mean delta | 95% CI | Sign-flip p |
+| --- | --- | --- | --- |
+| nDCG@10 | +0.0053 | [+0.0004, +0.0099] | 0.0228 |
+| Recall@10 | +0.0036 | [-0.0015, +0.0090] | 0.1737 |
+| Recall@100 | -0.0007 | [-0.0096, +0.0065] | 0.8926 |
+| MAP | -0.0003 | [-0.0034, +0.0023] | 0.8801 |
+| MRR | +0.0113 | [-0.0031, +0.0257] | 0.1207 |
+
+On NFCorpus the selected windows are only narrowly higher on nDCG@10. The
+other four intervals include zero. That does not confirm a general advantage
+for the 480-word stem index over document-level BM25.
+
+Selected hybrid minus document-level BM25
+([document-vs-hybrid-selected.json](benchmarks/nfcorpus/document-vs-hybrid-selected.json)):
+
+| Metric | Mean delta | 95% CI | Sign-flip p |
+| --- | --- | --- | --- |
+| nDCG@10 | +0.0322 | [+0.0213, +0.0438] | 0.0001 |
+| Recall@10 | +0.0177 | [+0.0076, +0.0295] | 0.0002 |
+| Recall@100 | +0.0619 | [+0.0448, +0.0799] | 0.0001 |
+| MAP | +0.0289 | [+0.0216, +0.0369] | 0.0001 |
+| MRR | +0.0372 | [+0.0176, +0.0566] | 0.0002 |
+
+Those five intervals are above zero. The hybrid comparison is the one that
+repeats on this second corpus.
+[bm25-selected-vs-hybrid.json](benchmarks/nfcorpus/bm25-selected-vs-hybrid.json)
+is the same hybrid minus the selected chunked BM25 index (nDCG@10 delta
++0.0269, CI [+0.0170, +0.0376]).
+
+### Exploratory test-split runs
+
+These looked at the 300 test queries before the freeze. They did not choose
+the settings above.
+
+| Setup | Recall@10 | Recall@100 | nDCG@10 | MAP | MRR |
+| --- | --- | --- | --- | --- | --- |
+| Whitespace chunked BM25 | 0.7707 | 0.8729 | 0.6433 | 0.6034 | 0.6136 |
+| Stem, 120-word windows | 0.8096 | 0.9116 | 0.6828 | 0.6434 | 0.6539 |
+| Dense MiniLM, 120-word windows | 0.8243 | 0.9427 | 0.6699 | 0.6213 | 0.6315 |
+| Hybrid min-max, dense_weight 0.5 | 0.8338 | 0.9443 | 0.7087 | 0.6699 | 0.6763 |
+| Hybrid RRF, rrf_k 60 | 0.8171 | 0.9610 | 0.6978 | 0.6612 | 0.6736 |
+| Hybrid min-max, dense_weight 0.75 | 0.8371 | 0.9567 | 0.7252 | 0.6900 | 0.7006 |
+
+The stem 120-word run is
+[bm25-stem-chunk120-exploratory.json](benchmarks/scifact/bm25-stem-chunk120-exploratory.json).
+It was scored before the train grid finished. `dense_weight` 0.75 was the
+highest nDCG@10 in the test-split hybrid ablation
+([ablation-hybrid.json](benchmarks/scifact/ablation-hybrid.json)); the train
+sweep later froze 0.50 on the 480-word stem index. One-factor BM25 rows
+remain in [ablation-bm25.json](benchmarks/scifact/ablation-bm25.json). The
+paired comparison of the exploratory 0.75 hybrid with whitespace BM25 remains
+in [bm25-vs-hybrid-w075.json](benchmarks/scifact/bm25-vs-hybrid-w075.json).
 
 ## Judge sample
 
@@ -283,15 +382,17 @@ document production index.
 
 The committed BM25 baseline on the 12-document fixture has Recall@3 and
 Recall@5 of 1.0, and its document count equals its chunk count, so that
-configuration never splits a document. SciFact is the public measurement. It is one BEIR
-dataset, not the BEIR suite. FiQA and NFCorpus are not run here; a much larger
-passage corpus would multiply CPU embedding time without changing the method.
-Reported SciFact scores use whitespace word windows and then collapse chunk
-hits to documents. They are not a reproduction of the official BEIR leaderboard,
-which scores the dataset's own passages.
+configuration never splits a document. SciFact is one BEIR dataset. NFCorpus
+is a second corpus used only to repeat frozen settings. FiQA is not run.
+Reported scores collapse chunk hits to documents. They are not a reproduction
+of the official BEIR leaderboard or of Pyserini's Lucene BM25.
 
 SciFact test qrels in this export are all grade 1, so nDCG is binary on that
-run even though the metric accepts grades. Precision@K uses K as the denominator,
+run even though the metric accepts grades. NFCorpus test qrels include grades
+1 and 2. nDCG gain is `2^grade - 1`. `pytrec_eval`'s `ndcg_cut` uses the grade
+itself, so the two nDCG numbers match on binary labels and differ when a grade
+is greater than 1. MAP, recall, precision, and MRR treat any positive grade as
+relevant. Precision@K uses K as the denominator,
 so Precision@10 stays near 0.1 when a question has a single relevant document.
 MAP and MRR use the full document ranking. The JSON report stores only
 `stored_hits` documents per question.

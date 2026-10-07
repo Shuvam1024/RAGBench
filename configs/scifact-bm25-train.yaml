@@ -1,0 +1,22 @@
+# Historical chunked BM25 on the SciFact train split (whitespace tokenizer,
+# 120-word windows). scripts/select_scifact_train.py varies tokenizer and
+# chunk size from this file. It does not read the test split.
+# Train qrels: https://ir-datasets.com/beir.html#beir/scifact/train
+schema_version: 1
+dataset:
+  documents_path: ../.cache/beir/scifact
+  benchmark_path: ../.cache/beir/scifact/benchmark.train.json
+chunking:
+  chunk_size: 120
+  overlap: 20
+retrieval:
+  type: bm25
+  k1: 1.5
+  b: 0.75
+evaluation:
+  recall_at_k: [10, 100]
+  ndcg_at_k: [10]
+  precision_at_k: [10]
+  stored_hits: 10
+output:
+  json_path: null

@@ -101,13 +101,36 @@ optional judging. See [providers and scoring](providers.md).
 
 ```bash
 uv run ragbench dataset scifact --cache .cache/beir --manifest benchmarks/scifact/corpus_stats.json
+uv run ragbench dataset scifact --split train --cache .cache/beir
 uv run ragbench evaluate --config configs/scifact-bm25.yaml --output results/scifact-bm25.json --portable
 uv run ragbench sweep --config configs/scifact-ablation.yaml --output results/ablation-bm25.json
 ```
 
 The dataset command downloads the BEIR SciFact zip and rejects it unless the
-SHA-256 matches. Dense and hybrid configs need the `dense` extra and a Hugging
-Face cache. Reports under `benchmarks/scifact/` are the committed measurements.
+SHA-256 matches. `--split` defaults to `test` and still writes `benchmark.json`.
+`--split train` writes `benchmark.train.json` beside it (809 queries; see
+[ir-datasets](https://ir-datasets.com/beir.html#beir/scifact/train)) and does
+not replace the test benchmark. `scripts/select_scifact_train.py` chooses
+chunk size and the BM25 tokenizer on that train split.
+`scripts/lock_dense_weight.py` then locks `dense_weight` from the train hybrid
+sweep. Commit those frozen configs before evaluating the test split again.
+Earlier test-split runs, including the whitespace ablation and the stem
+120-word report, are exploratory and do not choose the frozen settings.
+
+`chunking.unit: document` indexes each prepared document once. That
+document-level config is the pre-specified comparison baseline. It is not the
+chunked RAG setup and is not a Pyserini reproduction
+([Pyserini BEIR 2CR](https://castorini.github.io/pyserini/2cr/beir.html)).
+Omitting `tokenizer` keeps the original `\w+` tokenizer. Dense and hybrid
+configs need the `dense` extra and a Hugging Face cache.
+
+`ragbench dataset nfcorpus` prepares a second BEIR corpus. Its test qrels
+repeat the frozen SciFact settings. Chunk size, tokenizer, and fusion weight
+stay on the values committed from the SciFact train split. The held-out
+reports are `benchmarks/scifact/bm25-selected.json`,
+`benchmarks/scifact/bm25-document.json`, `benchmarks/scifact/hybrid-selected.json`,
+and the matching files under `benchmarks/nfcorpus/`. Paired intervals use
+`configs/paired-uncertainty.yaml`.
 
 ## Tests
 

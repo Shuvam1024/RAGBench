@@ -1,0 +1,30 @@
+# Document-level BM25 on the SciFact test split. Parameters are pre-specified.
+# This is not a Pyserini or BEIR leaderboard reproduction.
+#
+# Indexed text: one string per document, the prepared title and body joined by
+# a newline (see benchmarks/scifact/corpus_stats.json text_policy). There is no
+# separate title field, so this is a flat index, not Pyserini bm25-multifield.
+# Tokenizer: stem. Tokens are \w+ after casefold, minus the vendored NLTK
+# English stopword list, then the Snowball English stemmer (snowballstemmer).
+# That is not Lucene's English analyzer (StandardTokenizer + Porter).
+# BM25Okapi k1=0.9 and b=0.4 match Pyserini's --bm25 flag. rank_bm25 is not
+# Lucene BM25. Pyserini 2CR bm25-flat reports SciFact test nDCG@10 0.679:
+# https://castorini.github.io/pyserini/2cr/beir.html
+schema_version: 1
+dataset:
+  documents_path: ../.cache/beir/scifact
+  benchmark_path: ../.cache/beir/scifact/benchmark.json
+chunking:
+  unit: document
+retrieval:
+  type: bm25
+  k1: 0.9
+  b: 0.4
+  tokenizer: stem
+evaluation:
+  recall_at_k: [10, 100]
+  ndcg_at_k: [10]
+  precision_at_k: [10]
+  stored_hits: 10
+output:
+  json_path: null

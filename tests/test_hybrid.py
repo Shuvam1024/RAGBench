@@ -2,8 +2,10 @@ from collections.abc import Callable, Sequence
 
 import pytest
 
+from ragbench.config import BM25Config
 from ragbench.ingestion.chunker import Chunk
 from ragbench.retrieval.base import Retriever, SearchResult
+from ragbench.retrieval.bm25 import BM25Retriever
 from ragbench.retrieval.hybrid import HybridRetriever, min_max_normalize
 
 
@@ -17,6 +19,11 @@ class ScoredRetriever(Retriever):
 
     def retrieve(self, query: str, k: int) -> list[SearchResult]:
         return [] if self.empty else self.rank(self.scores, k)
+
+
+def test_hybrid_records_the_bm25_tokenizer() -> None:
+    hybrid = HybridRetriever(BM25Retriever(BM25Config(tokenizer="stem")), ScoredRetriever([1.0]))
+    assert hybrid.metadata["bm25_tokenizer"] == "stem"
 
 
 def test_normalization() -> None:

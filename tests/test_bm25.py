@@ -2,8 +2,9 @@ from collections.abc import Callable
 
 import pytest
 
+from ragbench.config import BM25Config
 from ragbench.ingestion.chunker import Chunk
-from ragbench.retrieval.bm25 import BM25Retriever
+from ragbench.retrieval.bm25 import BM25Retriever, tokenize
 
 
 def test_keyword_ranking_and_case(make_chunk: Callable[..., Chunk]) -> None:
@@ -45,3 +46,27 @@ def test_lifecycle_ties_and_negative_scores(make_chunk: Callable[..., Chunk]) ->
             retriever.retrieve("word", k)
     retriever.index([make_chunk("new", "z")])
     assert [hit.chunk.id for hit in retriever.retrieve("word", 10)] == ["z"]
+
+
+def test_stem_tokenizer_drops_stopwords_and_shares_stems(make_chunk: Callable[..., Chunk]) -> None:
+    assert tokenize("OCEAN!", "whitespace") == ["ocean"]
+    assert tokenize("The runners are running!", "stem") == ["runner", "run"]
+    assert tokenize("runs", "stem") == ["run"]
+    assert tokenize("the and of", "stem") == []
+    with pytest.raises(ValueError, match="Unknown BM25 tokenizer"):
+        tokenize("ocean", "porter")
+
+    retriever = BM25Retriever(BM25Config(tokenizer="stem"))
+    assert retriever.metadata["tokenizer"] == "stem"
+    with pytest.raises(ValueError, match="searchable"):
+        retriever.index([make_chunk("the and of")])
+    retriever.index(
+        [
+            make_chunk("the running runners", "a"),
+            make_chunk("ocean wave", "b"),
+        ]
+    )
+    hits = retriever.retrieve("runs", 2)
+    assert hits[0].chunk.id == "a"
+    assert retriever.retrieve("the", 1) == []
+    assert retriever.retrieve("The Runs!", 1)[0].chunk.id == "a"

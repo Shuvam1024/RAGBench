@@ -1,4 +1,6 @@
-# One factor at a time around the SciFact BM25 configuration.
+# Exploratory one-factor sweep on the SciFact test split. The committed
+# result is benchmarks/scifact/ablation-bm25.json. It does not choose the
+# frozen settings. Train selection is scripts/select_scifact_train.py.
 schema_version: 1
 base: scifact-bm25.yaml
 axes:

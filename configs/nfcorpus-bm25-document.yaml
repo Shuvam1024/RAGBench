@@ -1,0 +1,25 @@
+# NFCorpus test split, document-level BM25. Parameters are the pre-specified
+# comparison baseline, copied from configs/scifact-bm25-document.yaml and not
+# tuned on NFCorpus.
+# One string per document: prepared title and body joined by a newline.
+# Tokenizer: stem (Snowball English after vendored NLTK stopword removal).
+# BM25Okapi k1=0.9, b=0.4. rank_bm25, not Lucene, not Pyserini.
+# Grades 1 and 2: nDCG here uses exponential gain.
+schema_version: 1
+dataset:
+  documents_path: ../.cache/beir/nfcorpus
+  benchmark_path: ../.cache/beir/nfcorpus/benchmark.json
+chunking:
+  unit: document
+retrieval:
+  type: bm25
+  k1: 0.9
+  b: 0.4
+  tokenizer: stem
+evaluation:
+  recall_at_k: [10, 100]
+  ndcg_at_k: [10]
+  precision_at_k: [10]
+  stored_hits: 10
+output:
+  json_path: null

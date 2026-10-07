@@ -25,12 +25,16 @@ class DatasetConfig(ConfigModel):
 
 
 class ChunkingConfig(ConfigModel):
+    # ``words`` is the historical overlapping word-window chunker. ``document``
+    # indexes each document as one string. The default keeps existing configs
+    # on word windows.
+    unit: Literal["words", "document"] = "words"
     chunk_size: PositiveInt = 120
     overlap: NonnegativeInt = 20
 
     @model_validator(mode="after")
     def validate_overlap(self) -> Self:
-        if self.overlap >= self.chunk_size:
+        if self.unit == "words" and self.overlap >= self.chunk_size:
             raise ValueError("overlap must be smaller than chunk_size")
         return self
 
@@ -39,6 +43,10 @@ class BM25Config(ConfigModel):
     type: Literal["bm25"] = "bm25"
     k1: Annotated[float, Field(strict=True, gt=0, allow_inf_nan=False)] = 1.5
     b: UnitFloat = 0.75
+    # ``whitespace`` is the historical ``\\w+`` tokenizer. ``stem`` also drops
+    # English stopwords and applies the Snowball English stemmer. The default
+    # keeps existing configs and committed reports on the original tokenizer.
+    tokenizer: Literal["whitespace", "stem"] = "whitespace"
 
 
 class DenseConfig(ConfigModel):

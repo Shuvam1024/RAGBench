@@ -1,0 +1,45 @@
+{
+  "dataset": "scifact",
+  "split": "train",
+  "source_url": "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/scifact.zip",
+  "sha256": "536e14446a0ba56ed1398ab1055f39fe852686ecad24a6306c80c490fa8e0165",
+  "text_policy": "title and body joined by a newline when both are non-empty; words are \\S+ spans",
+  "document_count": 5183,
+  "skipped_empty_documents": 0,
+  "query_count": 809,
+  "qrel_count": 919,
+  "grades": [
+    {
+      "grade": 1,
+      "qrels": 919
+    }
+  ],
+  "word_length": {
+    "minimum": 33,
+    "p50": 204.0,
+    "mean": 214.6280146633224,
+    "maximum": 1541,
+    "longer_than": [
+      {
+        "words": 64,
+        "documents": 5162
+      },
+      {
+        "words": 120,
+        "documents": 4738
+      },
+      {
+        "words": 200,
+        "documents": 2687
+      },
+      {
+        "words": 256,
+        "documents": 1387
+      },
+      {
+        "words": 480,
+        "documents": 46
+      }
+    ]
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "dataset": "nfcorpus",
+  "split": "test",
+  "source_url": "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/nfcorpus.zip",
+  "sha256": "efe5be03f8c5b86a5870102d0599d227c8c6e2484328e68c6522560385671b0b",
+  "text_policy": "title and body joined by a newline when both are non-empty; words are \\S+ spans",
+  "document_count": 3633,
+  "skipped_empty_documents": 0,
+  "query_count": 323,
+  "qrel_count": 12334,
+  "grades": [
+    {
+      "grade": 1,
+      "qrels": 11758
+    },
+    {
+      "grade": 2,
+      "qrels": 576
+    }
+  ],
+  "word_length": {
+    "minimum": 17,
+    "p50": 237.0,
+    "mean": 233.76520781723093,
+    "maximum": 1481,
+    "longer_than": [
+      {
+        "words": 64,
+        "documents": 3596
+      },
+      {
+        "words": 120,
+        "documents": 3377
+      },
+      {
+        "words": 200,
+        "documents": 2532
+      },
+      {
+        "words": 256,
+        "documents": 1405
+      },
+      {
+        "words": 480,
+        "documents": 26
+      }
+    ]
+  }
+}
